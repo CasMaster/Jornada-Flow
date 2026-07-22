@@ -12,7 +12,7 @@ RUN apt-get update \
     && a2enconf hibrido
 
 WORKDIR /var/www/html
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY --from=composer /usr/bin/composer /usr/bin/composer
 COPY composer.json ./
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 COPY . .

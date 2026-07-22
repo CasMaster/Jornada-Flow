@@ -4,114 +4,84 @@ session_start();
 require __DIR__ . '/config.php';
 
 if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(24));
-$authenticated = !empty($_SESSION['manager']);
-if (!$authenticated) { header('Location: login.php?perfil=manager'); exit; }
+if (empty($_SESSION['manager']) || !is_array($_SESSION['manager'])) { header('Location: login.php?perfil=manager'); exit; }
+$manager = $_SESSION['manager'];
+$message = '';
 $error = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!hash_equals($_SESSION['csrf'], (string)($_POST['csrf'] ?? ''))) {
-        $error = 'Sessão expirada. Atualize a página.';
-    } elseif (isset($_POST['login'])) {
-        if (hash_equals(manager_pin(), (string)($_POST['pin'] ?? ''))) {
-            session_regenerate_id(true);
-            $_SESSION['manager'] = true;
-            header('Location: gestor.php'); exit;
-        }
-        $error = 'PIN inválido. Tente novamente.';
-    } elseif (isset($_POST['logout'])) {
-        unset($_SESSION['manager']);
-        header('Location: gestor.php'); exit;
-    } elseif (!empty($_SESSION['manager']) && isset($_POST['delete_id'])) {
-        $stmt = db()->prepare('DELETE FROM records WHERE id = ?');
-        $stmt->execute([(int)$_POST['delete_id']]);
-        header('Location: gestor.php?' . http_build_query($_GET)); exit;
-    }
-}
-
-$records = [];
-$teams = [];
-$params = [];
-$conditions = [];
-$month = preg_match('/^\d{4}-\d{2}$/', (string)($_GET['month'] ?? '')) ? (string)$_GET['month'] : '';
-$team = trim((string)($_GET['team'] ?? ''));
-$search = trim((string)($_GET['search'] ?? ''));
-
-if ($authenticated) {
-    $teams = db()->query("SELECT DISTINCT team FROM records WHERE team <> '' ORDER BY team")->fetchAll(PDO::FETCH_COLUMN);
-    if ($month !== '') { $conditions[] = 'substr(work_date, 1, 7) = ?'; $params[] = $month; }
-    if ($team !== '') { $conditions[] = 'team = ?'; $params[] = $team; }
-    if ($search !== '') { $conditions[] = '(name LIKE ? OR email LIKE ?)'; $params[] = "%$search%"; $params[] = "%$search%"; }
-    $sql = 'SELECT id, name, email, team, work_date, created_at FROM records' . ($conditions ? ' WHERE ' . implode(' AND ', $conditions) : '') . ' ORDER BY work_date DESC, name';
-    $stmt = db()->prepare($sql); $stmt->execute($params); $records = $stmt->fetchAll();
-
-    if (isset($_GET['export'])) {
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="home-office-' . date('Y-m-d') . '.csv"');
-        echo "\xEF\xBB\xBF";
-        $out = fopen('php://output', 'w');
-        fputcsv($out, ['Colaborador', 'E-mail', 'Equipe', 'Data', 'Dia da semana'], ';');
-        $weekdays = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
-        foreach ($records as $row) fputcsv($out, [$row['name'], $row['email'], $row['team'], date('d/m/Y', strtotime($row['work_date'])), $weekdays[(int)date('w', strtotime($row['work_date']))]], ';');
-        fclose($out); exit;
-    }
-}
-
-$people = count(array_unique(array_column($records, 'email')));
-$remoteDays = count($records);
-$teamCount = count(array_unique(array_filter(array_column($records, 'team'))));
-$weekdays = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
 function h(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
+function redirect_manager(string $section = ''): never { header('Location: gestor.php' . ($section ? '#' . $section : '')); exit; }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!hash_equals($_SESSION['csrf'], (string)($_POST['csrf'] ?? ''))) $error = 'Sessão expirada. Atualize a página.';
+    else {
+        $action = (string)($_POST['action'] ?? '');
+        try {
+            if ($action === 'logout') { $_SESSION = []; session_regenerate_id(true); header('Location: login.php?perfil=manager'); exit; }
+            if ($action === 'delete_record') { db()->prepare('DELETE FROM records WHERE id = ?')->execute([(int)$_POST['id']]); redirect_manager('registros'); }
+            if ($action === 'add_team') {
+                $name = trim((string)($_POST['name'] ?? ''));
+                if ($name === '') throw new RuntimeException('Informe o nome da equipe.');
+                db()->prepare('INSERT INTO teams (name) VALUES (?)')->execute([$name]); redirect_manager('equipes');
+            }
+            if ($action === 'toggle_team') {
+                db()->prepare('UPDATE teams SET active = CASE active WHEN 1 THEN 0 ELSE 1 END WHERE id = ?')->execute([(int)$_POST['id']]); redirect_manager('equipes');
+            }
+            if ($action === 'save_user') {
+                $id = (int)($_POST['id'] ?? 0); $name = trim((string)($_POST['name'] ?? ''));
+                $email = strtolower(trim((string)($_POST['email'] ?? ''))); $team = trim((string)($_POST['team'] ?? ''));
+                $role = ($_POST['role'] ?? '') === 'manager' ? 'manager' : 'employee'; $password = (string)($_POST['password'] ?? '');
+                if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) throw new RuntimeException('Informe nome e e-mail válidos.');
+                if ($role === 'employee' && $team === '') throw new RuntimeException('Selecione a equipe do colaborador.');
+                if ($id > 0) {
+                    db()->prepare('UPDATE users SET name = ?, email = ?, team = ?, role = ? WHERE id = ?')->execute([$name, $email, $team, $role, $id]);
+                    if ($password !== '') { if (strlen($password) < 8) throw new RuntimeException('A nova senha deve ter 8 caracteres.'); db()->prepare('UPDATE users SET password_hash = ? WHERE id = ?')->execute([password_hash($password, PASSWORD_DEFAULT), $id]); }
+                } else {
+                    if (strlen($password) < 8) throw new RuntimeException('A senha inicial deve ter 8 caracteres.');
+                    db()->prepare('INSERT INTO users (name, email, team, password_hash, role) VALUES (?, ?, ?, ?, ?)')->execute([$name, $email, $team, password_hash($password, PASSWORD_DEFAULT), $role]);
+                }
+                redirect_manager('usuarios');
+            }
+            if ($action === 'toggle_user') {
+                $id = (int)($_POST['id'] ?? 0); if ($id === (int)$manager['id']) throw new RuntimeException('Você não pode desativar sua própria conta.');
+                db()->prepare('UPDATE users SET active = CASE active WHEN 1 THEN 0 ELSE 1 END WHERE id = ?')->execute([$id]); redirect_manager('usuarios');
+            }
+        } catch (Throwable $exception) {
+            $error = str_contains($exception->getMessage(), 'UNIQUE') ? 'Este nome ou e-mail já está cadastrado.' : $exception->getMessage();
+        }
+    }
+}
+
+[$defaultStart, $defaultEnd] = reporting_period();
+$start = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)($_GET['start'] ?? '')) ? (string)$_GET['start'] : $defaultStart->format('Y-m-d');
+$end = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)($_GET['end'] ?? '')) ? (string)$_GET['end'] : $defaultEnd->format('Y-m-d');
+$team = trim((string)($_GET['team'] ?? '')); $search = trim((string)($_GET['search'] ?? ''));
+$teams = db()->query('SELECT id, name, active FROM teams ORDER BY active DESC, name')->fetchAll();
+$users = db()->query('SELECT id, name, email, team, role, active, created_at FROM users ORDER BY role DESC, name')->fetchAll();
+$conditions = ['work_date BETWEEN ? AND ?']; $params = [$start, $end];
+if ($team !== '') { $conditions[] = 'team = ?'; $params[] = $team; }
+if ($search !== '') { $conditions[] = '(name LIKE ? OR email LIKE ?)'; $params[] = "%$search%"; $params[] = "%$search%"; }
+$stmt = db()->prepare('SELECT id, name, email, team, work_date, created_at FROM records WHERE ' . implode(' AND ', $conditions) . ' ORDER BY work_date DESC, name');
+$stmt->execute($params); $records = $stmt->fetchAll();
+if (isset($_GET['export'])) {
+    header('Content-Type: text/csv; charset=utf-8'); header('Content-Disposition: attachment; filename="home-office-' . $start . '-a-' . $end . '.csv"'); echo "\xEF\xBB\xBF";
+    $out = fopen('php://output', 'w'); fputcsv($out, ['Colaborador','E-mail','Equipe','Data','Dia da semana'], ';');
+    $weekdays = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+    foreach ($records as $row) fputcsv($out, [$row['name'],$row['email'],$row['team'],date('d/m/Y', strtotime($row['work_date'])),$weekdays[(int)date('w', strtotime($row['work_date']))]], ';'); fclose($out); exit;
+}
+$people = count(array_unique(array_column($records, 'email'))); $weekdays = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
 ?>
-<!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Gestor — Híbrido</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css">
-  <link rel="stylesheet" href="assets/manager.css">
-</head>
-<body class="manager-page">
-  <header class="topbar"><a class="brand" href="gestor.php"><span class="mark">H</span> HÍBRIDO<span class="accent">.</span></a><nav><a class="tab" href="login.php?logout=1">Acesso do colaborador</a><?php if ($authenticated): ?><form method="post"><input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>"><button class="tab active" name="logout">Sair do painel</button></form><?php endif; ?></nav></header>
-  <main>
-  <?php if (!$authenticated): ?>
-    <section class="login-page">
-      <article class="card login-panel">
-        <div class="login-brand"><span class="login-icon">↗</span><p class="eyebrow">ÁREA RESTRITA</p></div>
-        <h1>Acesso do <em>gestor.</em></h1>
-        <p>Entre com o PIN administrativo para consultar, filtrar e exportar os registros da equipe.</p>
-        <form method="post" class="login-form">
-          <input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>">
-          <label>PIN administrativo<input name="pin" type="password" inputmode="numeric" autocomplete="current-password" autofocus required placeholder="••••"></label>
-          <?php if ($error): ?><p class="login-error" role="alert"><?= h($error) ?></p><?php endif; ?>
-          <button class="primary" name="login">Entrar no painel <span>→</span></button>
-        </form>
-        <a class="back-link" href="index.php">← Voltar ao registro</a>
-      </article>
-      <aside class="login-aside"><p class="eyebrow">GESTÃO SIMPLES</p><h2>Decisões melhores começam com dados organizados.</h2><div class="feature-list"><span>01 <b>Visão consolidada</b></span><span>02 <b>Filtros rápidos</b></span><span>03 <b>Exportação para Excel</b></span></div></aside>
-    </section>
-  <?php else: ?>
-    <section class="workspace manager-workspace">
-      <div class="manager-head"><div><p class="eyebrow">PAINEL DO GESTOR</p><h1>Visão do <em>trabalho remoto.</em></h1><p>Acompanhe os registros, encontre inconsistências e exporte o recorte necessário.</p></div><a class="primary button-link" href="?<?= h(http_build_query(array_merge($_GET, ['export' => 1]))) ?>">Exportar CSV ↓</a></div>
-      <div class="stats stats-three"><div><span>DIAS REGISTRADOS</span><strong><?= $remoteDays ?></strong></div><div><span>COLABORADORES</span><strong><?= $people ?></strong></div><div><span>EQUIPES</span><strong><?= $teamCount ?></strong></div></div>
-      <article class="card filters-card">
-        <form method="get" class="filters">
-          <label>Mês<input type="month" name="month" value="<?= h($month) ?>"></label>
-          <label>Equipe<select name="team"><option value="">Todas</option><?php foreach ($teams as $option): ?><option <?= $team === $option ? 'selected' : '' ?>><?= h($option) ?></option><?php endforeach; ?></select></label>
-          <label>Colaborador<input name="search" value="<?= h($search) ?>" placeholder="Nome ou e-mail"></label>
-          <button class="primary">Aplicar filtros</button><a class="clear-filter" href="gestor.php">Limpar</a>
-        </form>
-      </article>
-      <article class="card report">
-        <div class="report-head"><div><p class="eyebrow">REGISTROS CONSOLIDADOS</p><h2><?= $remoteDays ?> <?= $remoteDays === 1 ? 'resultado' : 'resultados' ?></h2></div><span class="status-ok">● Dados atualizados</span></div>
-        <div class="table-wrap"><table><thead><tr><th>COLABORADOR</th><th>EQUIPE</th><th>DATA</th><th>DIA</th><th></th></tr></thead><tbody>
-        <?php if (!$records): ?><tr><td colspan="5" class="empty">Nenhum registro encontrado para os filtros selecionados.</td></tr><?php endif; ?>
-        <?php foreach ($records as $row): ?><tr><td><b><?= h($row['name']) ?></b><small><?= h($row['email']) ?></small></td><td><?= h($row['team'] ?: '—') ?></td><td><?= date('d/m/Y', strtotime($row['work_date'])) ?></td><td><?= $weekdays[(int)date('w', strtotime($row['work_date']))] ?></td><td class="row-action"><form method="post" onsubmit="return confirm('Excluir este registro?')"><input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>"><button name="delete_id" value="<?= (int)$row['id'] ?>" title="Excluir registro">×</button></form></td></tr><?php endforeach; ?>
-        </tbody></table></div>
-      </article>
-    </section>
-  <?php endif; ?>
-  </main>
-  <footer><b>HÍBRIDO.</b><span>Controle simples. Trabalho flexível.</span></footer>
-</body></html>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gestor — Híbrido</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/style.css"><link rel="stylesheet" href="assets/manager.css"></head>
+<body class="manager-page"><header class="topbar"><a class="brand" href="gestor.php"><span class="mark">H</span> HÍBRIDO<span class="accent">.</span></a><nav><span class="user-label"><?= h($manager['name']) ?></span><form method="post"><input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>"><button class="tab active" name="action" value="logout">Sair</button></form></nav></header>
+<main><section class="workspace manager-workspace"><div class="manager-head"><div><p class="eyebrow">PAINEL DO GESTOR</p><h1>Gestão do <em>trabalho remoto.</em></h1><p>Período padrão: dia 20 até dia 19 do mês seguinte.</p></div><a class="primary button-link" href="?<?= h(http_build_query(array_merge($_GET, ['export'=>1]))) ?>">Exportar CSV ↓</a></div>
+<?php if ($error): ?><p class="login-error manager-alert"><?= h($error) ?></p><?php endif; ?>
+<nav class="manager-sections"><a href="#registros">Registros</a><a href="#equipes">Equipes</a><a href="#usuarios">Usuários</a></nav>
+<div class="stats stats-three"><div><span>DIAS NO PERÍODO</span><strong><?= count($records) ?></strong></div><div><span>COLABORADORES</span><strong><?= $people ?></strong></div><div><span>GESTORES ATIVOS</span><strong><?= count(array_filter($users, fn($u) => $u['role'] === 'manager' && (int)$u['active'] === 1)) ?></strong></div></div>
+<article class="card filters-card" id="registros"><form method="get" class="filters"><label>Início<input type="date" name="start" value="<?= h($start) ?>"></label><label>Fim<input type="date" name="end" value="<?= h($end) ?>"></label><label>Equipe<select name="team"><option value="">Todas</option><?php foreach ($teams as $option): if (!(int)$option['active']) continue; ?><option <?= $team === $option['name'] ? 'selected' : '' ?>><?= h($option['name']) ?></option><?php endforeach; ?></select></label><label>Colaborador<input name="search" value="<?= h($search) ?>" placeholder="Nome ou e-mail"></label><button class="primary">Aplicar</button><a class="clear-filter" href="gestor.php">Período atual</a></form></article>
+<article class="card report"><div class="report-head"><div><p class="eyebrow">REGISTROS CONSOLIDADOS</p><h2><?= count($records) ?> resultados</h2></div><span class="status-ok">● <?= date('d/m/Y', strtotime($start)) ?> — <?= date('d/m/Y', strtotime($end)) ?></span></div><div class="table-wrap"><table><thead><tr><th>COLABORADOR</th><th>EQUIPE</th><th>DATA</th><th>DIA</th><th></th></tr></thead><tbody><?php if (!$records): ?><tr><td colspan="5" class="empty">Nenhum registro neste período.</td></tr><?php endif; ?><?php foreach ($records as $row): ?><tr><td><b><?= h($row['name']) ?></b><small><?= h($row['email']) ?></small></td><td><?= h($row['team'] ?: '—') ?></td><td><?= date('d/m/Y', strtotime($row['work_date'])) ?></td><td><?= $weekdays[(int)date('w', strtotime($row['work_date']))] ?></td><td class="row-action"><form method="post" onsubmit="return confirm('Excluir este registro?')"><input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>"><input type="hidden" name="action" value="delete_record"><button name="id" value="<?= (int)$row['id'] ?>">×</button></form></td></tr><?php endforeach; ?></tbody></table></div></article>
+<div class="admin-grid">
+<article class="card admin-card" id="equipes"><div class="report-head"><div><p class="eyebrow">CADASTRO CENTRAL</p><h2>Equipes</h2></div></div><form method="post" class="inline-create"><input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>"><input name="name" required placeholder="Nome da nova equipe"><button class="primary" name="action" value="add_team">Adicionar</button></form><div class="compact-list"><?php if (!$teams): ?><p class="empty">Nenhuma equipe cadastrada.</p><?php endif; ?><?php foreach ($teams as $item): ?><div><span><b><?= h($item['name']) ?></b><small><?= (int)$item['active'] ? 'Ativa' : 'Inativa' ?></small></span><form method="post"><input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>"><input type="hidden" name="id" value="<?= (int)$item['id'] ?>"><button class="text-action" name="action" value="toggle_team"><?= (int)$item['active'] ? 'Desativar' : 'Ativar' ?></button></form></div><?php endforeach; ?></div></article>
+<article class="card admin-card user-editor" id="usuarios"><div class="report-head"><div><p class="eyebrow">ACESSOS E PERMISSÕES</p><h2>Novo usuário</h2></div></div><form method="post" class="management-form"><input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>"><label>Nome<input name="name" required></label><label>E-mail<input name="email" type="email" required></label><label>Perfil<select name="role"><option value="employee">Colaborador</option><option value="manager">Gestor</option></select></label><label>Equipe<select name="team"><option value="">Sem equipe</option><?php foreach ($teams as $option): if ((int)$option['active']): ?><option><?= h($option['name']) ?></option><?php endif; endforeach; ?></select></label><label>Senha inicial<input name="password" type="password" minlength="8" required></label><button class="primary" name="action" value="save_user">Criar usuário</button></form></article>
+</div>
+<article class="card report users-report"><div class="report-head"><div><p class="eyebrow">DIRETÓRIO</p><h2><?= count($users) ?> usuários</h2></div></div><div class="table-wrap"><table><thead><tr><th>USUÁRIO</th><th>PERFIL</th><th>EQUIPE</th><th>STATUS</th><th></th></tr></thead><tbody><?php foreach ($users as $user): ?><tr><td><b><?= h($user['name']) ?></b><small><?= h($user['email']) ?></small></td><td><?= $user['role'] === 'manager' ? 'Gestor' : 'Colaborador' ?></td><td><?= h($user['team'] ?: '—') ?></td><td><span class="<?= (int)$user['active'] ? 'status-ok' : '' ?>"><?= (int)$user['active'] ? 'Ativo' : 'Inativo' ?></span></td><td class="user-actions"><details><summary>Editar</summary><form method="post" class="edit-user-form"><input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>"><input type="hidden" name="id" value="<?= (int)$user['id'] ?>"><input name="name" value="<?= h($user['name']) ?>" required><input name="email" type="email" value="<?= h($user['email']) ?>" required><select name="role"><option value="employee" <?= $user['role']==='employee'?'selected':'' ?>>Colaborador</option><option value="manager" <?= $user['role']==='manager'?'selected':'' ?>>Gestor</option></select><select name="team"><option value="">Sem equipe</option><?php foreach ($teams as $option): ?><option <?= $user['team']===$option['name']?'selected':'' ?>><?= h($option['name']) ?></option><?php endforeach; ?></select><input name="password" type="password" placeholder="Nova senha (opcional)"><button class="primary" name="action" value="save_user">Salvar</button><button class="text-action" name="action" value="toggle_user"><?= (int)$user['active']?'Desativar':'Ativar' ?></button></form></details></td></tr><?php endforeach; ?></tbody></table></div></article>
+</section></main><footer><b>HÍBRIDO.</b><span>Controle simples. Trabalho flexível.</span></footer></body></html>

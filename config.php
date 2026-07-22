@@ -40,8 +40,33 @@ function db(): PDO
         role TEXT NOT NULL DEFAULT "employee",
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )');
+    $pdo->exec('CREATE TABLE IF NOT EXISTS teams (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        active INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )');
+    $columns = $pdo->query('PRAGMA table_info(users)')->fetchAll(PDO::FETCH_COLUMN, 1);
+    if (!in_array('active', $columns, true)) {
+        $pdo->exec('ALTER TABLE users ADD COLUMN active INTEGER NOT NULL DEFAULT 1');
+    }
+    $pdo->exec("INSERT OR IGNORE INTO teams (name) SELECT DISTINCT team FROM users WHERE team <> ''");
+    $managerCount = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role = 'manager'")->fetchColumn();
+    if ($managerCount === 0) {
+        $stmt = $pdo->prepare('INSERT OR IGNORE INTO users (name, email, team, password_hash, role) VALUES (?, ?, ?, ?, ?)');
+        $stmt->execute(['Gestor principal', 'gestor@local', '', password_hash(manager_pin(), PASSWORD_DEFAULT), 'manager']);
+    }
     $pdo->exec('CREATE INDEX IF NOT EXISTS records_email_idx ON records(email)');
     return $pdo;
+}
+
+function reporting_period(?DateTimeImmutable $today = null): array
+{
+    $today ??= new DateTimeImmutable('today');
+    $start = (int)$today->format('d') >= 20
+        ? $today->setDate((int)$today->format('Y'), (int)$today->format('m'), 20)
+        : $today->modify('first day of previous month')->setDate((int)$today->modify('first day of previous month')->format('Y'), (int)$today->modify('first day of previous month')->format('m'), 20);
+    return [$start, $start->modify('+1 month')->modify('-1 day')];
 }
 
 function json_response(array $data, int $status = 200): never

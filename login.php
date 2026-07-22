@@ -18,11 +18,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!hash_equals($_SESSION['csrf'], (string)($_POST['csrf'] ?? ''))) {
         $error = 'Sessão expirada. Atualize a página.';
     } elseif ($activeRole === 'manager') {
-        if (hash_equals(manager_pin(), (string)($_POST['pin'] ?? ''))) {
-            session_regenerate_id(true); unset($_SESSION['employee']); $_SESSION['manager'] = true;
-            header('Location: gestor.php'); exit;
+        $email = strtolower(trim((string)($_POST['email'] ?? '')));
+        $password = (string)($_POST['password'] ?? '');
+        $stmt = db()->prepare("SELECT id, name, email, team, password_hash, role FROM users WHERE email = ? AND role = 'manager' AND active = 1 LIMIT 1");
+        $stmt->execute([$email]); $manager = $stmt->fetch();
+        if ($manager && password_verify($password, $manager['password_hash'])) {
+            unset($manager['password_hash']); session_regenerate_id(true); unset($_SESSION['employee']);
+            $_SESSION['manager'] = $manager; header('Location: gestor.php'); exit;
         }
-        $error = 'PIN do gestor inválido.';
+        $error = 'E-mail ou senha de gestor inválidos.';
     } elseif ($employeeMode === 'register') {
         $name = trim((string)($_POST['name'] ?? ''));
         $email = strtolower(trim((string)($_POST['email'] ?? '')));
@@ -30,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $password = (string)($_POST['password'] ?? '');
         $confirmation = (string)($_POST['password_confirmation'] ?? '');
         if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) $error = 'Informe nome e e-mail corporativo válido.';
+        elseif ($team === '' || !(function () use ($team): bool { $stmt = db()->prepare('SELECT 1 FROM teams WHERE name = ? AND active = 1'); $stmt->execute([$team]); return (bool)$stmt->fetchColumn(); })()) $error = 'Selecione uma equipe válida.';
         elseif (strlen($password) < 8) $error = 'A senha deve ter pelo menos 8 caracteres.';
         elseif ($password !== $confirmation) $error = 'As senhas não coincidem.';
         else {
@@ -46,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $email = strtolower(trim((string)($_POST['email'] ?? '')));
         $password = (string)($_POST['password'] ?? '');
-        $stmt = db()->prepare('SELECT id, name, email, team, password_hash, role FROM users WHERE email = ? LIMIT 1');
+        $stmt = db()->prepare("SELECT id, name, email, team, password_hash, role FROM users WHERE email = ? AND role = 'employee' AND active = 1 LIMIT 1");
         $stmt->execute([$email]); $user = $stmt->fetch();
         if ($user && password_verify($password, $user['password_hash'])) {
             session_regenerate_id(true); unset($_SESSION['manager'], $user['password_hash']); $_SESSION['employee'] = $user;
@@ -56,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 function lh(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
+$availableTeams = db()->query("SELECT name FROM teams WHERE active = 1 ORDER BY name")->fetchAll(PDO::FETCH_COLUMN);
 ?>
 <!doctype html><html lang="pt-BR"><head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Entrar — Híbrido</title>
@@ -68,13 +74,13 @@ function lh(string $value): string { return htmlspecialchars($value, ENT_QUOTES,
     <section class="card unified-card">
       <div class="role-tabs" role="tablist"><a class="<?= $activeRole !== 'manager' ? 'active' : '' ?>" href="?perfil=employee">Sou colaborador</a><a class="<?= $activeRole === 'manager' ? 'active' : '' ?>" href="?perfil=manager">Sou gestor</a></div>
       <?php if ($activeRole === 'manager'): ?>
-        <div class="login-heading"><span class="role-icon">↗</span><div><p class="eyebrow">ACESSO RESTRITO</p><h2>Painel do gestor</h2></div></div><p class="form-intro">Use o PIN administrativo para acessar indicadores e relatórios.</p>
-        <form method="post" class="unified-form"><input type="hidden" name="csrf" value="<?= lh($_SESSION['csrf']) ?>"><input type="hidden" name="role" value="manager"><label>PIN administrativo<input name="pin" type="password" inputmode="numeric" autocomplete="current-password" autofocus required placeholder="••••"></label><?php if ($error): ?><p class="login-error"><?= lh($error) ?></p><?php endif; ?><button class="primary">Entrar como gestor <span>→</span></button></form>
+        <div class="login-heading"><span class="role-icon">↗</span><div><p class="eyebrow">ACESSO RESTRITO</p><h2>Painel do gestor</h2></div></div><p class="form-intro">Entre com sua conta individual de gestor.</p>
+        <form method="post" class="unified-form"><input type="hidden" name="csrf" value="<?= lh($_SESSION['csrf']) ?>"><input type="hidden" name="role" value="manager"><label>E-mail<input name="email" type="email" autocomplete="email" autofocus required></label><label>Senha<input name="password" type="password" autocomplete="current-password" required></label><?php if ($error): ?><p class="login-error"><?= lh($error) ?></p><?php endif; ?><button class="primary">Entrar como gestor <span>→</span></button></form>
       <?php else: ?>
         <div class="employee-auth-tabs"><a class="<?= $employeeMode === 'login' ? 'active' : '' ?>" href="?perfil=employee&modo=login">Já tenho cadastro</a><a class="<?= $employeeMode === 'register' ? 'active' : '' ?>" href="?perfil=employee&modo=register">Primeiro acesso</a></div>
         <?php if ($employeeMode === 'register'): ?>
           <div class="login-heading compact"><span class="role-icon">+</span><div><p class="eyebrow">PRIMEIRO ACESSO</p><h2>Crie sua conta</h2></div></div>
-          <form method="post" class="unified-form register-form"><input type="hidden" name="csrf" value="<?= lh($_SESSION['csrf']) ?>"><input type="hidden" name="role" value="employee"><input type="hidden" name="mode" value="register"><label>Nome completo<input name="name" value="<?= lh((string)($_POST['name'] ?? '')) ?>" required></label><label>E-mail corporativo<input name="email" type="email" value="<?= lh((string)($_POST['email'] ?? '')) ?>" required></label><label>Equipe / área<input name="team" value="<?= lh((string)($_POST['team'] ?? '')) ?>"></label><div class="password-grid"><label>Senha<input name="password" type="password" minlength="8" required></label><label>Confirmar senha<input name="password_confirmation" type="password" minlength="8" required></label></div><?php if ($error): ?><p class="login-error"><?= lh($error) ?></p><?php endif; ?><button class="primary">Criar conta e continuar <span>→</span></button></form>
+          <form method="post" class="unified-form register-form"><input type="hidden" name="csrf" value="<?= lh($_SESSION['csrf']) ?>"><input type="hidden" name="role" value="employee"><input type="hidden" name="mode" value="register"><label>Nome completo<input name="name" value="<?= lh((string)($_POST['name'] ?? '')) ?>" required></label><label>E-mail corporativo<input name="email" type="email" value="<?= lh((string)($_POST['email'] ?? '')) ?>" required></label><label>Equipe / área<select name="team" required><option value="">Selecione</option><?php foreach ($availableTeams as $option): ?><option <?= ($_POST['team'] ?? '') === $option ? 'selected' : '' ?>><?= lh($option) ?></option><?php endforeach; ?></select></label><div class="password-grid"><label>Senha<input name="password" type="password" minlength="8" required></label><label>Confirmar senha<input name="password_confirmation" type="password" minlength="8" required></label></div><?php if (!$availableTeams): ?><p class="login-error">O gestor ainda não cadastrou equipes.</p><?php endif; ?><?php if ($error): ?><p class="login-error"><?= lh($error) ?></p><?php endif; ?><button class="primary" <?= !$availableTeams ? 'disabled' : '' ?>>Criar conta e continuar <span>→</span></button></form>
         <?php else: ?>
           <div class="login-heading compact"><span class="role-icon">H</span><div><p class="eyebrow">BEM-VINDO DE VOLTA</p><h2>Acesse sua conta</h2></div></div>
           <form method="post" class="unified-form"><input type="hidden" name="csrf" value="<?= lh($_SESSION['csrf']) ?>"><input type="hidden" name="role" value="employee"><input type="hidden" name="mode" value="login"><label>E-mail corporativo<input name="email" type="email" autocomplete="email" autofocus required></label><label>Senha<input name="password" type="password" autocomplete="current-password" required></label><?php if ($error): ?><p class="login-error"><?= lh($error) ?></p><?php endif; ?><button class="primary">Entrar na minha conta <span>→</span></button></form>

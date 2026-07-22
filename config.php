@@ -28,6 +28,9 @@ function db(): PDO
         email TEXT NOT NULL,
         team TEXT NOT NULL DEFAULT "",
         work_date TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT "pending",
+        reviewed_at TEXT,
+        reviewed_by INTEGER,
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         UNIQUE(email, work_date)
     )');
@@ -50,6 +53,12 @@ function db(): PDO
     if (!in_array('active', $columns, true)) {
         $pdo->exec('ALTER TABLE users ADD COLUMN active INTEGER NOT NULL DEFAULT 1');
     }
+    $recordColumns = $pdo->query('PRAGMA table_info(records)')->fetchAll(PDO::FETCH_COLUMN, 1);
+    if (!in_array('status', $recordColumns, true)) {
+        $pdo->exec('ALTER TABLE records ADD COLUMN status TEXT NOT NULL DEFAULT "approved"');
+    }
+    if (!in_array('reviewed_at', $recordColumns, true)) $pdo->exec('ALTER TABLE records ADD COLUMN reviewed_at TEXT');
+    if (!in_array('reviewed_by', $recordColumns, true)) $pdo->exec('ALTER TABLE records ADD COLUMN reviewed_by INTEGER');
     $pdo->exec("INSERT OR IGNORE INTO teams (name) SELECT DISTINCT team FROM users WHERE team <> ''");
     $managerCount = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role = 'manager'")->fetchColumn();
     if ($managerCount === 0) {
@@ -57,6 +66,7 @@ function db(): PDO
         $stmt->execute(['Gestor principal', 'gestor@local', '', password_hash(manager_pin(), PASSWORD_DEFAULT), 'manager']);
     }
     $pdo->exec('CREATE INDEX IF NOT EXISTS records_email_idx ON records(email)');
+    $pdo->exec('CREATE INDEX IF NOT EXISTS records_status_idx ON records(status)');
     return $pdo;
 }
 

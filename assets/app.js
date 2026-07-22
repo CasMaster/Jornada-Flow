@@ -19,7 +19,7 @@ $('#nextMonth').onclick = () => { cursor = new Date(cursor.getFullYear(), cursor
 $('#register').onclick = async () => {
   const response = await fetch('?api=register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ csrf:document.body.dataset.csrf, dates:[...selected] }) });
   const data = await response.json();
-  $('#notice').textContent = response.ok ? `${data.saved} dia(s) registrado(s) com sucesso.` : data.error;
+  $('#notice').textContent = response.ok ? `${data.saved} solicitação(ões) enviada(s) ao gestor.` : data.error;
   if (response.ok) { selected.clear(); renderCalendar(); setTimeout(() => location.reload(), 700); }
 };
 

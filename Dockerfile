@@ -1,3 +1,5 @@
+FROM docker.io/library/composer:2 AS composer
+
 FROM php:8.3-apache
 
 RUN apt-get update \

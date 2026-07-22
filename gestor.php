@@ -72,16 +72,50 @@ if ($search !== '') { $conditions[] = '(name LIKE ? OR email LIKE ?)'; $params[]
 $stmt = db()->prepare('SELECT id, name, email, team, work_date, created_at FROM records WHERE ' . implode(' AND ', $conditions) . ' ORDER BY work_date DESC, name');
 $stmt->execute($params); $records = $stmt->fetchAll();
 if (isset($_GET['export'])) {
-    header('Content-Type: text/csv; charset=utf-8'); header('Content-Disposition: attachment; filename="home-office-' . $start . '-a-' . $end . '.csv"'); echo "\xEF\xBB\xBF";
-    $out = fopen('php://output', 'w'); fputcsv($out, ['Colaborador','E-mail','Equipe','Data','Dia da semana'], ';');
-    $weekdays = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
-    foreach ($records as $row) fputcsv($out, [$row['name'],$row['email'],$row['team'],date('d/m/Y', strtotime($row['work_date'])),$weekdays[(int)date('w', strtotime($row['work_date']))]], ';'); fclose($out); exit;
+    require __DIR__ . '/vendor/autoload.php';
+    $peopleConditions = ["role = 'employee'", 'active = 1']; $peopleParams = [];
+    if ($team !== '') { $peopleConditions[] = 'team = ?'; $peopleParams[] = $team; }
+    if ($search !== '') { $peopleConditions[] = '(name LIKE ? OR email LIKE ?)'; $peopleParams[] = "%$search%"; $peopleParams[] = "%$search%"; }
+    $peopleStmt = db()->prepare('SELECT name, email, team FROM users WHERE ' . implode(' AND ', $peopleConditions) . ' ORDER BY name');
+    $peopleStmt->execute($peopleParams); $exportPeople = $peopleStmt->fetchAll();
+    $recordMap = [];
+    foreach ($records as $row) $recordMap[strtolower($row['email'])][$row['work_date']] = true;
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet(); $sheet = $spreadsheet->getActiveSheet(); $sheet->setTitle('Home Office'); $sheet->setShowGridlines(false);
+    $dates = []; for ($day = new DateTimeImmutable($start); $day <= new DateTimeImmutable($end); $day = $day->modify('+1 day')) $dates[] = $day;
+    $lastColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($dates) + 1);
+    $sheet->mergeCells("A1:{$lastColumn}1"); $sheet->setCellValue('A1', 'CONTROLE DE HOME OFFICE — ' . date('d/m/Y', strtotime($start)) . ' A ' . date('d/m/Y', strtotime($end)));
+    $sheet->setCellValue('A3', 'Colaborador');
+    foreach ($dates as $index => $date) {
+        $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($index + 2);
+        $sheet->setCellValue($column . '3', \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($date));
+        $sheet->getStyle($column . '3')->getNumberFormat()->setFormatCode('dd/mm');
+        if ((int)$date->format('N') >= 6) $sheet->getStyle($column . '3:' . $column . (max(4, count($exportPeople) + 3)))->getFill()->setFillType('solid')->getStartColor()->setRGB('F2F2F2');
+    }
+    foreach ($exportPeople as $rowIndex => $person) {
+        $excelRow = $rowIndex + 4; $sheet->setCellValue('A' . $excelRow, $person['name']);
+        foreach ($dates as $dateIndex => $date) {
+            $dateKey = $date->format('Y-m-d'); if (empty($recordMap[strtolower($person['email'])][$dateKey])) continue;
+            $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($dateIndex + 2); $cell = $column . $excelRow; $sheet->setCellValue($cell, 'HOME');
+            $sheet->getStyle($cell)->applyFromArray(['font'=>['bold'=>true,'color'=>['rgb'=>'9C0006']],'fill'=>['fillType'=>'solid','startColor'=>['rgb'=>'F4CCCC']],'alignment'=>['horizontal'=>'center','vertical'=>'center']]);
+        }
+    }
+    $lastDataRow = max(4, count($exportPeople) + 3); $noteRow = $lastDataRow + 2;
+    $sheet->mergeCells("A{$noteRow}:{$lastColumn}{$noteRow}"); $sheet->setCellValue("A{$noteRow}", 'Ciclo selecionado: ' . date('d/m/Y', strtotime($start)) . ' a ' . date('d/m/Y', strtotime($end)) . '. Exportado em ' . date('d/m/Y H:i') . '.');
+    $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray(['font'=>['bold'=>true,'size'=>14,'color'=>['rgb'=>'FFFFFF']],'fill'=>['fillType'=>'solid','startColor'=>['rgb'=>'1F4E78']],'alignment'=>['horizontal'=>'center','vertical'=>'center']]);
+    $sheet->getStyle("A3:{$lastColumn}3")->applyFromArray(['font'=>['bold'=>true,'color'=>['rgb'=>'1F1F1F']],'fill'=>['fillType'=>'solid','startColor'=>['rgb'=>'D9EAF7']],'alignment'=>['horizontal'=>'center','vertical'=>'center']]);
+    $sheet->getStyle("A4:A{$lastDataRow}")->getFont()->setBold(true); $sheet->getStyle("A3:{$lastColumn}{$lastDataRow}")->getBorders()->getAllBorders()->setBorderStyle('hair')->getColor()->setRGB('E6E6E6');
+    $sheet->getStyle("A{$noteRow}:{$lastColumn}{$noteRow}")->applyFromArray(['font'=>['bold'=>true,'color'=>['rgb'=>'7F6000']],'fill'=>['fillType'=>'solid','startColor'=>['rgb'=>'FFF2CC']]]);
+    $sheet->getColumnDimension('A')->setWidth(28); for ($index = 2; $index <= count($dates) + 1; $index++) $sheet->getColumnDimension(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($index))->setWidth(11);
+    $sheet->getRowDimension(1)->setRowHeight(28); $sheet->getRowDimension(3)->setRowHeight(22); $sheet->freezePane('B4'); $sheet->setAutoFilter("A3:{$lastColumn}3");
+    $sheet->getPageSetup()->setOrientation('landscape')->setFitToWidth(1)->setFitToHeight(0); $sheet->getPageMargins()->setTop(0.4)->setBottom(0.4)->setLeft(0.25)->setRight(0.25);
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'); header('Content-Disposition: attachment; filename="home-office-' . $start . '-a-' . $end . '.xlsx"'); header('Cache-Control: max-age=0');
+    (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save('php://output'); exit;
 }
 $people = count(array_unique(array_column($records, 'email'))); $weekdays = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
 ?>
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gestor — Híbrido</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/style.css"><link rel="stylesheet" href="assets/manager.css"></head>
 <body class="manager-page"><header class="topbar"><a class="brand" href="gestor.php"><span class="mark">H</span> HÍBRIDO<span class="accent">.</span></a><nav><span class="user-label"><?= h($manager['name']) ?></span><form method="post"><input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>"><button class="tab active" name="action" value="logout">Sair</button></form></nav></header>
-<main><section class="workspace manager-workspace"><div class="manager-head"><div><p class="eyebrow">PAINEL DO GESTOR</p><h1>Gestão do <em>trabalho remoto.</em></h1><p>Período padrão: dia 20 até dia 19 do mês seguinte.</p></div><a class="primary button-link" href="?<?= h(http_build_query(array_merge($_GET, ['export'=>1]))) ?>">Exportar CSV ↓</a></div>
+<main><section class="workspace manager-workspace"><div class="manager-head"><div><p class="eyebrow">PAINEL DO GESTOR</p><h1>Gestão do <em>trabalho remoto.</em></h1><p>Período padrão: dia 20 até dia 19 do mês seguinte.</p></div><a class="primary button-link" href="?<?= h(http_build_query(array_merge($_GET, ['export'=>1]))) ?>">Exportar Excel ↓</a></div>
 <?php if ($error): ?><p class="login-error manager-alert"><?= h($error) ?></p><?php endif; ?>
 <nav class="manager-sections"><a href="#registros">Registros</a><a href="#equipes">Equipes</a><a href="#usuarios">Usuários</a></nav>
 <div class="stats stats-three"><div><span>DIAS NO PERÍODO</span><strong><?= count($records) ?></strong></div><div><span>COLABORADORES</span><strong><?= $people ?></strong></div><div><span>GESTORES ATIVOS</span><strong><?= count(array_filter($users, fn($u) => $u['role'] === 'manager' && (int)$u['active'] === 1)) ?></strong></div></div>

@@ -1,14 +1,18 @@
 FROM php:8.3-apache
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libsqlite3-dev \
-    && docker-php-ext-install pdo_sqlite \
+    && apt-get install -y --no-install-recommends libfreetype6-dev libjpeg62-turbo-dev libonig-dev libpng-dev libsqlite3-dev libzip-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd mbstring pdo_sqlite zip \
     && rm -rf /var/lib/apt/lists/* \
     && a2enmod rewrite headers \
     && printf '<Directory /var/www/html>\nAllowOverride All\nRequire all granted\n</Directory>\n' > /etc/apache2/conf-available/hibrido.conf \
     && a2enconf hibrido
 
 WORKDIR /var/www/html
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY composer.json ./
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 COPY . .
 
 RUN mkdir -p /var/www/html/data \

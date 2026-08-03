@@ -67,6 +67,8 @@ return [
 
     'timezone' => env('APP_TIMEZONE', 'America/Sao_Paulo'),
 
+    'route_prefix' => trim((string) env('APP_ROUTE_PREFIX', ''), '/'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

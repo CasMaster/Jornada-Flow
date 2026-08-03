@@ -7,6 +7,8 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -21,7 +23,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'password',
+        'password', 'role', 'team', 'active',
     ];
 
     /**
@@ -44,6 +46,15 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'active' => 'boolean',
         ];
     }
+
+    public function managedTeams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'manager_team', 'manager_id', 'team_id')->withTimestamps();
+    }
+
+    public function workRequests(): HasMany { return $this->hasMany(WorkRequest::class); }
+    public function isManager(): bool { return in_array($this->role, ['manager', 'super_admin'], true); }
 }

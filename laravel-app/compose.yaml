@@ -1,0 +1,22 @@
+services:
+  hibrido_laravel:
+    build: .
+    container_name: hibrido-home-office-laravel
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      APP_NAME: "Híbrido | Mix Fiscal"
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: http://localhost:8081
+      APP_TIMEZONE: America/Sao_Paulo
+      APP_KEY: "${APP_KEY}"
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /var/www/html/database/database.sqlite
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+    volumes:
+      - hibrido_laravel_data:/var/www/html/database
+volumes:
+  hibrido_laravel_data:

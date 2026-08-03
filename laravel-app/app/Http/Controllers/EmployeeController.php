@@ -18,6 +18,7 @@ class EmployeeController extends Controller
             $record = WorkRequest::firstOrCreate(['user_id'=>$request->user()->id,'work_date'=>$date], ['status'=>'pending']);
             $added += $record->wasRecentlyCreated ? 1 : 0;
         }
+        if ($request->expectsJson()) return response()->json(['saved'=>$added], 201);
         return back()->with('success', $added ? "$added solicitação(ões) enviada(s)." : 'Esses dias já estavam registrados.');
     }
 }

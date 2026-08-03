@@ -17,7 +17,7 @@ $('#prevMonth').onclick = () => { cursor = new Date(cursor.getFullYear(), cursor
 $('#nextMonth').onclick = () => { cursor = new Date(cursor.getFullYear(), cursor.getMonth()+1, 1); renderCalendar(); };
 
 $('#register').onclick = async () => {
-  const response = await fetch('?api=register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ csrf:document.body.dataset.csrf, dates:[...selected] }) });
+  const response = await fetch(window.HIBRIDO_REQUEST_URL, { method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':window.HIBRIDO_CSRF}, body:JSON.stringify({ dates:[...selected] }) });
   const data = await response.json();
   $('#notice').textContent = response.ok ? `${data.saved} solicitação(ões) enviada(s) ao gestor.` : data.error;
   if (response.ok) { selected.clear(); renderCalendar(); setTimeout(() => location.reload(), 700); }

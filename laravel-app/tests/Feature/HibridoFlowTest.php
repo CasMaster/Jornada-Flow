@@ -14,6 +14,7 @@ class HibridoFlowTest extends TestCase
         $this->post('/cadastro',['name'=>'Ana','email'=>'ana@example.com','team'=>'Fiscal','password'=>'password1','password_confirmation'=>'password1'])->assertRedirect('/painel');
         $this->post('/solicitacoes',['dates'=>['2026-08-05']])->assertSessionHasNoErrors();
         $this->assertDatabaseHas('work_requests',['work_date'=>'2026-08-05 00:00:00','status'=>'pending']);
+        $this->get('/painel')->assertOk()->assertSee('Selecione os dias')->assertSee('Dias já registrados')->assertSee('05/08/2026');
         $this->delete('/solicitacoes/1')->assertNotFound();
     }
     public function test_manager_can_only_review_requests_from_assigned_teams(): void

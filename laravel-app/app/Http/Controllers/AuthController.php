@@ -9,11 +9,13 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 class AuthController extends Controller
 {
-    public function show(Request $request): View { return view('auth.login', ['teams' => Team::where('active', true)->orderBy('name')->get(), 'mode' => $request->string('modo', 'login')]); }
+    public function show(Request $request): View { return view('auth.login', ['teams' => Team::where('active', true)->orderBy('name')->get(), 'mode' => $request->string('modo', 'login')->toString(), 'profile' => $request->string('perfil', 'employee')->toString()]); }
     public function login(Request $request): RedirectResponse
     {
-        $credentials = $request->validate(['email' => ['required','email'], 'password' => ['required','string']]);
+        $credentials = $request->validate(['email' => ['required','email'], 'password' => ['required','string'], 'profile'=>['required','in:employee,manager']]);
         if (!Auth::attempt(['email' => strtolower($credentials['email']), 'password' => $credentials['password'], 'active' => true], true)) return back()->withErrors(['email' => 'E-mail ou senha inválidos.'])->onlyInput('email');
+        $validProfile = $credentials['profile'] === 'manager' ? $request->user()->isManager() : $request->user()->role === 'employee';
+        if (!$validProfile) { Auth::logout(); return back()->withErrors(['email' => $credentials['profile'] === 'manager' ? 'Esta conta não possui acesso de gestor.' : 'Use a opção Sou gestor para esta conta.'])->onlyInput('email'); }
         $request->session()->regenerate();
         return redirect()->intended($request->user()->isManager() ? route('manager.dashboard') : route('employee.dashboard'));
     }

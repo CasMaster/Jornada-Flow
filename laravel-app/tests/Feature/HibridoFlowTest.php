@@ -8,6 +8,13 @@ use Tests\TestCase;
 class HibridoFlowTest extends TestCase
 {
     use RefreshDatabase;
+    public function test_login_exposes_employee_and_manager_areas(): void
+    {
+        $this->get('/login')->assertOk()->assertSee('Sou colaborador')->assertSee('Sou gestor');
+        $this->get('/login?perfil=manager')->assertOk()->assertSee('Painel do gestor')->assertSee('Entrar como gestor');
+        $manager=User::factory()->create(['role'=>'manager','password'=>'password']);
+        $this->post('/login',['email'=>$manager->email,'password'=>'password','profile'=>'manager'])->assertRedirect('/gestor');
+    }
     public function test_employee_can_register_and_submit_immutable_request(): void
     {
         Team::create(['name'=>'Fiscal','active'=>true]);

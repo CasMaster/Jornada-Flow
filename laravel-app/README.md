@@ -7,6 +7,30 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Banco de dados da aplicação
+
+O ambiente em container usa PostgreSQL 16, sem publicar a porta 5432 no host. O banco fica no volume `hibrido_postgres_data`; o volume SQLite anterior é montado somente para leitura durante a migração.
+
+Defina uma senha forte em `DB_PASSWORD` no `.env` antes de iniciar os containers. Para importar uma única vez o banco legado em um PostgreSQL vazio:
+
+```bash
+podman exec hibrido-home-office-laravel php artisan hibrido:import-sqlite
+```
+
+O comando recusa a operação se o PostgreSQL já tiver usuários, equipes ou solicitações. Depois da conferência, gere backups com:
+
+```bash
+podman exec hibrido-home-office-postgres pg_dump -U hibrido -d hibrido -Fc -f /tmp/hibrido.dump
+podman cp hibrido-home-office-postgres:/tmp/hibrido.dump ./hibrido.dump
+```
+
+Restaure somente em um banco vazio e em janela de manutenção:
+
+```bash
+podman cp ./hibrido.dump hibrido-home-office-postgres:/tmp/hibrido.dump
+podman exec hibrido-home-office-postgres pg_restore -U hibrido -d hibrido --clean --if-exists /tmp/hibrido.dump
+```
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

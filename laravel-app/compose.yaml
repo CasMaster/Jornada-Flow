@@ -1,4 +1,20 @@
 services:
+  postgres:
+    image: docker.io/library/postgres:16-alpine
+    container_name: hibrido-home-office-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: "${DB_DATABASE:-hibrido}"
+      POSTGRES_USER: "${DB_USERNAME:-hibrido}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+    volumes:
+      - hibrido_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-hibrido} -d ${DB_DATABASE:-hibrido}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   hibrido_laravel:
     build: .
     container_name: hibrido-home-office-laravel
@@ -14,11 +30,19 @@ services:
       APP_ROUTE_PREFIX: "${APP_ROUTE_PREFIX:-}"
       APP_TIMEZONE: America/Sao_Paulo
       APP_KEY: "${APP_KEY}"
-      DB_CONNECTION: sqlite
-      DB_DATABASE: /var/www/html/database/database.sqlite
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: "${DB_DATABASE:-hibrido}"
+      DB_USERNAME: "${DB_USERNAME:-hibrido}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      LEGACY_SQLITE_PATH: /var/www/html/legacy/database.sqlite
       SESSION_DRIVER: database
       CACHE_STORE: database
     volumes:
-      - hibrido_laravel_data:/var/www/html/database
+      - hibrido_laravel_data:/var/www/html/legacy:ro
+    depends_on:
+      - postgres
 volumes:
   hibrido_laravel_data:
+  hibrido_postgres_data:

@@ -17,6 +17,8 @@ Valide o backup:
 
 ```bash
 sha256sum -c ~/hibrido-migracao/SHA256SUMS
+podman cp ~/hibrido-migracao/home-office.sqlite hibrido-home-office:/tmp/backup-verificacao.sqlite
+podman exec hibrido-home-office php /var/www/html/scripts/verify-data.php /tmp/backup-verificacao.sqlite
 ```
 
 O arquivo preserva usuários, gestores, equipes, solicitações, decisões e históricos. O `.env` não deve ser incluído no pacote; configure novas variáveis no destino.
@@ -83,4 +85,3 @@ sudo systemctl reload caddy
 ## 6. Retorno ao servidor anterior
 
 Não desligue o servidor anterior antes da conferência. Caso seja necessário voltar, direcione o acesso novamente ao endereço antigo; o backup e a restauração não modificam o banco de origem.
-

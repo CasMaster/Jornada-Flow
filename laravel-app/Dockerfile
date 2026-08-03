@@ -14,7 +14,9 @@ RUN sed -ri 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-avail
 WORKDIR /var/www/html
 COPY --from=vendor /app/vendor ./vendor
 COPY . .
-RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs database && chown -R www-data:www-data storage database
+RUN chmod 755 /var/www/html /var/www/html/public \
+    && mkdir -p storage/framework/{cache,sessions,views} storage/logs database \
+    && chown -R www-data:www-data storage database
 COPY docker-entrypoint.sh /usr/local/bin/hibrido-entrypoint
 RUN chmod +x /usr/local/bin/hibrido-entrypoint
 ENTRYPOINT ["hibrido-entrypoint"]

@@ -66,11 +66,12 @@ $availableTeams = db()->query("SELECT name FROM teams WHERE active = 1 ORDER BY 
 <!doctype html><html lang="pt-BR"><head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Entrar — Híbrido</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css"><link rel="stylesheet" href="assets/login.css">
+  <link rel="stylesheet" href="assets/style.css"><link rel="stylesheet" href="assets/login.css"><link rel="stylesheet" href="assets/brand-theme.css">
+  <script src="assets/theme.js"></script>
 </head><body class="unified-login">
-  <header class="topbar"><a class="brand" href="login.php"><span class="mark">H</span> HÍBRIDO<span class="accent">.</span></a><span class="secure-label">● AMBIENTE SEGURO</span></header>
+  <header class="topbar"><a class="brand" href="login.php"><img src="assets/mix-fiscal-mark.png" alt="Mix Fiscal"><span>HÍBRIDO</span></a><nav><span class="secure-label">● AMBIENTE SEGURO</span></nav></header>
   <main class="login-shell">
-    <section class="login-copy"><p class="eyebrow">CONTROLE DE HOME OFFICE</p><h1>Um só acesso.<br><em>Duas experiências.</em></h1><p>Cadastre-se como colaborador para manter seu histórico ou entre como gestor para acompanhar toda a equipe.</p><div class="login-note"><b>H</b><span>Após o envio, seus registros ficam disponíveis apenas para consulta e não podem ser alterados pelo colaborador.</span></div></section>
+    <section class="login-copy"><img class="institutional-logo" src="assets/mix-fiscal-logo.png" alt="Mix Fiscal"><p class="eyebrow">CONTROLE DE HOME OFFICE</p><h1>Um só acesso.<br><em>Duas experiências.</em></h1><p>Cadastre-se como colaborador para manter seu histórico ou entre como gestor para acompanhar toda a equipe.</p><div class="login-note"><b>MF</b><span>Após o envio, seus registros ficam disponíveis apenas para consulta e não podem ser alterados pelo colaborador.</span></div></section>
     <section class="card unified-card">
       <div class="role-tabs" role="tablist"><a class="<?= $activeRole !== 'manager' ? 'active' : '' ?>" href="?perfil=employee">Sou colaborador</a><a class="<?= $activeRole === 'manager' ? 'active' : '' ?>" href="?perfil=manager">Sou gestor</a></div>
       <?php if ($activeRole === 'manager'): ?>
@@ -87,5 +88,5 @@ $availableTeams = db()->query("SELECT name FROM teams WHERE active = 1 ORDER BY 
         <?php endif; ?>
       <?php endif; ?>
     </section>
-  </main><footer><b>HÍBRIDO.</b><span>Controle simples. Trabalho flexível.</span></footer>
+  </main><footer><span class="footer-brand"><img src="assets/mix-fiscal-logo.svg" alt="Mix Fiscal"><b>HÍBRIDO</b></span><span>Controle simples. Trabalho flexível.</span></footer>
 </body></html>

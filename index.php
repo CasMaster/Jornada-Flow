@@ -52,10 +52,12 @@ $historyWeekdays = ['domingo','segunda-feira','terça-feira','quarta-feira','qui
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/style.css">
   <link rel="stylesheet" href="assets/employee.css">
+  <link rel="stylesheet" href="assets/brand-theme.css">
+  <script src="assets/theme.js"></script>
 </head>
 <body data-csrf="<?= htmlspecialchars($_SESSION['csrf'], ENT_QUOTES) ?>">
   <header class="topbar">
-    <a class="brand" href="index.php"><span class="mark">H</span> HÍBRIDO<span class="accent">.</span></a>
+    <a class="brand" href="index.php"><img src="assets/mix-fiscal-mark.png" alt="Mix Fiscal"><span>HÍBRIDO</span></a>
     <nav><span class="user-label"><?= htmlspecialchars($employee['name'], ENT_QUOTES) ?></span><a class="tab" href="login.php?logout=1">Sair</a></nav>
   </header>
 
@@ -87,7 +89,7 @@ $historyWeekdays = ['domingo','segunda-feira','terça-feira','quarta-feira','qui
     </section>
 
   </main>
-  <footer><b>HÍBRIDO.</b><span>Controle simples. Trabalho flexível.</span></footer>
+  <footer><span class="footer-brand"><img src="assets/mix-fiscal-logo.svg" alt="Mix Fiscal"><b>HÍBRIDO</b></span><span>Controle simples. Trabalho flexível.</span></footer>
   <script src="assets/app.js" defer></script>
 </body>
 </html>

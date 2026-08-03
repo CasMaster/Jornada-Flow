@@ -9,7 +9,7 @@ services:
       APP_NAME: "Híbrido | Mix Fiscal"
       APP_ENV: production
       APP_DEBUG: "false"
-      APP_URL: http://localhost:8081
+      APP_URL: "${APP_URL:-http://localhost:8081}"
       APP_TIMEZONE: America/Sao_Paulo
       APP_KEY: "${APP_KEY}"
       DB_CONNECTION: sqlite

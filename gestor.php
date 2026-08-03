@@ -45,8 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $email = strtolower(trim((string)($_POST['email'] ?? ''))); $team = trim((string)($_POST['team'] ?? ''));
                 $role = in_array((string)($_POST['role'] ?? ''), ['employee','manager','super_admin'], true) ? (string)$_POST['role'] : 'employee'; $password = (string)($_POST['password'] ?? '');
                 $managerTeamIds = array_values(array_unique(array_filter(array_map('intval', (array)($_POST['manager_teams'] ?? [])), fn($id) => $id > 0)));
+                $validTeamIds = array_map('intval', db()->query('SELECT id FROM teams WHERE active = 1')->fetchAll(PDO::FETCH_COLUMN));
+                $managerTeamIds = array_values(array_intersect($managerTeamIds, $validTeamIds));
                 if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) throw new RuntimeException('Informe nome e e-mail válidos.');
                 if ($role === 'employee' && $team === '') throw new RuntimeException('Selecione a equipe do colaborador.');
+                if ($role === 'manager' && !$managerTeamIds) throw new RuntimeException('Vincule pelo menos uma equipe ao gestor.');
                 if ($id === (int)$manager['id'] && $role !== 'super_admin') throw new RuntimeException('Você não pode remover sua própria permissão de Super Admin.');
                 db()->beginTransaction();
                 if ($id > 0) {

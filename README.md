@@ -6,12 +6,14 @@ Aplicação em PHP 8.3 com SQLite para solicitação, aprovação e consolidaç�
 
 - Login unificado para colaboradores e gestores.
 - Primeiro acesso de colaboradores com equipes predefinidas.
-- Múltiplos gestores com contas individuais.
+- Super Admin com visão global e administração de acessos.
+- Múltiplos gestores com contas individuais e vínculo a várias equipes.
 - Cadastro de equipes e gerenciamento de usuários.
 - Solicitações com estados pendente, aprovada e recusada.
 - Histórico imutável para o colaborador; recusas permanecem arquivadas.
 - Ciclos de apuração entre o dia 20 e o dia 19 do mês seguinte.
 - Exportação Excel em formato matricial, com colaboradores nas linhas e datas nas colunas.
+- Filtro de múltiplos colaboradores limitado às equipes permitidas para o gestor.
 - Fuso horário configurável, com padrão `America/Sao_Paulo`.
 
 ## Arquitetura
@@ -42,7 +44,7 @@ Quando o banco ainda não possui gestores, o sistema cria:
 - E-mail: `gestor@local`
 - Senha inicial: valor de `HIBRIDO_MANAGER_PIN`
 
-Depois disso, novos gestores e redefinições de senha são administrados pelo painel. Em uma restauração de banco, as contas e senhas existentes são preservadas.
+Essa conta é promovida automaticamente a Super Admin. Depois disso, novos gestores, suas equipes e redefinições de senha são administrados pelo painel. Gestores comuns só consultam e analisam solicitações das equipes vinculadas. Em uma restauração de banco, contas, vínculos e senhas existentes são preservados.
 
 ## Dados persistentes
 

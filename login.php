@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($activeRole === 'manager') {
         $email = strtolower(trim((string)($_POST['email'] ?? '')));
         $password = (string)($_POST['password'] ?? '');
-        $stmt = db()->prepare("SELECT id, name, email, team, password_hash, role FROM users WHERE email = ? AND role = 'manager' AND active = 1 LIMIT 1");
+        $stmt = db()->prepare("SELECT id, name, email, team, password_hash, role FROM users WHERE email = ? AND role IN ('manager', 'super_admin') AND active = 1 LIMIT 1");
         $stmt->execute([$email]); $manager = $stmt->fetch();
         if ($manager && password_verify($password, $manager['password_hash'])) {
             unset($manager['password_hash']); session_regenerate_id(true); unset($_SESSION['employee']);

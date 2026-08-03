@@ -49,6 +49,14 @@ function db(): PDO
         active INTEGER NOT NULL DEFAULT 1,
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )');
+    $pdo->exec('CREATE TABLE IF NOT EXISTS manager_teams (
+        manager_id INTEGER NOT NULL,
+        team_id INTEGER NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (manager_id, team_id),
+        FOREIGN KEY (manager_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
+    )');
     $columns = $pdo->query('PRAGMA table_info(users)')->fetchAll(PDO::FETCH_COLUMN, 1);
     if (!in_array('active', $columns, true)) {
         $pdo->exec('ALTER TABLE users ADD COLUMN active INTEGER NOT NULL DEFAULT 1');
@@ -60,11 +68,15 @@ function db(): PDO
     if (!in_array('reviewed_at', $recordColumns, true)) $pdo->exec('ALTER TABLE records ADD COLUMN reviewed_at TEXT');
     if (!in_array('reviewed_by', $recordColumns, true)) $pdo->exec('ALTER TABLE records ADD COLUMN reviewed_by INTEGER');
     $pdo->exec("INSERT OR IGNORE INTO teams (name) SELECT DISTINCT team FROM users WHERE team <> ''");
-    $managerCount = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role = 'manager'")->fetchColumn();
+    $managerCount = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role IN ('manager', 'super_admin')")->fetchColumn();
     if ($managerCount === 0) {
         $stmt = $pdo->prepare('INSERT OR IGNORE INTO users (name, email, team, password_hash, role) VALUES (?, ?, ?, ?, ?)');
-        $stmt->execute(['Gestor principal', 'gestor@local', '', password_hash(manager_pin(), PASSWORD_DEFAULT), 'manager']);
+        $stmt->execute(['Gestor principal', 'gestor@local', '', password_hash(manager_pin(), PASSWORD_DEFAULT), 'super_admin']);
     }
+    $pdo->exec("UPDATE users SET role = 'super_admin' WHERE email = 'gestor@local' AND role = 'manager'");
+    $pdo->exec("INSERT OR IGNORE INTO manager_teams (manager_id, team_id)
+        SELECT users.id, teams.id FROM users JOIN teams ON teams.name = users.team
+        WHERE users.role = 'manager' AND users.team <> ''");
     $pdo->exec('CREATE INDEX IF NOT EXISTS records_email_idx ON records(email)');
     $pdo->exec('CREATE INDEX IF NOT EXISTS records_status_idx ON records(status)');
     return $pdo;

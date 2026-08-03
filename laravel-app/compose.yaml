@@ -1,7 +1,7 @@
 services:
   postgres:
     image: docker.io/library/postgres:16-alpine
-    container_name: hibrido-home-office-postgres
+    container_name: "${POSTGRES_CONTAINER_NAME:-hibrido-home-office-postgres}"
     restart: unless-stopped
     environment:
       POSTGRES_DB: "${DB_DATABASE:-hibrido}"
@@ -17,10 +17,10 @@ services:
 
   hibrido_laravel:
     build: .
-    container_name: hibrido-home-office-laravel
+    container_name: "${APP_CONTAINER_NAME:-hibrido-home-office-laravel}"
     restart: unless-stopped
     ports:
-      - "8081:80"
+      - "${APP_PORT:-8081}:80"
     environment:
       APP_NAME: "Híbrido | Mix Fiscal"
       APP_ENV: production

@@ -13,7 +13,12 @@ DB_PORT=5432
 DB_DATABASE=hibrido
 DB_USERNAME=hibrido
 DB_PASSWORD=UMA_SENHA_FORTE_E_EXCLUSIVA
+APP_PORT=8081
+APP_CONTAINER_NAME=hibrido-home-office-laravel
+POSTGRES_CONTAINER_NAME=hibrido-home-office-postgres
 ```
+
+Para manter produção e homologação no mesmo servidor, use nomes de containers, diretórios de projeto e portas diferentes. Os volumes do PostgreSQL também ficam separados pelo nome do projeto do `podman-compose`.
 
 O SQLite anterior permanece no volume `hibrido_laravel_data`, montado como somente leitura. Após subir os containers, importe-o uma vez:
 

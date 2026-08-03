@@ -1,29 +1,65 @@
-# HÍBRIDO — versão PHP
+# HÍBRIDO — Controle de Home Office
 
-Sistema autocontido em PHP 8.1+ com banco SQLite. Não requer Node.js, processo de build ou serviço de banco separado.
+Aplicação em PHP 8.3 com SQLite para solicitação, aprovação e consolidação de dias de home office.
 
-## Publicação
+## Funcionalidades
 
-1. Envie todo o conteúdo desta pasta para a pasta pública do host (`public_html`, `www` ou equivalente).
-2. Confirme que as extensões PHP `pdo` e `pdo_sqlite` estão habilitadas.
-3. Garanta permissão de escrita do PHP na pasta `data`.
-4. Configure a variável de ambiente `HIBRIDO_MANAGER_PIN` com um PIN seguro.
-5. Opcionalmente, configure `HIBRIDO_TIMEZONE` (o padrão é `America/Sao_Paulo`).
-6. Acesse o domínio. O banco será criado automaticamente no primeiro uso.
+- Login unificado para colaboradores e gestores.
+- Primeiro acesso de colaboradores com equipes predefinidas.
+- Múltiplos gestores com contas individuais.
+- Cadastro de equipes e gerenciamento de usuários.
+- Solicitações com estados pendente, aprovada e recusada.
+- Histórico imutável para o colaborador; recusas permanecem arquivadas.
+- Ciclos de apuração entre o dia 20 e o dia 19 do mês seguinte.
+- Exportação Excel em formato matricial, com colaboradores nas linhas e datas nas colunas.
+- Fuso horário configurável, com padrão `America/Sao_Paulo`.
 
-O PIN padrão `1234` serve apenas para teste local e deve ser substituído em produção.
+## Arquitetura
 
-## Execução com contêiner
+- PHP 8.3 e Apache em um único container.
+- Banco SQLite persistido no volume `hibrido_data`.
+- Dependências PHP instaladas pelo Composer durante o build.
+- Porta interna publicada em `8080`; em produção, recomenda-se Caddy ou outro proxy reverso na porta 80/443.
 
-1. Copie `.env.example` para `.env` e defina um PIN seguro.
-2. Execute `docker compose up -d --build`.
-3. Acesse `http://IP_DO_SERVIDOR:8080`.
+## Execução local com Podman
 
-O banco SQLite fica no volume persistente `hibrido_data`. Nenhum DNS é necessário; o acesso inicial é feito pelo IP do servidor e porta 8080.
+1. Copie `.env.example` para `.env`.
+2. Defina um valor seguro em `HIBRIDO_MANAGER_PIN`.
+3. Execute:
 
-## Requisitos do host
+   ```bash
+   podman-compose up -d --build
+   ```
 
-- PHP 8.1 ou superior
-- PDO SQLite
-- HTTPS
-- Apache com `.htaccess` ou regra equivalente para impedir acesso à pasta `data`
+4. Acesse `http://127.0.0.1:8080`.
+
+Também é possível usar `docker compose up -d --build` em ambientes Docker.
+
+## Primeiro gestor
+
+Quando o banco ainda não possui gestores, o sistema cria:
+
+- E-mail: `gestor@local`
+- Senha inicial: valor de `HIBRIDO_MANAGER_PIN`
+
+Depois disso, novos gestores e redefinições de senha são administrados pelo painel. Em uma restauração de banco, as contas e senhas existentes são preservadas.
+
+## Dados persistentes
+
+O arquivo principal é `/var/www/html/data/home-office.sqlite`, armazenado no volume `hibrido_data`. Não copie o arquivo diretamente enquanto houver gravações; use o script de backup consistente:
+
+```bash
+podman exec hibrido-home-office php /var/www/html/scripts/backup-data.php /tmp/home-office.sqlite
+podman cp hibrido-home-office:/tmp/home-office.sqlite ./home-office.sqlite
+```
+
+## Migração
+
+O procedimento completo de backup, transporte, restauração e validação está em [MIGRACAO.md](MIGRACAO.md).
+
+## Segurança
+
+- Nunca versione `.env`, backups ou arquivos SQLite.
+- O backup contém dados pessoais e hashes de senha; armazene-o em local privado.
+- Publique o sistema atrás de HTTPS ao configurar um domínio.
+- Troque credenciais iniciais antes de liberar o ambiente a usuários.

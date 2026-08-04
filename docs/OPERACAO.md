@@ -21,6 +21,7 @@ APP_TIMEZONE=America/Sao_Paulo
 APP_PORT=8082
 APP_CONTAINER_NAME=hibrido-home-office-prod
 POSTGRES_CONTAINER_NAME=hibrido-home-office-postgres-prod
+POSTGRES_HOST_PORT=15432
 DB_CONNECTION=pgsql
 DB_HOST=postgres
 DB_PORT=5432
@@ -30,6 +31,20 @@ DB_PASSWORD=SENHA_PRIVADA
 ```
 
 O `.env` deve ter permissão `600` e nunca pode entrar no Git.
+
+## Acesso administrativo pelo DBeaver
+
+O PostgreSQL é publicado somente no loopback do servidor em
+`127.0.0.1:${POSTGRES_HOST_PORT}`. Ele não deve ser liberado no firewall público.
+
+No DBeaver, crie uma conexão PostgreSQL com:
+
+- host do banco: `127.0.0.1`;
+- porta do banco: `15432` (ou o valor de `POSTGRES_HOST_PORT`);
+- banco e usuário: valores de `DB_DATABASE` e `DB_USERNAME`;
+- túnel SSH: servidor de produção, porta `22`, usuário `admin`.
+
+A senha do banco é o valor de `DB_PASSWORD` no `.env` de produção.
 
 ## Publicação segura
 

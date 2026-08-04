@@ -23,7 +23,7 @@ class ManagerController extends Controller
     public function index(Request $request): View
     {
         [$start,$end]=ReportingCycle::bounds($request->string('cycle')->toString() ?: null); $allowed=$this->allowedTeams($request->user());
-        return view('manager.dashboard',['records'=>$this->query($request)->orderBy('work_date')->get(),'teams'=>Team::whereIn('name',$allowed)->orderBy('name')->get(),'employees'=>User::where('role','employee')->whereIn('team',$allowed)->orderBy('name')->get(),'cycles'=>ReportingCycle::options(),'start'=>$start,'end'=>$end,'allTeams'=>Team::orderBy('name')->get(),'users'=>$request->user()->role==='super_admin'?User::with('managedTeams')->orderBy('name')->get():collect()]);
+        return view('manager.dashboard',['records'=>$this->query($request)->orderBy('work_date')->get(),'teams'=>Team::whereIn('name',$allowed)->orderBy('name')->get(),'employees'=>User::where('active',true)->where('team','<>','')->whereIn('team',$allowed)->orderBy('name')->get(),'cycles'=>ReportingCycle::options(),'start'=>$start,'end'=>$end,'allTeams'=>Team::orderBy('name')->get(),'users'=>$request->user()->role==='super_admin'?User::with('managedTeams')->orderBy('name')->get():collect()]);
     }
     public function review(Request $request, WorkRequest $workRequest): RedirectResponse
     {
@@ -34,7 +34,7 @@ class ManagerController extends Controller
     {
         [$start,$end]=ReportingCycle::bounds($request->string('cycle')->toString() ?: null);
         $approved=$this->query($request, false)->where('status','approved')->get(); $allowed=$this->allowedTeams($request->user());
-        $people=User::where('role','employee')->where('active',true)->whereIn('team',$allowed);
+        $people=User::where('active',true)->where('team','<>','')->whereIn('team',$allowed);
         if($request->filled('team'))$people->where('team',$request->string('team')); if($emails=array_filter((array)$request->input('employees',[])))$people->whereIn('email',$emails); $people=$people->orderBy('name')->get();
         $map=[]; foreach($approved as $record)$map[strtolower($record->user->email)][$record->work_date->format('Y-m-d')]=true;
         return response()->streamDownload(function()use($start,$end,$people,$map){

@@ -34,6 +34,15 @@ class HibridoFlowTest extends TestCase
         $this->actingAs($manager)->post("/gestor/solicitacoes/{$blocked->id}/analisar",['decision'=>'rejected'])->assertForbidden();
         $this->assertDatabaseHas('work_requests',['id'=>$allowed->id,'status'=>'approved']); $this->assertDatabaseHas('work_requests',['id'=>$blocked->id,'status'=>'pending']);
     }
+    public function test_manager_can_use_employee_panel_and_submit_own_request(): void
+    {
+        Team::create(['name'=>'Fiscal']);
+        $manager=User::factory()->create(['role'=>'manager','team'=>'Fiscal','password'=>'password']);
+        $this->post('/login',['email'=>$manager->email,'password'=>'password','profile'=>'employee'])->assertRedirect('/painel');
+        $this->post('/solicitacoes',['dates'=>['2026-08-12']])->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('work_requests',['user_id'=>$manager->id,'work_date'=>'2026-08-12 00:00:00','status'=>'pending']);
+        $this->get('/painel')->assertOk()->assertSee('Meu home office')->assertSee('Gestão');
+    }
     public function test_manager_cycle_filter_uses_twentieth_through_nineteenth(): void
     {
         $team=Team::create(['name'=>'Fiscal']); $manager=User::factory()->create(['role'=>'manager']); $manager->managedTeams()->attach($team);

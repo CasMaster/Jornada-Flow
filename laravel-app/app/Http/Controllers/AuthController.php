@@ -14,10 +14,10 @@ class AuthController extends Controller
     {
         $credentials = $request->validate(['email' => ['required','email'], 'password' => ['required','string'], 'profile'=>['required','in:employee,manager']]);
         if (!Auth::attempt(['email' => strtolower($credentials['email']), 'password' => $credentials['password'], 'active' => true], true)) return back()->withErrors(['email' => 'E-mail ou senha inválidos.'])->onlyInput('email');
-        $validProfile = $credentials['profile'] === 'manager' ? $request->user()->isManager() : $request->user()->role === 'employee';
-        if (!$validProfile) { Auth::logout(); return back()->withErrors(['email' => $credentials['profile'] === 'manager' ? 'Esta conta não possui acesso de gestor.' : 'Use a opção Sou gestor para esta conta.'])->onlyInput('email'); }
+        $validProfile = $credentials['profile'] !== 'manager' || $request->user()->isManager();
+        if (!$validProfile) { Auth::logout(); return back()->withErrors(['email' => 'Esta conta não possui acesso de gestor.'])->onlyInput('email'); }
         $request->session()->regenerate();
-        return redirect()->intended($request->user()->isManager() ? route('manager.dashboard') : route('employee.dashboard'));
+        return redirect()->intended($credentials['profile'] === 'manager' ? route('manager.dashboard') : route('employee.dashboard'));
     }
     public function register(Request $request): RedirectResponse
     {

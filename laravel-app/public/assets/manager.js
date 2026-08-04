@@ -11,6 +11,8 @@ document.querySelectorAll('select[multiple].click-multi').forEach((select) => {
   trigger.setAttribute('aria-expanded', 'false');
   const optionsArea = document.createElement('div');
   optionsArea.className = 'click-multi-options';
+  optionsArea.setAttribute('role', 'listbox');
+  optionsArea.setAttribute('aria-multiselectable', 'true');
   optionsArea.hidden = true;
 
   const render = () => {
@@ -34,16 +36,22 @@ document.querySelectorAll('select[multiple].click-multi').forEach((select) => {
       selectedArea.append(chip);
     });
     trigger.textContent = selected.length ? 'Adicionar outra opção' : (select.dataset.placeholder || 'Selecionar opções');
-    [...optionsArea.children].forEach((button, index) => button.classList.toggle('selected', select.options[index].selected));
+    [...optionsArea.children].forEach((button, index) => {
+      const isSelected = select.options[index].selected;
+      button.classList.toggle('selected', isSelected);
+      button.setAttribute('aria-selected', String(isSelected));
+    });
   };
 
   [...select.options].forEach((option) => {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'click-multi-option';
+    button.setAttribute('role', 'option');
     button.textContent = option.text;
     button.addEventListener('click', () => {
       option.selected = !option.selected;
+      button.setAttribute('aria-selected', String(option.selected));
       select.dispatchEvent(new Event('change', { bubbles: true }));
       render();
     });
@@ -62,6 +70,30 @@ document.querySelectorAll('select[multiple].click-multi').forEach((select) => {
   select.insertAdjacentElement('afterend', picker);
   render();
 });
+
+const positionUserMenu = (details) => {
+  const form = details.querySelector('.edit-user-form');
+  const summary = details.querySelector('summary');
+  if (!form || !summary || !details.open) return;
+  const rect = summary.getBoundingClientRect();
+  const menuWidth = Math.min(620, window.innerWidth - 24);
+  const right = Math.max(12, window.innerWidth - rect.right);
+  let top = rect.bottom + 8;
+  const estimatedHeight = Math.min(form.scrollHeight || 420, window.innerHeight - 24);
+  if (top + estimatedHeight > window.innerHeight - 12) top = Math.max(12, rect.top - estimatedHeight - 8);
+  form.style.setProperty('--menu-top', `${top}px`);
+  form.style.setProperty('--menu-right', `${Math.min(right, window.innerWidth - menuWidth - 12)}px`);
+};
+
+document.querySelectorAll('details.user-menu').forEach((details) => {
+  details.addEventListener('toggle', () => {
+    if (!details.open) return;
+    document.querySelectorAll('details.user-menu[open]').forEach((other) => { if (other !== details) other.open = false; });
+    positionUserMenu(details);
+  });
+});
+
+window.addEventListener('resize', () => document.querySelectorAll('details.user-menu[open]').forEach(positionUserMenu));
 
 document.addEventListener('click', (event) => {
   if (event.target.closest('.click-multi-picker')) return;

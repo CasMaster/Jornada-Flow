@@ -1,67 +1,105 @@
 # HÍBRIDO — Controle de Home Office
 
-Aplicação em PHP 8.3 com SQLite para solicitação, aprovação e consolidação de dias de home office.
+Sistema da Mix Fiscal para solicitação, aprovação, acompanhamento e exportação de dias de home office.
+
+## Estado atual
+
+A aplicação oficial está em [`laravel-app`](laravel-app) e utiliza:
+
+- PHP 8.3, Laravel 12 e Apache;
+- PostgreSQL 16 em container separado;
+- Podman e `podman-compose`;
+- fuso horário `America/Sao_Paulo`;
+- temas claro e escuro com preferência salva no navegador.
+
+A antiga implementação PHP/SQLite foi retirada da árvore ativa após a migração para produção. Ela continua recuperável pelo histórico do Git, e os backups de migração permanecem armazenados no servidor.
 
 ## Funcionalidades
 
-- Login unificado para colaboradores e gestores.
-- Primeiro acesso de colaboradores com equipes predefinidas.
-- Super Admin com visão global e administração de acessos.
-- Múltiplos gestores com contas individuais e vínculo a várias equipes.
-- Cadastro de equipes e gerenciamento de usuários.
-- Solicitações com estados pendente, aprovada e recusada.
-- Histórico imutável para o colaborador; recusas permanecem arquivadas.
-- Ciclos de apuração entre o dia 20 e o dia 19 do mês seguinte.
-- Exportação Excel em formato matricial, com colaboradores nas linhas e datas nas colunas.
-- Filtro de múltiplos colaboradores limitado às equipes permitidas para o gestor.
-- Fuso horário configurável, com padrão `America/Sao_Paulo`.
+- Login unificado para colaboradores, gestores e Super Admin;
+- primeiro cadastro de colaboradores com equipes predefinidas;
+- gestores vinculados a múltiplas equipes;
+- gestores também podem usar o sistema como colaboradores;
+- solicitações imutáveis com estados pendente, aprovada e recusada;
+- recusas arquivadas, sem exclusão do histórico;
+- ciclo padrão de apuração do dia 20 ao dia 19;
+- filtros por ciclo, equipe, status e múltiplos colaboradores;
+- exportação Excel em formato matricial;
+- gerenciamento de equipes, usuários, perfis e acessos;
+- PostgreSQL sem porta pública e backups com `pg_dump`.
 
-## Arquitetura
+## Estrutura
 
-- PHP 8.3 e Apache em um único container.
-- Banco SQLite persistido no volume `hibrido_data`.
-- Dependências PHP instaladas pelo Composer durante o build.
-- Porta interna publicada em `8080`; em produção, recomenda-se Caddy ou outro proxy reverso na porta 80/443.
-
-## Execução local com Podman
-
-1. Copie `.env.example` para `.env`.
-2. Defina um valor seguro em `HIBRIDO_MANAGER_PIN`.
-3. Execute:
-
-   ```bash
-   podman-compose up -d --build
-   ```
-
-4. Acesse `http://127.0.0.1:8080`.
-
-Também é possível usar `docker compose up -d --build` em ambientes Docker.
-
-## Primeiro gestor
-
-Quando o banco ainda não possui gestores, o sistema cria:
-
-- E-mail: `gestor@local`
-- Senha inicial: valor de `HIBRIDO_MANAGER_PIN`
-
-Essa conta é promovida automaticamente a Super Admin. Depois disso, novos gestores, suas equipes e redefinições de senha são administrados pelo painel. Gestores comuns só consultam e analisam solicitações das equipes vinculadas. Em uma restauração de banco, contas, vínculos e senhas existentes são preservados.
-
-## Dados persistentes
-
-O arquivo principal é `/var/www/html/data/home-office.sqlite`, armazenado no volume `hibrido_data`. Não copie o arquivo diretamente enquanto houver gravações; use o script de backup consistente:
-
-```bash
-podman exec hibrido-home-office php /var/www/html/scripts/backup-data.php /tmp/home-office.sqlite
-podman cp hibrido-home-office:/tmp/home-office.sqlite ./home-office.sqlite
+```text
+.
+├── docs/
+│   ├── ARQUITETURA.md
+│   ├── MANUAL_USUARIO.md
+│   ├── MIGRACAO.md
+│   └── OPERACAO.md
+└── laravel-app/
+    ├── app/                 Regras, controllers, models e comandos
+    ├── database/            Migrations, factories e seeders
+    ├── public/assets/       CSS, JavaScript e identidade visual
+    ├── resources/views/     Telas Blade
+    ├── routes/              Rotas web e console
+    ├── tests/               Testes automatizados do fluxo do sistema
+    ├── compose.yaml         Aplicação e PostgreSQL
+    └── Dockerfile           Imagem PHP/Apache
 ```
 
-## Migração
+## Execução local
 
-O procedimento completo de backup, transporte, restauração e validação está em [MIGRACAO.md](MIGRACAO.md).
+Pré-requisitos: Podman 4+, `podman-compose`, Git e portas locais disponíveis.
+
+```bash
+cd laravel-app
+cp .env.example .env
+```
+
+Edite `.env` e configure obrigatoriamente:
+
+```dotenv
+APP_KEY=base64:CHAVE_GERADA_COM_32_BYTES
+APP_URL=http://127.0.0.1:8081
+ASSET_URL=http://127.0.0.1:8081
+DB_PASSWORD=SENHA_FORTE_E_EXCLUSIVA
+```
+
+Inicie o ambiente:
+
+```bash
+podman-compose up -d --build
+```
+
+Crie o primeiro Super Admin pelo modo interativo, para não registrar a senha no histórico do terminal:
+
+```bash
+podman exec -it hibrido-home-office-laravel php artisan hibrido:create-admin
+```
+
+Acesse `http://127.0.0.1:8081`.
+
+## Testes
+
+Com as dependências instaladas:
+
+```bash
+cd laravel-app
+php artisan test
+```
+
+## Documentação
+
+- [Manual de usuário](docs/MANUAL_USUARIO.md)
+- [Operação, publicação e backup](docs/OPERACAO.md)
+- [Migração para outro servidor](docs/MIGRACAO.md)
+- [Arquitetura e regras do sistema](docs/ARQUITETURA.md)
 
 ## Segurança
 
-- Nunca versione `.env`, backups ou arquivos SQLite.
-- O backup contém dados pessoais e hashes de senha; armazene-o em local privado.
-- Publique o sistema atrás de HTTPS ao configurar um domínio.
-- Troque credenciais iniciais antes de liberar o ambiente a usuários.
+- Nunca versione `.env`, dumps, arquivos SQLite ou credenciais.
+- Não publique a porta 5432 do PostgreSQL.
+- Use HTTPS assim que houver domínio.
+- Guarde dumps em local privado e teste periodicamente a restauração.
+- Desative imediatamente contas de pessoas que perderem o acesso autorizado.

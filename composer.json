@@ -1,9 +1,0 @@
-{
-  "require": {
-    "phpoffice/phpspreadsheet": "^5.9"
-  },
-  "config": {
-    "optimize-autoloader": true,
-    "sort-packages": true
-  }
-}

@@ -1,7 +1,0 @@
-.git
-.env
-data/*.sqlite
-data/*.sqlite-*
-*.zip
-*.tar.gz
-backups/

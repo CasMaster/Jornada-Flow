@@ -12,4 +12,4 @@
   </article>
 </section></main>
 @endsection
-@push('scripts')<script>window.HIBRIDO_REQUEST_URL=@json(route('employee.requests.store'));window.HIBRIDO_CSRF=@json(csrf_token());</script><script src="{{ asset('assets/app.js') }}" defer></script>@endpush
+@push('scripts')<script>window.HIBRIDO_REQUEST_URL=@json(route('employee.requests.store'));window.HIBRIDO_CSRF=@json(csrf_token());</script><script src="{{ asset('assets/app.js') }}?v={{ filemtime(public_path('assets/app.js')) }}" defer></script>@endpush

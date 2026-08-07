@@ -5,7 +5,15 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ManagerController;
 use Illuminate\Support\Facades\Route;
 Route::prefix(config('app.route_prefix'))->group(function () {
-Route::get('/', fn () => redirect()->route('login'));
+Route::get('/', function () {
+    if (! auth()->check()) {
+        return redirect()->route('login');
+    }
+
+    return redirect()->route(auth()->user()->isManager()
+        ? 'manager.dashboard'
+        : 'employee.dashboard');
+});
 Route::middleware('guest')->group(function(){ Route::get('/login',[AuthController::class,'show'])->name('login'); Route::post('/login',[AuthController::class,'login']); Route::post('/cadastro',[AuthController::class,'register'])->name('register'); });
 Route::post('/logout',[AuthController::class,'logout'])->middleware('auth')->name('logout');
 Route::middleware(['auth','role:employee,manager,super_admin'])->group(function(){ Route::get('/painel',[EmployeeController::class,'index'])->name('employee.dashboard'); Route::post('/solicitacoes',[EmployeeController::class,'store'])->name('employee.requests.store'); });

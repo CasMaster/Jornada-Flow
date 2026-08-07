@@ -15,6 +15,17 @@ class HibridoFlowTest extends TestCase
         $manager=User::factory()->create(['role'=>'manager','password'=>'password']);
         $this->post('/login',['email'=>$manager->email,'password'=>'password','profile'=>'manager'])->assertRedirect('/gestor');
     }
+    public function test_authenticated_users_do_not_loop_between_root_and_login(): void
+    {
+        $employee=User::factory()->create(['role'=>'employee']);
+        $manager=User::factory()->create(['role'=>'manager']);
+
+        $this->actingAs($employee)->get('/login')->assertRedirect('/');
+        $this->get('/')->assertRedirect('/painel');
+
+        $this->actingAs($manager)->get('/login')->assertRedirect('/');
+        $this->get('/')->assertRedirect('/gestor');
+    }
     public function test_employee_can_register_and_submit_immutable_request(): void
     {
         Team::create(['name'=>'Fiscal','active'=>true]);

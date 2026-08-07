@@ -22,7 +22,7 @@ services:
     container_name: "${APP_CONTAINER_NAME:-hibrido-home-office-laravel}"
     restart: unless-stopped
     ports:
-      - "${APP_PORT:-8081}:80"
+      - "${APP_BIND_IP:-127.0.0.1}:${APP_PORT:-8081}:80"
     environment:
       APP_NAME: "Híbrido | Mix Fiscal"
       APP_ENV: production

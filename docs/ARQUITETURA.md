@@ -17,6 +17,10 @@ PostgreSQL 16
 
 O banco não publica a porta 5432. A persistência fica em volume próprio do Podman. A aplicação executa migrations automaticamente na inicialização e aguarda o banco ficar disponível.
 
+O Laravel também não publica portas em interfaces externas: produção e
+homologação são vinculadas ao loopback do host. O Caddy é a única camada HTTP
+pública e atua como proxy reverso para essas portas locais.
+
 ## Perfis e permissões
 
 | Perfil | Painel pessoal | Painel de gestão | Administração |

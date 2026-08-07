@@ -19,6 +19,7 @@ APP_URL=http://IP_OU_DOMINIO
 ASSET_URL=http://IP_OU_DOMINIO
 APP_TIMEZONE=America/Sao_Paulo
 APP_PORT=8082
+APP_BIND_IP=127.0.0.1
 APP_CONTAINER_NAME=hibrido-home-office-prod
 POSTGRES_CONTAINER_NAME=hibrido-home-office-postgres-prod
 POSTGRES_HOST_PORT=15432
@@ -31,6 +32,10 @@ DB_PASSWORD=SENHA_PRIVADA
 ```
 
 O `.env` deve ter permissão `600` e nunca pode entrar no Git.
+
+O container Laravel deve publicar sua porta apenas em `127.0.0.1`. O Caddy é a
+única entrada HTTP pública e encaminha as requisições para a porta local do
+ambiente. Não use `0.0.0.0` em `APP_BIND_IP` em produção.
 
 ## Acesso administrativo pelo DBeaver
 
@@ -111,6 +116,7 @@ podman logs --tail 100 hibrido-home-office-prod
 podman logs --tail 100 hibrido-home-office-postgres-prod
 podman inspect --format '{{.State.Health.Status}}' hibrido-home-office-postgres-prod
 curl -I http://127.0.0.1:8082/login
+sudo caddy validate --config /etc/caddy/Caddyfile
 ```
 
 ## Retorno de versão

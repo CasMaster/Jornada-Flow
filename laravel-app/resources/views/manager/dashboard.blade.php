@@ -22,22 +22,25 @@
             @endif
         </nav>
 
-        <div class="stats stats-three">
-            <div><span>SOLICITAÇÕES</span><strong>{{ $records->count() }}</strong></div>
-            <div><span>PENDENTES</span><strong>{{ $records->where('status','pending')->count() }}</strong></div>
-            <div><span>COLABORADORES</span><strong>{{ $records->pluck('user_id')->unique()->count() }}</strong></div>
-        </div>
-
         <article class="card filters-card" id="registros">
+            <div class="report-head filter-priority-head">
+                <div><p class="eyebrow">PESQUISA E FILTROS</p><h2>Localizar solicitações</h2></div>
+                <a class="clear-filter" href="{{ route('manager.dashboard') }}">Limpar filtros</a>
+            </div>
             <form method="get" class="filters request-filters">
                 <label>Ciclo 20–19<select name="cycle">@foreach($cycles as $cycle)<option value="{{ $cycle['value'] }}" @selected(request('cycle',$cycles[0]['value'])===$cycle['value'])>{{ $cycle['label'] }}</option>@endforeach</select></label>
                 <label>Equipe<select name="team"><option value="">Todas permitidas</option>@foreach($teams as $team)<option @selected(request('team')===$team->name)>{{ $team->name }}</option>@endforeach</select></label>
                 <label>Status<select name="status"><option value="">Todos</option>@foreach(['pending'=>'Pendentes','approved'=>'Aprovadas','rejected'=>'Recusadas'] as $value=>$label)<option value="{{ $value }}" @selected(request('status')===$value)>{{ $label }}</option>@endforeach</select></label>
                 <label>Colaboradores<select name="employees[]" multiple class="click-multi" data-placeholder="Selecionar colaboradores">@foreach($employees as $employee)<option value="{{ $employee->email }}" @selected(in_array($employee->email,(array)request('employees',[])))>{{ $employee->name }} · {{ $employee->team }}</option>@endforeach</select></label>
-                <button class="primary">Aplicar</button>
-                <a class="clear-filter" href="{{ route('manager.dashboard') }}">Ciclo atual</a>
+                <button class="primary">Pesquisar</button>
             </form>
         </article>
+
+        <div class="stats stats-three compact-stats">
+            <div><span>SOLICITAÇÕES</span><strong>{{ $records->count() }}</strong></div>
+            <div><span>PENDENTES</span><strong>{{ $records->where('status','pending')->count() }}</strong></div>
+            <div><span>COLABORADORES</span><strong>{{ $records->pluck('user_id')->unique()->count() }}</strong></div>
+        </div>
 
         <article class="card report">
             <div class="report-head"><div><p class="eyebrow">SOLICITAÇÕES</p><h2>{{ $records->count() }} resultados</h2></div></div>
@@ -48,7 +51,7 @@
                         <td><b>{{ $record->user->name }}</b><small>{{ $record->user->email }}</small></td>
                         <td>{{ $record->user->team }}</td><td><b>{{ $record->work_date->format('d/m/Y') }}</b></td>
                         <td><span class="request-badge">{{ ['pending'=>'Pendente','approved'=>'Aprovada','rejected'=>'Recusada'][$record->status] }}</span></td>
-                        <td class="review-actions"><form method="post" action="{{ route('manager.review',$record) }}">@csrf<button class="approve-action" name="decision" value="approved">✓ Aprovar</button><button class="reject-action" name="decision" value="rejected" onclick="return confirm('Recusar e arquivar esta solicitação?')">× Recusar</button></form></td>
+                        <td class="review-actions"><details class="request-menu"><summary>Analisar</summary><form method="post" action="{{ route('manager.review',$record) }}" class="request-menu-panel">@csrf<button class="approve-action" name="decision" value="approved">✓ Aprovar</button><button class="reject-action" name="decision" value="rejected" onclick="return confirm('Recusar e arquivar esta solicitação?')">× Recusar</button></form></details></td>
                     </tr>
                 @empty<tr><td colspan="5" class="empty">Nenhuma solicitação neste ciclo.</td></tr>@endforelse</tbody>
             </table></div>

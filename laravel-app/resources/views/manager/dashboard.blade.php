@@ -42,9 +42,12 @@
             <div><span>COLABORADORES</span><strong>{{ $records->pluck('user_id')->unique()->count() }}</strong></div>
         </div>
 
-        <article class="card report">
-            <div class="report-head"><div><p class="eyebrow">SOLICITAÇÕES</p><h2>{{ $records->count() }} resultados</h2></div></div>
-            <div class="table-wrap"><table>
+        <details class="card report requests-accordion" @if(request()->hasAny(['cycle','team','status','employees'])) open @endif>
+            <summary class="requests-accordion-summary">
+                <span><span class="eyebrow">SOLICITAÇÕES</span><strong>{{ $records->count() }} resultados</strong></span>
+                <span class="requests-accordion-action"><span class="when-closed">Exibir lista</span><span class="when-open">Ocultar lista</span></span>
+            </summary>
+            <div class="table-wrap compact-requests-table"><table>
                 <thead><tr><th>COLABORADOR</th><th>EQUIPE</th><th>DATA</th><th>STATUS</th><th>ANÁLISE</th></tr></thead>
                 <tbody>@forelse($records as $record)
                     <tr class="request-row request-{{ $record->status }}">
@@ -55,7 +58,7 @@
                     </tr>
                 @empty<tr><td colspan="5" class="empty">Nenhuma solicitação neste ciclo.</td></tr>@endforelse</tbody>
             </table></div>
-        </article>
+        </details>
 
         @if(auth()->user()->role==='super_admin')
             <div class="admin-grid admin-grid-directory">

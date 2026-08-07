@@ -72,7 +72,7 @@ document.querySelectorAll('select[multiple].click-multi').forEach((select) => {
 });
 
 const positionUserMenu = (details) => {
-  const form = details.querySelector('.edit-user-form');
+  const form = details.querySelector('.user-actions-panel') || details.querySelector('.edit-user-form');
   const summary = details.querySelector('summary');
   if (!form || !summary || !details.open) return;
   const rect = summary.getBoundingClientRect();

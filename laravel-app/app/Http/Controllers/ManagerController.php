@@ -23,7 +23,7 @@ class ManagerController extends Controller
     public function index(Request $request): View
     {
         [$start,$end]=ReportingCycle::bounds($request->string('cycle')->toString() ?: null); $allowed=$this->allowedTeams($request->user());
-        return view('manager.dashboard',['records'=>$this->query($request)->orderBy('work_date')->get(),'teams'=>Team::whereIn('name',$allowed)->orderBy('name')->get(),'employees'=>User::where('active',true)->where('team','<>','')->whereIn('team',$allowed)->orderBy('name')->get(),'cycles'=>ReportingCycle::options(),'start'=>$start,'end'=>$end,'allTeams'=>Team::orderBy('name')->get(),'users'=>$request->user()->role==='super_admin'?User::with('managedTeams')->orderBy('name')->get():collect()]);
+        return view('manager.dashboard',['records'=>$this->query($request)->orderBy('work_date')->get(),'teams'=>Team::whereIn('name',$allowed)->orderBy('name')->get(),'employees'=>User::where('active',true)->where('team','<>','')->whereIn('team',$allowed)->orderBy('name')->get(),'cycles'=>ReportingCycle::options(),'start'=>$start,'end'=>$end,'allTeams'=>Team::orderBy('name')->get()]);
     }
     public function review(Request $request, WorkRequest $workRequest): RedirectResponse
     {

@@ -100,18 +100,23 @@ Desativar uma equipe não apaga usuários nem solicitações existentes.
 
 ### Criar usuário
 
-Informe:
+Abra **Usuários** no seletor superior. O diretório possui busca por nome ou
+e-mail, filtros de perfil, equipe e status, além de paginação.
+
+Para criar uma conta, informe:
 
 - nome e e-mail;
 - perfil: Colaborador, Gestor ou Super Admin;
 - equipe para as solicitações pessoais;
 - equipes administradas, quando o perfil for Gestor;
-- senha inicial com pelo menos oito caracteres.
+- senha provisória com pelo menos oito caracteres; ou, quando a recuperação por
+  e-mail estiver habilitada, deixe-a vazia para enviar um link de definição de
+  senha.
 
 ### Editar usuário
 
-1. Localize a pessoa no diretório.
-2. Abra **Editar**.
+1. Localize a pessoa usando a busca e os filtros.
+2. Abra **Gerenciar**.
 3. Atualize os campos necessários.
 4. Deixe a senha vazia para mantê-la ou informe uma nova senha.
 5. Clique em **Salvar alterações**.
@@ -119,6 +124,12 @@ Informe:
 ### Desativar usuário
 
 Use **Desativar** para impedir novos acessos. O histórico permanece preservado. O Super Admin não pode desativar a própria conta enquanto estiver conectado.
+
+### Reenviar acesso
+
+Quando o envio por e-mail estiver habilitado, use **Enviar acesso por e-mail**.
+O usuário receberá um link individual, válido por 60 minutos e utilizável uma
+única vez.
 
 ## 7. Sair e trocar de usuário
 
@@ -134,6 +145,17 @@ Não compartilhe senhas e sempre encerre a sessão em computadores compartilhado
 - Confirme se escolheu o perfil correto na tela de login.
 - Verifique e-mail e senha.
 - Peça ao Super Admin para confirmar se a conta está ativa.
+- Se **Esqueci minha senha** estiver disponível, solicite um link pelo próprio sistema.
+
+### Recuperar senha
+
+1. Na tela de login, clique em **Esqueci minha senha**.
+2. Informe o e-mail corporativo.
+3. Abra o link recebido por e-mail.
+4. Defina e confirme a nova senha.
+
+Por segurança, o sistema apresenta a mesma confirmação mesmo quando o e-mail
+não está cadastrado. Ao redefinir a senha, as sessões anteriores são encerradas.
 
 ### Sou gestor, mas não vejo uma equipe
 
@@ -153,4 +175,4 @@ Recarregue a página. Os arquivos visuais são versionados automaticamente; se n
 
 ### Preciso corrigir um dado ou redefinir a senha
 
-Procure o Super Admin. Colaboradores não podem editar solicitações já enviadas.
+Use a recuperação de senha ou procure o Super Admin. Colaboradores não podem editar solicitações já enviadas.

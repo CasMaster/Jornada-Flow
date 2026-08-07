@@ -1,0 +1,125 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Models\Team;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Password as PasswordBroker;
+use Illuminate\Support\Str;
+use Illuminate\View\View;
+
+class UserDirectoryController extends Controller
+{
+    public function index(Request $request): View
+    {
+        $users = User::query()
+            ->with('managedTeams:id,name')
+            ->when($request->filled('q'), function ($query) use ($request): void {
+                $term = '%'.strtolower(trim($request->string('q')->toString())).'%';
+                $query->where(function ($query) use ($term): void {
+                    $query->whereRaw('LOWER(name) LIKE ?', [$term])
+                        ->orWhereRaw('LOWER(email) LIKE ?', [$term]);
+                });
+            })
+            ->when($request->filled('role'), fn ($query) => $query->where('role', $request->string('role')))
+            ->when($request->filled('team'), fn ($query) => $query->where('team', $request->string('team')))
+            ->when($request->filled('status'), fn ($query) => $query->where('active', $request->string('status')->toString() === 'active'))
+            ->orderBy('name')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('admin.users.index', [
+            'users' => $users,
+            'teams' => Team::orderBy('name')->get(),
+            'totalUsers' => User::count(),
+            'activeUsers' => User::where('active', true)->count(),
+            'managerUsers' => User::whereIn('role', ['manager', 'super_admin'])->count(),
+        ]);
+    }
+
+    public function store(StoreUserRequest $request): RedirectResponse
+    {
+        $data = $request->validated();
+        $generatedPassword = empty($data['password']);
+
+        $user = DB::transaction(function () use ($data, $generatedPassword): User {
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'role' => $data['role'],
+                'team' => $data['team'] ?? '',
+                'active' => true,
+                'password' => $generatedPassword ? Str::password(32) : $data['password'],
+            ]);
+            $this->syncManagedTeams($user, $data);
+
+            return $user;
+        });
+
+        if (! $generatedPassword) {
+            return redirect()->route('admin.users.index')->with('success', 'Usuário criado com senha provisória.');
+        }
+
+        return $this->sendPasswordLink($user, 'Usuário criado.');
+    }
+
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse
+    {
+        $data = $request->validated();
+        DB::transaction(function () use ($user, $data): void {
+            $user->fill([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'role' => $data['role'],
+                'team' => $data['team'] ?? '',
+            ]);
+            if (! empty($data['password'])) {
+                $user->password = $data['password'];
+            }
+            $user->save();
+            $this->syncManagedTeams($user, $data);
+        });
+
+        return back()->with('success', 'Usuário atualizado.');
+    }
+
+    public function toggle(Request $request, User $user): RedirectResponse
+    {
+        abort_if($request->user()->is($user), 422, 'Você não pode desativar a própria conta.');
+        $user->update(['active' => ! $user->active]);
+
+        return back()->with('success', 'Status do usuário atualizado.');
+    }
+
+    public function passwordLink(User $user): RedirectResponse
+    {
+        abort_unless(config('auth.password_recovery_enabled'), 404);
+        abort_unless($user->active, 422, 'Ative o usuário antes de enviar o acesso.');
+
+        return $this->sendPasswordLink($user, 'Solicitação registrada.');
+    }
+
+    private function syncManagedTeams(User $user, array $data): void
+    {
+        $user->managedTeams()->sync($data['role'] === 'manager' ? ($data['manager_teams'] ?? []) : []);
+    }
+
+    private function sendPasswordLink(User $user, string $prefix): RedirectResponse
+    {
+        abort_unless(config('auth.password_recovery_enabled'), 422, 'Configure HTTPS e SMTP antes de enviar links de acesso.');
+        $status = PasswordBroker::sendResetLink(['email' => $user->email]);
+        $message = $status === PasswordBroker::RESET_LINK_SENT
+            ? $prefix.' Link para definição de senha enviado por e-mail.'
+            : $prefix.' Não foi possível enviar o e-mail; verifique a configuração de SMTP.';
+
+        return redirect()->route('admin.users.index')->with(
+            $status === PasswordBroker::RESET_LINK_SENT ? 'success' : 'warning',
+            $message
+        );
+    }
+}

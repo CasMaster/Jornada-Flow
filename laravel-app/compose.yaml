@@ -41,6 +41,15 @@ services:
       LEGACY_SQLITE_PATH: /var/www/html/legacy/database.sqlite
       SESSION_DRIVER: database
       CACHE_STORE: database
+      PASSWORD_RECOVERY_ENABLED: "${PASSWORD_RECOVERY_ENABLED:-false}"
+      MAIL_MAILER: "${MAIL_MAILER:-log}"
+      MAIL_SCHEME: "${MAIL_SCHEME:-}"
+      MAIL_HOST: "${MAIL_HOST:-127.0.0.1}"
+      MAIL_PORT: "${MAIL_PORT:-2525}"
+      MAIL_USERNAME: "${MAIL_USERNAME:-}"
+      MAIL_PASSWORD: "${MAIL_PASSWORD:-}"
+      MAIL_FROM_ADDRESS: "${MAIL_FROM_ADDRESS:-hibrido@localhost}"
+      MAIL_FROM_NAME: "${MAIL_FROM_NAME:-Híbrido | Mix Fiscal}"
     volumes:
       - hibrido_laravel_data:/var/www/html/legacy:ro
     depends_on:

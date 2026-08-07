@@ -46,10 +46,11 @@ O ciclo começa no dia 20 e termina no dia 19 do mês seguinte. O filtro do gest
 
 ## Dados principais
 
-- `users`: identidade, senha, perfil, equipe própria e status;
+- `users`: identidade, senha, perfil, equipe própria e status, com índices para o diretório;
 - `teams`: equipes e disponibilidade para novos cadastros;
 - `manager_team`: vínculo de gestores a múltiplas equipes;
 - `work_requests`: data, estado, solicitante e análise;
+- `password_reset_tokens`: tokens de uso único e expiração de 60 minutos;
 - `sessions`, `cache` e tabelas de filas: infraestrutura do Laravel.
 
 ## Decisões técnicas
@@ -58,4 +59,6 @@ O ciclo começa no dia 20 e termina no dia 19 do mês seguinte. O filtro do gest
 - CSS e JavaScript do produto são servidos diretamente de `public/assets`; não há etapa Node/Vite.
 - As URLs dos assets recebem versão baseada no arquivo para evitar cache antigo após atualizações.
 - A autorização é conferida no servidor; esconder botões na interface não substitui a validação de perfil.
+- O diretório de usuários usa busca no banco e paginação de 20 registros, evitando carregar todas as contas em memória.
+- A recuperação de senha permanece desabilitada até que HTTPS e SMTP estejam configurados.
 - Os importadores SQLite permanecem apenas para recuperação e migração de instalações antigas.

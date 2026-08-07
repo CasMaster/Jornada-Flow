@@ -29,6 +29,14 @@ DB_PORT=5432
 DB_DATABASE=hibrido
 DB_USERNAME=hibrido
 DB_PASSWORD=SENHA_PRIVADA
+PASSWORD_RECOVERY_ENABLED=false
+MAIL_MAILER=smtp
+MAIL_HOST=SERVIDOR_SMTP
+MAIL_PORT=587
+MAIL_USERNAME=USUARIO_SMTP
+MAIL_PASSWORD=SENHA_SMTP
+MAIL_FROM_ADDRESS=hibrido@DOMINIO
+MAIL_FROM_NAME="Híbrido | Mix Fiscal"
 ```
 
 O `.env` deve ter permissão `600` e nunca pode entrar no Git.
@@ -36,6 +44,22 @@ O `.env` deve ter permissão `600` e nunca pode entrar no Git.
 O container Laravel deve publicar sua porta apenas em `127.0.0.1`. O Caddy é a
 única entrada HTTP pública e encaminha as requisições para a porta local do
 ambiente. Não use `0.0.0.0` em `APP_BIND_IP` em produção.
+
+## Recuperação de senha e SMTP
+
+Mantenha `PASSWORD_RECOVERY_ENABLED=false` enquanto o endereço público não usar
+HTTPS ou enquanto o SMTP não estiver validado. Depois de configurar domínio,
+certificado e credenciais de e-mail:
+
+1. ajuste `APP_URL` e `ASSET_URL` para a URL `https://`;
+2. configure as variáveis `MAIL_*` no `.env` de produção;
+3. envie um e-mail de teste;
+4. altere `PASSWORD_RECOVERY_ENABLED=true`;
+5. recrie apenas o container Laravel;
+6. teste solicitação, recebimento, expiração e redefinição.
+
+Tokens expiram em 60 minutos, são substituídos quando um novo link é solicitado
+e nunca devem aparecer em logs, chamados ou capturas de tela.
 
 ## Acesso administrativo pelo DBeaver
 

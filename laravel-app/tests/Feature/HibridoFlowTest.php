@@ -4,6 +4,9 @@ use App\Models\Team;
 use App\Models\User;
 use App\Models\WorkRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
 class HibridoFlowTest extends TestCase
 {
@@ -69,5 +72,41 @@ class HibridoFlowTest extends TestCase
         $response=$this->actingAs($admin)->get('/gestor/exportar?cycle=2026-07-20');
         $response->assertOk()->assertHeader('content-type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         $this->assertStringStartsWith('PK',$response->streamedContent());
+    }
+    public function test_super_admin_uses_paginated_user_directory_and_creates_invited_user(): void
+    {
+        config(['auth.password_recovery_enabled'=>true]);
+        Notification::fake();
+        $team=Team::create(['name'=>'Fiscal']);
+        $admin=User::factory()->create(['role'=>'super_admin']);
+
+        $this->actingAs($admin)->get('/admin/usuarios?q='.$admin->email)
+            ->assertOk()->assertSee($admin->email);
+
+        $this->post('/admin/usuarios',[
+            'name'=>'Nova Pessoa','email'=>'nova.pessoa@example.com','role'=>'manager',
+            'team'=>'Fiscal','manager_teams'=>[$team->id],
+        ])->assertRedirect('/admin/usuarios');
+
+        $created=User::where('email','nova.pessoa@example.com')->firstOrFail();
+        $this->assertTrue($created->managedTeams->contains($team));
+        Notification::assertSentTo($created,ResetPassword::class);
+    }
+    public function test_active_user_can_request_and_complete_password_recovery(): void
+    {
+        config(['auth.password_recovery_enabled'=>true]);
+        Notification::fake();
+        $user=User::factory()->create(['email'=>'recuperar@example.com','active'=>true]);
+
+        $this->post('/esqueci-a-senha',['email'=>$user->email])->assertSessionHas('success');
+        Notification::assertSentTo($user,ResetPassword::class);
+
+        $token=Password::createToken($user);
+        $this->post('/redefinir-senha',[
+            'token'=>$token,'email'=>$user->email,'password'=>'nova-senha-segura',
+            'password_confirmation'=>'nova-senha-segura',
+        ])->assertRedirect('/login');
+
+        $this->assertTrue(auth()->validate(['email'=>$user->email,'password'=>'nova-senha-segura']));
     }
 }

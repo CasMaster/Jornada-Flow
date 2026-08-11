@@ -18,6 +18,7 @@ class PasswordController extends Controller
     public function request(): View
     {
         abort_unless(config('auth.password_recovery_enabled'), 404);
+
         return view('auth.forgot-password');
     }
 
@@ -37,6 +38,7 @@ class PasswordController extends Controller
     public function reset(Request $request, string $token): View
     {
         abort_unless(config('auth.password_recovery_enabled'), 404);
+
         return view('auth.reset-password', ['token' => $token, 'email' => $request->string('email')->toString()]);
     }
 

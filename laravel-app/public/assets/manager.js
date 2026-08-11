@@ -119,6 +119,15 @@ window.addEventListener('resize', () => {
   document.querySelectorAll('details.request-menu[open]').forEach(positionRequestMenu);
 });
 
+const selectAll = document.querySelector('[data-select-all]');
+const batchCheckboxes = [...document.querySelectorAll('.batch-checkbox')];
+selectAll?.addEventListener('change', () => batchCheckboxes.forEach((checkbox) => { checkbox.checked = selectAll.checked; }));
+batchCheckboxes.forEach((checkbox) => checkbox.addEventListener('change', () => {
+  if (!selectAll) return;
+  selectAll.checked = batchCheckboxes.length > 0 && batchCheckboxes.every((item) => item.checked);
+  selectAll.indeterminate = batchCheckboxes.some((item) => item.checked) && !selectAll.checked;
+}));
+
 document.addEventListener('click', (event) => {
   if (event.target.closest('.click-multi-picker')) return;
   document.querySelectorAll('.click-multi-options').forEach((area) => { area.hidden = true; });

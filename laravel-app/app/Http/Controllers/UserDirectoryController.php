@@ -6,6 +6,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,8 @@ use Illuminate\View\View;
 
 class UserDirectoryController extends Controller
 {
+    public function __construct(private AuditService $audit) {}
+
     public function index(Request $request): View
     {
         $users = User::query()
@@ -60,6 +63,7 @@ class UserDirectoryController extends Controller
 
             return $user;
         });
+        $this->audit->record('user.created', $user, [], $user->only(['name', 'email', 'role', 'team', 'active']));
 
         if (! $generatedPassword) {
             return redirect()->route('admin.users.index')->with('success', 'Usuário criado com senha provisória.');
@@ -71,6 +75,7 @@ class UserDirectoryController extends Controller
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
         $data = $request->validated();
+        $old = $user->only(['name', 'email', 'role', 'team', 'active']);
         DB::transaction(function () use ($user, $data): void {
             $user->fill([
                 'name' => $data['name'],
@@ -84,6 +89,7 @@ class UserDirectoryController extends Controller
             $user->save();
             $this->syncManagedTeams($user, $data);
         });
+        $this->audit->record('user.updated', $user, $old, $user->only(['name', 'email', 'role', 'team', 'active']));
 
         return back()->with('success', 'Usuário atualizado.');
     }
@@ -91,7 +97,9 @@ class UserDirectoryController extends Controller
     public function toggle(Request $request, User $user): RedirectResponse
     {
         abort_if($request->user()->is($user), 422, 'Você não pode desativar a própria conta.');
+        $old = $user->only(['active']);
         $user->update(['active' => ! $user->active]);
+        $this->audit->record('user.status_changed', $user, $old, $user->only(['active']));
 
         return back()->with('success', 'Status do usuário atualizado.');
     }

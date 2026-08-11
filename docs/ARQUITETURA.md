@@ -62,3 +62,11 @@ O ciclo começa no dia 20 e termina no dia 19 do mês seguinte. O filtro do gest
 - O diretório de usuários usa busca no banco e paginação de 20 registros, evitando carregar todas as contas em memória.
 - A recuperação de senha permanece desabilitada até que HTTPS e SMTP estejam configurados.
 - Os importadores SQLite permanecem apenas para recuperação e migração de instalações antigas.
+
+## Serviços de domínio e processamento assíncrono
+
+`WorkRequestService` concentra criação, bloqueios do calendário e análise; `AuditService` registra rastreabilidade; `WorkRequestPolicy` limita cada gestor às equipes permitidas. Controllers coordenam HTTP e não devem duplicar essas regras.
+
+O fluxo é: colaborador envia datas → serviço valida calendário e imutabilidade → solicitação e auditoria são gravadas → gestor analisa individualmente ou em lote → nova auditoria é gravada → notificação é enfileirada → worker persiste a notificação e envia e-mail.
+
+PostgreSQL armazena negócio, sessões, cache, filas, notificações e auditoria. Web, worker e scheduler compartilham a imagem, mas possuem ciclos de vida independentes. O painel pagina 25 solicitações e aplica pesquisa e filtros diretamente no banco.

@@ -8,14 +8,16 @@ if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ]; then
     chown -R www-data:www-data /var/www/html/database
 fi
 
-attempt=0
-until php artisan migrate --force; do
-    attempt=$((attempt + 1))
-    if [ "$attempt" -ge 30 ]; then
-        echo "Banco de dados indisponível após 30 tentativas." >&2
-        exit 1
-    fi
-    sleep 2
-done
+if [ "${SKIP_MIGRATIONS:-false}" != "true" ]; then
+    attempt=0
+    until php artisan migrate --force; do
+        attempt=$((attempt + 1))
+        if [ "$attempt" -ge 30 ]; then
+            echo "Banco de dados indisponível após 30 tentativas." >&2
+            exit 1
+        fi
+        sleep 2
+    done
+fi
 php artisan config:cache
 exec "$@"

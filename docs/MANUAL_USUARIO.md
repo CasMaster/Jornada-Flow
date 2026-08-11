@@ -176,3 +176,17 @@ Recarregue a página. Os arquivos visuais são versionados automaticamente; se n
 ### Preciso corrigir um dado ou redefinir a senha
 
 Use a recuperação de senha ou procure o Super Admin. Colaboradores não podem editar solicitações já enviadas.
+
+## 9. Calendário, notificações e histórico
+
+Datas bloqueadas pela empresa aparecem marcadas no calendário e não podem ser selecionadas. O histórico informa envio, análise e gestor responsável. Aprovações e recusas aparecem também em “Notificações recentes”.
+
+## 10. Pesquisa e análise em lote
+
+O gestor pode pesquisar por nome ou e-mail e combinar ciclo, equipe, status e colaboradores. Os resultados são paginados em grupos de 25. Para analisar vários, marque as caixas e use a barra “Ações em lote”. Todas as permissões são verificadas novamente no servidor.
+
+O cartão “Aguardando sua ação” destaca pendências do filtro atual. Próximo ao fechamento, o sistema envia lembretes automáticos aos gestores.
+
+## 11. Calendário corporativo e auditoria
+
+O Super Admin pode cadastrar datas informativas ou bloquear solicitações. A tela “Auditoria” mostra aprovações, recusas e mudanças administrativas, com responsável, horário e IP.

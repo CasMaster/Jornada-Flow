@@ -2,6 +2,8 @@
 
 Sistema da Mix Fiscal para solicitação, aprovação, acompanhamento e exportação de dias de home office.
 
+Inclui ciclos 20–19, múltiplas equipes, gestores que também atuam como colaboradores, aprovação individual ou em lote, calendário corporativo, notificações assíncronas, auditoria e monitoramento de prontidão.
+
 ## Estado atual
 
 A aplicação oficial está em [`laravel-app`](laravel-app) e utiliza:

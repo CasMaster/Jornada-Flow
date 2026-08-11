@@ -146,3 +146,17 @@ sudo caddy validate --config /etc/caddy/Caddyfile
 ## Retorno de versão
 
 Uma reversão de código deve usar a imagem anterior e preservar o PostgreSQL. Uma reversão de dados só deve ocorrer com autorização explícita, pois elimina alterações posteriores ao dump restaurado.
+
+## Continuidade, filas e monitoramento
+
+O `compose.yaml` mantém quatro processos: PostgreSQL, aplicação web, worker de filas e agendador. E-mails e notificações são processados pelo worker. O agendador dispara às 08:00 lembretes de pendências quando faltarem até três dias para fechar o ciclo.
+
+Use `GET /health/ready` para confirmar aplicação e PostgreSQL e consultar jobs pendentes ou com falha. O script `scripts/monitor-production.sh` pode ser chamado a cada cinco minutos. Configure alertas para indisponibilidade, reinícios, `failed_jobs`, disco acima de 80% e ausência de backup nas últimas 26 horas.
+
+O script `scripts/backup-postgres.sh` cria dump em formato custom, SHA-256 e retenção configurável. Exemplo de cron diário:
+
+```cron
+15 2 * * * BACKUP_DIR=/opt/backups/hibrido-home-office RETENTION_DAYS=30 /opt/hibrido-home-office/scripts/backup-postgres.sh >> /var/log/hibrido-backup.log 2>&1
+```
+
+Mantenha uma cópia fora do servidor e teste mensalmente `pg_restore` em um banco descartável. O deploy manual do GitHub exige `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER` e `TARGET_DIR`, sempre promovendo homologação antes de produção.

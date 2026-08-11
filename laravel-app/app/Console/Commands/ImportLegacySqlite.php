@@ -17,24 +17,28 @@ class ImportLegacySqlite extends Command
     {
         if (DB::getDriverName() !== 'pgsql') {
             $this->error('A conexão principal precisa ser PostgreSQL.');
+
             return self::FAILURE;
         }
 
         $path = $this->option('path') ?: env('LEGACY_SQLITE_PATH');
         if (! is_string($path) || ! is_file($path)) {
             $this->error('Banco SQLite legado não encontrado.');
+
             return self::FAILURE;
         }
 
         foreach (['users', 'teams', 'manager_team', 'work_requests'] as $table) {
             if (! Schema::hasTable($table)) {
                 $this->error("Tabela de destino ausente: {$table}");
+
                 return self::FAILURE;
             }
         }
 
         if (DB::table('users')->exists() || DB::table('teams')->exists() || DB::table('work_requests')->exists()) {
             $this->error('Importação cancelada: o PostgreSQL já contém dados do sistema.');
+
             return self::FAILURE;
         }
 

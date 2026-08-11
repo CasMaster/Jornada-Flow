@@ -11,7 +11,7 @@ jobs:
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Publicar pacote pelo SSH
         env:
           SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}

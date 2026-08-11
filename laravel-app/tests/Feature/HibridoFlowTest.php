@@ -203,6 +203,6 @@ class HibridoFlowTest extends TestCase
 
     public function test_readiness_endpoint_checks_database(): void
     {
-        $this->get('/health/ready')->assertOk()->assertJsonPath('database','ok');
+        $this->get('/health/ready')->assertOk()->assertJsonPath('database', 'ok');
     }
 }

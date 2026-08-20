@@ -14,6 +14,15 @@ document.querySelectorAll('select[multiple].click-multi').forEach((select) => {
   optionsArea.setAttribute('role', 'listbox');
   optionsArea.setAttribute('aria-multiselectable', 'true');
   optionsArea.hidden = true;
+  const optionSearch = document.createElement('input');
+  optionSearch.type = 'search';
+  optionSearch.className = 'click-multi-search';
+  optionSearch.placeholder = 'Buscar colaborador...';
+  optionSearch.setAttribute('aria-label', 'Buscar colaborador');
+  const emptyMessage = document.createElement('span');
+  emptyMessage.className = 'click-multi-empty';
+  emptyMessage.textContent = 'Nenhum colaborador encontrado.';
+  emptyMessage.hidden = true;
 
   const render = () => {
     selectedArea.replaceChildren();
@@ -35,8 +44,8 @@ document.querySelectorAll('select[multiple].click-multi').forEach((select) => {
       chip.append(remove);
       selectedArea.append(chip);
     });
-    trigger.textContent = selected.length ? 'Adicionar outra opção' : (select.dataset.placeholder || 'Selecionar opções');
-    [...optionsArea.children].forEach((button, index) => {
+    trigger.textContent = selected.length ? `${selected.length} colaborador(es) selecionado(s)` : (select.dataset.placeholder || 'Selecionar opções');
+    [...optionsArea.querySelectorAll('.click-multi-option')].forEach((button, index) => {
       const isSelected = select.options[index].selected;
       button.classList.toggle('selected', isSelected);
       button.setAttribute('aria-selected', String(isSelected));
@@ -58,14 +67,27 @@ document.querySelectorAll('select[multiple].click-multi').forEach((select) => {
     optionsArea.append(button);
   });
 
+  optionSearch.addEventListener('input', () => {
+    const query = optionSearch.value.trim().toLocaleLowerCase('pt-BR');
+    let visible = 0;
+    optionsArea.querySelectorAll('.click-multi-option').forEach((button) => {
+      button.hidden = query !== '' && !button.textContent.toLocaleLowerCase('pt-BR').includes(query);
+      if (!button.hidden) visible++;
+    });
+    emptyMessage.hidden = visible > 0;
+  });
+
   trigger.addEventListener('click', () => {
     const willOpen = optionsArea.hidden;
     document.querySelectorAll('.click-multi-options').forEach((area) => { area.hidden = true; });
     document.querySelectorAll('.click-multi-trigger').forEach((button) => button.setAttribute('aria-expanded', 'false'));
     optionsArea.hidden = !willOpen;
     trigger.setAttribute('aria-expanded', String(willOpen));
+    if (willOpen) { optionSearch.value = ''; optionSearch.dispatchEvent(new Event('input')); optionSearch.focus(); }
   });
 
+  optionsArea.prepend(optionSearch);
+  optionsArea.append(emptyMessage);
   picker.append(selectedArea, trigger, optionsArea);
   select.insertAdjacentElement('afterend', picker);
   render();

@@ -25,8 +25,7 @@
 
         <article class="card filters-card" id="registros">
             <div class="report-head filter-priority-head">
-                <div><p class="eyebrow">PESQUISA E FILTROS</p><h2>Localizar solicitações</h2></div>
-                <a class="clear-filter" href="{{ route('manager.dashboard') }}">Limpar filtros</a>
+                <div><p class="eyebrow">PESQUISA E FILTROS</p><h2>Localizar solicitações</h2><p class="filter-description">Combine os campos abaixo para encontrar rapidamente os registros que precisam de análise.</p></div>
             </div>
             <form method="get" class="filters request-filters">
                 <label class="request-search">Nome ou e-mail<input name="q" value="{{ request('q') }}" placeholder="Pesquisar colaborador"></label>
@@ -34,7 +33,10 @@
                 <label>Equipe<select name="team"><option value="">Todas permitidas</option>@foreach($teams as $team)<option @selected(request('team')===$team->name)>{{ $team->name }}</option>@endforeach</select></label>
                 <label>Status<select name="status"><option value="">Todos</option>@foreach(['pending'=>'Pendentes','approved'=>'Aprovadas','rejected'=>'Recusadas'] as $value=>$label)<option value="{{ $value }}" @selected(request('status')===$value)>{{ $label }}</option>@endforeach</select></label>
                 <label>Colaboradores<select name="employees[]" multiple class="click-multi" data-placeholder="Selecionar colaboradores">@foreach($employees as $employee)<option value="{{ $employee->email }}" @selected(in_array($employee->email,(array)request('employees',[])))>{{ $employee->name }} · {{ $employee->team }}</option>@endforeach</select></label>
-                <button class="primary">Pesquisar</button>
+                <div class="filter-actions">
+                    <button class="primary" type="submit">Aplicar filtros</button>
+                    @if(request()->hasAny(['q','cycle','team','status','employees']))<a class="clear-filter" href="{{ route('manager.dashboard') }}">Limpar</a>@endif
+                </div>
             </form>
         </article>
 

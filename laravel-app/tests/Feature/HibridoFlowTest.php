@@ -49,6 +49,22 @@ class HibridoFlowTest extends TestCase
         $this->delete('/solicitacoes/1')->assertNotFound();
     }
 
+    public function test_employee_can_submit_request_using_json_dashboard_flow(): void
+    {
+        $employee = User::factory()->create(['role' => 'employee']);
+
+        $this->actingAs($employee)
+            ->postJson('/solicitacoes', ['dates' => ['2026-08-06']])
+            ->assertCreated()
+            ->assertJson(['saved' => 1]);
+
+        $this->assertDatabaseHas('work_requests', [
+            'user_id' => $employee->id,
+            'work_date' => '2026-08-06 00:00:00',
+            'status' => 'pending',
+        ]);
+    }
+
     public function test_manager_can_only_review_requests_from_assigned_teams(): void
     {
         $a = Team::create(['name' => 'Fiscal']);

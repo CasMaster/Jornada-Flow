@@ -18,10 +18,19 @@ $('#prevMonth').onclick = () => { cursor = new Date(cursor.getFullYear(), cursor
 $('#nextMonth').onclick = () => { cursor = new Date(cursor.getFullYear(), cursor.getMonth()+1, 1); renderCalendar(); };
 
 $('#register').onclick = async () => {
-  const response = await fetch(window.HIBRIDO_REQUEST_URL, { method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':window.HIBRIDO_CSRF}, body:JSON.stringify({ dates:[...selected] }) });
-  const data = await response.json();
-  $('#notice').textContent = response.ok ? `${data.saved} solicitação(ões) enviada(s) ao gestor.` : (data.message || 'Não foi possível enviar as solicitações.');
-  if (response.ok) { selected.clear(); renderCalendar(); setTimeout(() => location.reload(), 700); }
+  if (!selected.size) { $('#notice').textContent = 'Selecione ao menos um dia antes de enviar.'; return; }
+  $('#register').disabled = true;
+  try {
+    const response = await fetch(window.HIBRIDO_REQUEST_URL, { method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':window.HIBRIDO_CSRF}, body:JSON.stringify({ dates:[...selected] }) });
+    const data = await response.json().catch(() => ({}));
+    const validationMessage = data.errors ? Object.values(data.errors).flat()[0] : null;
+    $('#notice').textContent = response.ok ? `${data.saved} solicitação(ões) enviada(s) ao gestor.` : (validationMessage || data.message || `Não foi possível enviar (erro ${response.status}). Atualize a página e tente novamente.`);
+    if (response.ok) { selected.clear(); renderCalendar(); setTimeout(() => location.reload(), 700); }
+  } catch (_) {
+    $('#notice').textContent = 'Falha de conexão. Atualize a página para renovar sua sessão e tente novamente.';
+  } finally {
+    $('#register').disabled = false;
+  }
 };
 
 renderCalendar();

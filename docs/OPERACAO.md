@@ -52,11 +52,14 @@ HTTPS ou enquanto o SMTP não estiver validado. Depois de configurar domínio,
 certificado e credenciais de e-mail:
 
 1. ajuste `APP_URL` e `ASSET_URL` para a URL `https://`;
-2. configure as variáveis `MAIL_*` no `.env` de produção;
-3. envie um e-mail de teste;
-4. altere `PASSWORD_RECOVERY_ENABLED=true`;
-5. recrie apenas o container Laravel;
-6. teste solicitação, recebimento, expiração e redefinição.
+2. defina `SESSION_SECURE_COOKIE=true` em produção;
+3. recrie os containers web, worker e scheduler para renovar o cache de configuração;
+4. confirme que o proxy envia `X-Forwarded-Proto: https` e que o cookie de sessão contém `Secure`.
+5. configure as variáveis `MAIL_*` no `.env` de produção;
+6. envie um e-mail de teste;
+7. altere `PASSWORD_RECOVERY_ENABLED=true`;
+8. recrie os containers web, worker e scheduler;
+9. teste solicitação, recebimento, expiração e redefinição.
 
 Tokens expiram em 60 minutos, são substituídos quando um novo link é solicitado
 e nunca devem aparecer em logs, chamados ou capturas de tela.

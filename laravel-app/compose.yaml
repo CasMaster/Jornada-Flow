@@ -40,6 +40,7 @@ services:
       DB_PASSWORD: "${DB_PASSWORD}"
       LEGACY_SQLITE_PATH: /var/www/html/legacy/database.sqlite
       SESSION_DRIVER: database
+      SESSION_SECURE_COOKIE: "${SESSION_SECURE_COOKIE:-true}"
       CACHE_STORE: database
       PASSWORD_RECOVERY_ENABLED: "${PASSWORD_RECOVERY_ENABLED:-false}"
       MAIL_MAILER: "${MAIL_MAILER:-log}"

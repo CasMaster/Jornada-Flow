@@ -205,4 +205,17 @@ class HibridoFlowTest extends TestCase
     {
         $this->get('/health/ready')->assertOk()->assertJsonPath('database', 'ok');
     }
+
+    public function test_https_proxy_is_trusted_and_session_cookie_is_secure(): void
+    {
+        config(['session.secure' => true]);
+
+        $response = $this->withHeaders([
+            'X-Forwarded-Proto' => 'https',
+            'X-Forwarded-Host' => 'mixhome.app.br',
+        ])->get('/login');
+
+        $response->assertOk();
+        $this->assertStringContainsString('secure', strtolower(implode(';', $response->headers->all('set-cookie'))));
+    }
 }

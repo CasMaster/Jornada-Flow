@@ -1,12 +1,54 @@
+# Environment files and local secrets
 .env
 .env.*
 !.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+auth.json
+credentials.json
+secrets.*
+
+# Databases, dumps, exports and backups
 *.sqlite
 *.sqlite-*
+*.db
+*.db-*
 *.dump
-*.zip
-*.tar.gz
+*.sql
+*.sql.gz
+*.bak
 backups/
+exports/
+
+# Generated archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+
+# Installed dependencies and generated build/runtime files
 vendor/
 node_modules/
+public/build/
+public/hot
+public/storage
+storage/*.key
+storage/pail/
+bootstrap/cache/*.php
+coverage/
+.phpunit.cache/
 .phpunit.result.cache
+
+# Logs, caches and local tooling
+*.log
+.DS_Store
+Thumbs.db
+/.fleet/
+/.idea/
+/.nova/
+/.vscode/
+/.zed/

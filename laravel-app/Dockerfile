@@ -21,4 +21,4 @@ COPY docker-entrypoint.sh /usr/local/bin/hibrido-entrypoint
 RUN chmod +x /usr/local/bin/hibrido-entrypoint
 ENTRYPOINT ["hibrido-entrypoint"]
 CMD ["apache2-foreground"]
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD php -r "exit(@file_get_contents('http://localhost/login')===false?1:0);"
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD ["php", "/var/www/html/docker-healthcheck.php"]

@@ -121,6 +121,12 @@ Política recomendada:
 - pelo menos uma cópia fora do servidor;
 - teste trimestral de restauração.
 
+A cópia externa definida para este projeto é o OneDrive. A ferramenta de sincronização e suas credenciais devem ser configuradas somente no servidor ou em um cofre de secrets, nunca no repositório. O backup só deve ser considerado concluído após validar checksum no destino externo.
+
+Somente o Super Admin pode autorizar deploy em produção, migrations de schema e restauração de dados. Configure proteção equivalente nos ambientes do GitHub e nos acessos ao servidor.
+
+Logs de auditoria, sessões, notificações, solicitações recusadas e contas desativadas têm retenção definida de dois anos. Até existir rotina segura de expurgo/anonimização, não faça exclusões manuais dessas categorias.
+
 ## Restauração
 
 Faça a restauração em janela de manutenção e confirme o arquivo antes:

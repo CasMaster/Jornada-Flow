@@ -143,6 +143,15 @@ O teste não cria usuários, solicitações ou outros registros de negócio. Uma
 falha encerra o job de deploy com uma mensagem que identifica apenas a etapa,
 sem imprimir credenciais, cookies ou conteúdo pessoal.
 
+O workflow manual `Smoke test` executa a mesma validação sem publicar arquivos.
+Use-o para verificar um ambiente existente ou para separar falhas do acesso SSH
+de falhas da aplicação:
+
+```bash
+gh workflow run "Smoke test" --ref main -f environment=homologacao
+gh workflow run "Smoke test" --ref main -f environment=producao
+```
+
 ## Backup
 
 Crie o dump dentro do PostgreSQL e copie-o para fora do container:

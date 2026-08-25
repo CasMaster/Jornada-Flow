@@ -21,6 +21,7 @@ A aplicação Laravel oficial foi promovida para a raiz do workspace local. O le
 - Testes unitários do ciclo 20–19.
 - Sintaxe PHP e shell validada; smoke test direto de `ReportingCycle` e `git diff --check` aprovados.
 - Smoke test pós-deploy com prontidão, HTTPS, assets, CSRF e cookies seguros; autenticação real é ativada quando os dois secrets da conta técnica existirem.
+- Workflow independente `Smoke test` para validar ambientes sem depender da etapa SSH de publicação.
 - Environments `homologacao` e `producao` criados no GitHub com secrets separados de SSH e diretório de destino.
 - Homologação confirmada em `/homologacao`, com aplicação, PostgreSQL, worker e scheduler ativos.
 

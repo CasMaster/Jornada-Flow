@@ -99,6 +99,50 @@ podman-compose up -d
 
 Não execute `podman-compose down -v`: a opção `-v` remove volumes e pode apagar o banco.
 
+### Smoke test automatizado
+
+O workflow manual de deploy executa `scripts/smoke-environment.sh` depois da
+publicação, tanto em homologação quanto em produção. Sem credenciais, ele
+valida pela entrada HTTPS pública:
+
+- resposta pronta do banco em `/health/ready`;
+- formulário de login e token CSRF;
+- referências e entrega dos assets sob `/homologacao` na homologação;
+- atributos `Secure` e `HttpOnly` no cookie de sessão;
+
+Quando `SMOKE_EMAIL` e `SMOKE_PASSWORD` estão configurados juntos, o teste
+também valida autenticação real, renovação segura da sessão e acesso ao painel.
+
+Cadastre `SMOKE_EMAIL` e `SMOKE_PASSWORD` como secrets em cada GitHub
+Environment (`homologacao` e `producao`) para ativar a etapa autenticada. A conta deve ser técnica, exclusiva
+para o smoke test, com perfil `employee`, nome claramente sintético e sem
+solicitações, equipe real ou qualquer dado pessoal. Desative interações e
+notificações que não sejam necessárias para o login. `SMOKE_BASE_URL` é uma
+variável opcional do Environment; na ausência dela, o script usa
+`https://mixhome.app.br`.
+
+Para executar manualmente sem registrar credenciais no histórico do shell,
+exporte-as por um mecanismo seguro e rode:
+
+```bash
+# Produção
+SMOKE_EMAIL="$SMOKE_EMAIL" SMOKE_PASSWORD="$SMOKE_PASSWORD" \
+  sh scripts/smoke-environment.sh
+
+# Homologação
+SMOKE_ROUTE_PREFIX=/homologacao \
+  SMOKE_EMAIL="$SMOKE_EMAIL" SMOKE_PASSWORD="$SMOKE_PASSWORD" \
+  sh scripts/smoke-environment.sh
+```
+
+Os dois secrets são opcionais, mas precisam ser configurados em conjunto. Sem
+eles, o deploy continua protegido pelas verificações públicas de prontidão,
+HTTPS, formulário, assets e cookies.
+
+O teste não cria usuários, solicitações ou outros registros de negócio. Uma
+falha encerra o job de deploy com uma mensagem que identifica apenas a etapa,
+sem imprimir credenciais, cookies ou conteúdo pessoal.
+
 ## Backup
 
 Crie o dump dentro do PostgreSQL e copie-o para fora do container:

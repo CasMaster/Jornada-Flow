@@ -109,6 +109,18 @@ scripts/monitor-production.sh
 scripts/backup-postgres.sh
 ```
 
+Smoke test externo. As credenciais de uma conta técnica sintética são
+opcionais e, quando utilizadas, devem ficar somente em secrets:
+
+```bash
+SMOKE_EMAIL="$SMOKE_EMAIL" SMOKE_PASSWORD="$SMOKE_PASSWORD" sh scripts/smoke-environment.sh
+SMOKE_ROUTE_PREFIX=/homologacao SMOKE_EMAIL="$SMOKE_EMAIL" SMOKE_PASSWORD="$SMOKE_PASSWORD" sh scripts/smoke-environment.sh
+```
+
+O script também aceita `SMOKE_BASE_URL`; o padrão é `https://mixhome.app.br`.
+Sem `SMOKE_EMAIL` e `SMOKE_PASSWORD`, são executadas as verificações públicas;
+com ambos configurados, o fluxo também autentica e confirma o painel.
+
 Em homologação com prefixo, use `/homologacao/health/ready` através do roteamento correspondente.
 
 ## Testes e CI

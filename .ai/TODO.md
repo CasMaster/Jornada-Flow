@@ -15,7 +15,7 @@
 
 ## Sugestão
 
-- Adicionar smoke test automatizado para produção/homologação que valide login, assets, prefixo, cookies HTTPS e `/health/ready` sem usar dados pessoais.
+- Cadastrar uma conta técnica sintética e os secrets `SMOKE_EMAIL` e `SMOKE_PASSWORD` nos environments do GitHub para ampliar o smoke test público com autenticação real.
 - Adicionar teste PostgreSQL em CI para mudanças que dependam de comportamento específico do banco, mantendo SQLite para feedback rápido.
 - Tornar o procedimento de deploy idempotente, com backup, recriação controlada, verificação de saúde e rollback de imagem.
 - Adicionar verificação automatizada de documentação/contexto para links quebrados e possíveis secrets.

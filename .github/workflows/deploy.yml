@@ -26,3 +26,13 @@ jobs:
           tar -C laravel-app -czf /tmp/hibrido.tgz .
           scp /tmp/hibrido.tgz "$DEPLOY_USER@$DEPLOY_HOST:/tmp/hibrido.tgz"
           ssh "$DEPLOY_USER@$DEPLOY_HOST" "tar -xzf /tmp/hibrido.tgz -C '$TARGET_DIR' && cd '$TARGET_DIR' && sh deploy.sh"
+      - name: Validar ambiente publicado
+        env:
+          SMOKE_BASE_URL: ${{ vars.SMOKE_BASE_URL }}
+          SMOKE_EMAIL: ${{ secrets.SMOKE_EMAIL }}
+          SMOKE_PASSWORD: ${{ secrets.SMOKE_PASSWORD }}
+        run: |
+          if [ "${{ inputs.environment }}" = "homologacao" ]; then
+            export SMOKE_ROUTE_PREFIX=/homologacao
+          fi
+          sh scripts/smoke-environment.sh

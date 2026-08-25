@@ -2,11 +2,11 @@
 
 ## Objetivo atual
 
-Preparar o repositório como fonte de verdade compartilhada e corrigir os débitos técnicos autorizados.
+Consolidar o repositório oficial, automatizar a validação pós-deploy e manter produção e homologação verificáveis.
 
 ## Estado atual
 
-A estrutura de contexto foi criada e recebeu as definições operacionais do responsável. Healthcheck, deploy, permissões de backup e separação de testes foram corrigidos localmente.
+A aplicação Laravel oficial foi promovida para a raiz do workspace local. O legado foi movido para uma pasta recuperável fora do projeto. Produção e homologação respondem pelo Caddy, e o smoke test público foi validado nos dois ambientes.
 
 ## Concluído
 
@@ -20,6 +20,9 @@ A estrutura de contexto foi criada e recebeu as definições operacionais do res
 - Backups locais com permissões restritas.
 - Testes unitários do ciclo 20–19.
 - Sintaxe PHP e shell validada; smoke test direto de `ReportingCycle` e `git diff --check` aprovados.
+- Smoke test pós-deploy com prontidão, HTTPS, assets, CSRF e cookies seguros; autenticação real é ativada quando os dois secrets da conta técnica existirem.
+- Environments `homologacao` e `producao` criados no GitHub com secrets separados de SSH e diretório de destino.
+- Homologação confirmada em `/homologacao`, com aplicação, PostgreSQL, worker e scheduler ativos.
 
 ## Em andamento
 
@@ -27,8 +30,8 @@ A estrutura de contexto foi criada e recebeu as definições operacionais do res
 
 ## Pendente
 
-- Aprovação do usuário para commit, push ou Pull Request; nenhuma dessas ações está autorizada nesta tarefa.
-- Executar a suíte PHPUnit completa em ambiente com `mbstring`; o PHP local não possui a extensão.
+- Cadastrar conta técnica sintética e os secrets `SMOKE_EMAIL` e `SMOKE_PASSWORD` para habilitar a etapa autenticada do smoke test.
+- O plano atual do GitHub não permite reviewer obrigatório em environment de repositório privado; deploy de produção permanece manual, mas sem aprovação técnica obrigatória pela plataforma.
 
 ## Arquivos alterados
 
@@ -59,7 +62,7 @@ A estrutura de contexto foi criada e recebeu as definições operacionais do res
 
 ## Próximo passo recomendado
 
-Executar a suíte e o build em ambiente completo. Depois da aprovação explícita, criar commit e integrar pelo fluxo Git escolhido pelo responsável.
+Publicar as alterações na `main`, acompanhar o CI e executar o deploy manual da homologação para validar o fluxo completo do GitHub Actions.
 
 ## Atenção
 

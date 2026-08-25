@@ -26,13 +26,23 @@ class ManagerController extends Controller
         return $user->role === 'super_admin' ? Team::pluck('name')->all() : $user->managedTeams()->pluck('name')->all();
     }
 
+    private function selectedTeams(Request $request, array $allowedTeams): array
+    {
+        $requested = $request->has('teams')
+            ? (array) $request->input('teams', [])
+            : ($request->filled('team') ? [$request->string('team')->toString()] : []);
+
+        return array_values(array_intersect(array_filter($requested, 'is_string'), $allowedTeams));
+    }
+
     private function query(Request $request, bool $applyStatus = true): Builder
     {
         [$start,$end] = ReportingCycle::bounds($request->string('cycle')->toString() ?: null);
         $teams = $this->allowedTeams($request->user());
         $query = WorkRequest::with('user')->whereDate('work_date', '>=', $start->toDateString())->whereDate('work_date', '<=', $end->toDateString())->whereHas('user', fn (Builder $q) => $q->whereIn('team', $teams));
-        if ($request->filled('team')) {
-            $query->whereHas('user', fn (Builder $q) => $q->where('team', $request->string('team')));
+        $selectedTeams = $this->selectedTeams($request, $teams);
+        if ($request->has('teams') || $request->filled('team')) {
+            $query->whereHas('user', fn (Builder $q) => $q->whereIn('team', $selectedTeams));
         }
         if ($applyStatus && $request->filled('status')) {
             $query->where('status', $request->string('status'));
@@ -53,10 +63,12 @@ class ManagerController extends Controller
     {
         [$start,$end] = ReportingCycle::bounds($request->string('cycle')->toString() ?: null);
         $allowed = $this->allowedTeams($request->user());
+        $selectedTeams = $this->selectedTeams($request, $allowed);
         $base = $this->query($request);
         $metrics = (clone $base)->selectRaw('COUNT(*) total')->selectRaw("SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) pending")->selectRaw('COUNT(DISTINCT user_id) collaborators')->first();
+        $employeeTeams = ($request->has('teams') || $request->filled('team')) ? $selectedTeams : $allowed;
 
-        return view('manager.dashboard', ['records' => $base->orderBy('work_date')->paginate(25)->withQueryString(), 'metrics' => $metrics, 'teams' => Team::whereIn('name', $allowed)->orderBy('name')->get(), 'employees' => User::where('active', true)->where('team', '<>', '')->whereIn('team', $allowed)->orderBy('name')->get(), 'cycles' => ReportingCycle::options(), 'start' => $start, 'end' => $end, 'allTeams' => Team::orderBy('name')->get(), 'holidays' => Holiday::whereBetween('date', [$start, $end])->orderBy('date')->get()]);
+        return view('manager.dashboard', ['records' => $base->orderBy('work_date')->paginate(25)->withQueryString(), 'metrics' => $metrics, 'teams' => Team::whereIn('name', $allowed)->orderBy('name')->get(), 'employees' => User::where('active', true)->where('team', '<>', '')->whereIn('team', $employeeTeams)->orderBy('name')->get(), 'cycles' => ReportingCycle::options(), 'start' => $start, 'end' => $end, 'allTeams' => Team::orderBy('name')->get(), 'holidays' => Holiday::whereBetween('date', [$start, $end])->orderBy('date')->get()]);
     }
 
     public function review(Request $request, WorkRequest $workRequest): RedirectResponse
@@ -88,8 +100,8 @@ class ManagerController extends Controller
         $approved = $this->query($request, false)->where('status', 'approved')->get();
         $allowed = $this->allowedTeams($request->user());
         $people = User::where('active', true)->where('team', '<>', '')->whereIn('team', $allowed);
-        if ($request->filled('team')) {
-            $people->where('team', $request->string('team'));
+        if ($request->has('teams') || $request->filled('team')) {
+            $people->whereIn('team', $this->selectedTeams($request, $allowed));
         } if ($emails = array_filter((array) $request->input('employees', []))) {
             $people->whereIn('email', $emails);
         } $people = $people->orderBy('name')->get();

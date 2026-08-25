@@ -60,13 +60,13 @@ O painel exibe solicitações somente das equipes vinculadas ao gestor. O Super 
 É possível combinar:
 
 - ciclo de apuração;
-- equipe;
+- uma ou várias equipes permitidas;
 - estado;
 - um ou vários colaboradores.
 
-Na seleção múltipla, clique nos nomes desejados. Cada escolha vira uma etiqueta. Use o **X** vermelho para removê-la; não é necessário usar `Ctrl` ou `Cmd`.
+Nas seleções de equipes e colaboradores, clique nos nomes desejados. Cada escolha vira uma etiqueta. Use o **X** vermelho para removê-la; não é necessário usar `Ctrl` ou `Cmd`. Ao escolher equipes, a lista de colaboradores passa a mostrar somente pessoas dessas equipes.
 
-Clique em **Aplicar** para atualizar os resultados ou em **Ciclo atual** para limpar os filtros e retornar ao período vigente.
+Clique em **Aplicar filtros** para atualizar os resultados ou em **Limpar** para retornar ao período vigente sem filtros adicionais.
 
 ### Ciclo 20–19
 

@@ -209,6 +209,24 @@ class HibridoFlowTest extends TestCase
         $this->get('/gestor/exportar?cycle=2026-07-20')->assertOk();
     }
 
+    public function test_manager_can_filter_multiple_allowed_teams(): void
+    {
+        $fiscal = Team::create(['name' => 'Fiscal']);
+        $support = Team::create(['name' => 'Suporte']);
+        Team::create(['name' => 'TI']);
+        $manager = User::factory()->create(['role' => 'manager']);
+        $manager->managedTeams()->attach([$fiscal->id, $support->id]);
+        $fiscalRequest = WorkRequest::create(['user_id' => User::factory()->create(['name' => 'Pessoa Fiscal', 'team' => 'Fiscal'])->id, 'work_date' => '2026-08-20']);
+        $supportRequest = WorkRequest::create(['user_id' => User::factory()->create(['name' => 'Pessoa Suporte', 'team' => 'Suporte'])->id, 'work_date' => '2026-08-21']);
+        WorkRequest::create(['user_id' => User::factory()->create(['name' => 'Pessoa TI', 'team' => 'TI'])->id, 'work_date' => '2026-08-22']);
+
+        $response = $this->actingAs($manager)->get('/gestor?cycle=2026-08-20&teams[]=Fiscal&teams[]=Suporte');
+
+        $response->assertOk()->assertSee('Pessoa Fiscal')->assertSee('Pessoa Suporte')->assertDontSee('Pessoa TI');
+        $this->assertEqualsCanonicalizing([$fiscalRequest->id, $supportRequest->id], $response->viewData('records')->pluck('id')->all());
+        $this->get('/gestor/exportar?cycle=2026-08-20&teams[]=Fiscal&teams[]=Suporte')->assertOk();
+    }
+
     public function test_super_admin_can_manage_holiday_and_view_audit(): void
     {
         $admin = User::factory()->create(['role' => 'super_admin']);

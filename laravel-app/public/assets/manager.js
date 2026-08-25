@@ -17,11 +17,11 @@ document.querySelectorAll('select[multiple].click-multi').forEach((select) => {
   const optionSearch = document.createElement('input');
   optionSearch.type = 'search';
   optionSearch.className = 'click-multi-search';
-  optionSearch.placeholder = 'Buscar colaborador...';
-  optionSearch.setAttribute('aria-label', 'Buscar colaborador');
+  optionSearch.placeholder = select.dataset.searchPlaceholder || 'Buscar opção...';
+  optionSearch.setAttribute('aria-label', optionSearch.placeholder.replace(/\.\.\.$/, ''));
   const emptyMessage = document.createElement('span');
   emptyMessage.className = 'click-multi-empty';
-  emptyMessage.textContent = 'Nenhum colaborador encontrado.';
+  emptyMessage.textContent = select.dataset.empty || 'Nenhuma opção encontrada.';
   emptyMessage.hidden = true;
 
   const render = () => {
@@ -44,7 +44,10 @@ document.querySelectorAll('select[multiple].click-multi').forEach((select) => {
       chip.append(remove);
       selectedArea.append(chip);
     });
-    trigger.textContent = selected.length ? `${selected.length} colaborador(es) selecionado(s)` : (select.dataset.placeholder || 'Selecionar opções');
+    const selectionLabel = selected.length === 1
+      ? (select.dataset.singular || 'opção selecionada')
+      : (select.dataset.plural || 'opções selecionadas');
+    trigger.textContent = selected.length ? `${selected.length} ${selectionLabel}` : (select.dataset.placeholder || 'Selecionar opções');
     [...optionsArea.querySelectorAll('.click-multi-option')].forEach((button, index) => {
       const isSelected = select.options[index].selected;
       button.classList.toggle('selected', isSelected);

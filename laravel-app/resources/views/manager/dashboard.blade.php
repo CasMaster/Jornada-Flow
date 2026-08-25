@@ -30,12 +30,12 @@
             <form method="get" class="filters request-filters">
                 <label class="request-search">Nome ou e-mail<input name="q" value="{{ request('q') }}" placeholder="Pesquisar colaborador"></label>
                 <label>Ciclo 20–19<select name="cycle">@foreach($cycles as $cycle)<option value="{{ $cycle['value'] }}" @selected(request('cycle',$cycles[0]['value'])===$cycle['value'])>{{ $cycle['label'] }}</option>@endforeach</select></label>
-                <label>Equipe<select name="team"><option value="">Todas permitidas</option>@foreach($teams as $team)<option @selected(request('team')===$team->name)>{{ $team->name }}</option>@endforeach</select></label>
+                <label>Equipes<select name="teams[]" multiple class="click-multi" data-placeholder="Todas as equipes permitidas" data-singular="equipe selecionada" data-plural="equipes selecionadas" data-search-placeholder="Buscar equipe..." data-empty="Nenhuma equipe encontrada">@foreach($teams as $team)<option value="{{ $team->name }}" @selected(in_array($team->name,(array)request('teams',request('team') ? [request('team')] : [])))>{{ $team->name }}</option>@endforeach</select></label>
                 <label>Status<select name="status"><option value="">Todos</option>@foreach(['pending'=>'Pendentes','approved'=>'Aprovadas','rejected'=>'Recusadas'] as $value=>$label)<option value="{{ $value }}" @selected(request('status')===$value)>{{ $label }}</option>@endforeach</select></label>
-                <label>Colaboradores<select name="employees[]" multiple class="click-multi" data-placeholder="Selecionar colaboradores">@foreach($employees as $employee)<option value="{{ $employee->email }}" @selected(in_array($employee->email,(array)request('employees',[])))>{{ $employee->name }} · {{ $employee->team }}</option>@endforeach</select></label>
+                <label>Colaboradores<select name="employees[]" multiple class="click-multi" data-placeholder="Selecionar colaboradores" data-singular="colaborador selecionado" data-plural="colaboradores selecionados" data-search-placeholder="Buscar colaborador..." data-empty="Nenhum colaborador encontrado">@foreach($employees as $employee)<option value="{{ $employee->email }}" @selected(in_array($employee->email,(array)request('employees',[])))>{{ $employee->name }} · {{ $employee->team }}</option>@endforeach</select></label>
                 <div class="filter-actions">
                     <button class="primary" type="submit">Aplicar filtros</button>
-                    @if(request()->hasAny(['q','cycle','team','status','employees']))<a class="clear-filter" href="{{ route('manager.dashboard') }}">Limpar</a>@endif
+                    @if(request()->hasAny(['q','cycle','team','teams','status','employees']))<a class="clear-filter" href="{{ route('manager.dashboard') }}">Limpar</a>@endif
                 </div>
             </form>
         </article>
@@ -46,7 +46,7 @@
             <div><span>COLABORADORES</span><strong>{{ $metrics->collaborators ?? 0 }}</strong></div>
         </div>
 
-        <details class="card report requests-accordion" @if(request()->hasAny(['cycle','team','status','employees'])) open @endif>
+        <details class="card report requests-accordion" @if(request()->hasAny(['cycle','team','teams','status','employees'])) open @endif>
             <summary class="requests-accordion-summary">
                 <span><span class="eyebrow">SOLICITAÇÕES</span><strong>{{ $records->total() }} resultados</strong></span>
                 <span class="requests-accordion-action"><span class="when-closed">Exibir lista</span><span class="when-open">Ocultar lista</span></span>

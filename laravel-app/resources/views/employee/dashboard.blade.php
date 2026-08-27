@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Híbrido — Controle de Home Office')
+@section('title','MixHome — Controle de Home Office')
 @section('content')
 <main><section id="employee" class="view workspace">
   <div class="hero"><div><p class="eyebrow">CONTROLE DE PRESENÇA</p><h1>Olá, {{ explode(' ',trim(auth()->user()->name))[0] }}.<br>Solicite seu <em>home office.</em></h1><p>Marque no calendário os dias e envie para aprovação do gestor.</p></div><div class="counter"><strong id="selectedCount">0</strong><span>DIAS SELECIONADOS</span></div></div>

@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Auditoria — Híbrido')
+@section('title','Auditoria — MixHome')
 @section('content')
 <main><section class="workspace manager-workspace"><div class="manager-head"><div><p class="eyebrow">SEGURANÇA</p><h1>Trilha de <em>auditoria.</em></h1><p>Registro imutável das ações relevantes do sistema.</p></div><a class="button-link primary" href="{{ route('manager.dashboard') }}">Voltar ao painel</a></div>
 <article class="card report"><div class="table-wrap"><table><thead><tr><th>DATA</th><th>RESPONSÁVEL</th><th>EVENTO</th><th>REGISTRO</th><th>IP</th></tr></thead><tbody>

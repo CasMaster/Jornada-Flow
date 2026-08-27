@@ -1,4 +1,4 @@
-# Aplicação Laravel do HÍBRIDO
+# Aplicação Laravel do MixHome
 
 Este diretório contém a aplicação oficial do sistema de controle de home office.
 

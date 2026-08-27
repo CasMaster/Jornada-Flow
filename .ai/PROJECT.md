@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-O HÍBRIDO é um sistema interno da Mix Fiscal para controlar dias de home office. Ele substitui controles dispersos por um fluxo rastreável de solicitação, análise gerencial, histórico e exportação.
+O MixHome é um sistema interno da Mix Fiscal para controlar dias de home office. Ele substitui controles dispersos por um fluxo rastreável de solicitação, análise gerencial, histórico e exportação.
 
 ## Problema resolvido
 

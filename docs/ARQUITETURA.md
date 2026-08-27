@@ -1,4 +1,4 @@
-# Arquitetura e regras do HÍBRIDO
+# Arquitetura e regras do MixHome
 
 ## Componentes
 

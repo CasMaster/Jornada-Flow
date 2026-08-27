@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Entrar — Híbrido') @section('bodyClass','unified-login')
+@section('title','Entrar — MixHome') @section('bodyClass','unified-login')
 @section('content')
 <main class="login-shell"><section class="login-copy"><img class="institutional-logo" src="{{ asset('assets/mix-fiscal-logo.png') }}" alt="Mix Fiscal"><p class="eyebrow">CONTROLE DE HOME OFFICE</p><h1>Um só acesso.<br><em>Duas experiências.</em></h1><p>Cadastre-se como colaborador para manter seu histórico ou entre como gestor para acompanhar suas equipes.</p><div class="login-note"><b>MF</b><span>Após o envio, seus registros ficam disponíveis apenas para consulta e não podem ser alterados.</span></div></section>
 <section class="card unified-card"><div class="role-tabs" role="tablist"><a class="{{ $profile!=='manager'?'active':'' }}" href="{{ route('login',['perfil'=>'employee']) }}">Sou colaborador</a><a class="{{ $profile==='manager'?'active':'' }}" href="{{ route('login',['perfil'=>'manager']) }}">Sou gestor</a></div>

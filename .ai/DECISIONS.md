@@ -2,6 +2,12 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-08-27 — Marca MixHome
+
+O nome público do produto passa a ser MixHome, com favicon baseado na marca existente da Mix Fiscal. Títulos, cabeçalho, rodapé, configuração de nome e documentação usam a nova marca.
+
+Identificadores técnicos `hibrido` (banco, volumes, containers, comandos e código) permanecem inalterados. O Compose preserva o nome anterior do cookie de sessão por padrão e permite sobrescrevê-lo por `SESSION_COOKIE`; não há migração de dados nesta mudança.
+
 ## 2026-08-03 — Laravel como aplicação oficial
 
 ### Contexto

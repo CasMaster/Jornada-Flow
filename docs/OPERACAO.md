@@ -1,4 +1,4 @@
-# Operação do HÍBRIDO
+# Operação do MixHome
 
 ## Ambientes atuais
 
@@ -36,7 +36,7 @@ MAIL_PORT=587
 MAIL_USERNAME=USUARIO_SMTP
 MAIL_PASSWORD=SENHA_SMTP
 MAIL_FROM_ADDRESS=hibrido@DOMINIO
-MAIL_FROM_NAME="Híbrido | Mix Fiscal"
+MAIL_FROM_NAME="MixHome | Mix Fiscal"
 ```
 
 O `.env` deve ter permissão `600` e nunca pode entrar no Git.

@@ -1,4 +1,4 @@
-# HÍBRIDO — Controle de Home Office
+# MixHome — Controle de Home Office
 
 Sistema da Mix Fiscal para solicitação, aprovação, acompanhamento e exportação de dias de home office.
 

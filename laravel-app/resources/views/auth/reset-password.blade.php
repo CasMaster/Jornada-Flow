@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Nova senha — Híbrido')
+@section('title','Nova senha — MixHome')
 @section('bodyClass','unified-login')
 @section('content')
 <main class="login-shell password-shell">

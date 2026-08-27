@@ -24,7 +24,7 @@ services:
     ports:
       - "${APP_BIND_IP:-127.0.0.1}:${APP_PORT:-8081}:80"
     environment:
-      APP_NAME: "Híbrido | Mix Fiscal"
+      APP_NAME: "MixHome | Mix Fiscal"
       APP_ENV: production
       APP_DEBUG: "false"
       APP_URL: "${APP_URL:-http://localhost:8081}"
@@ -40,6 +40,7 @@ services:
       DB_PASSWORD: "${DB_PASSWORD}"
       LEGACY_SQLITE_PATH: /var/www/html/legacy/database.sqlite
       SESSION_DRIVER: database
+      SESSION_COOKIE: "${SESSION_COOKIE:-hibrido-mix-fiscal-session}"
       SESSION_SECURE_COOKIE: "${SESSION_SECURE_COOKIE:-true}"
       CACHE_STORE: database
       PASSWORD_RECOVERY_ENABLED: "${PASSWORD_RECOVERY_ENABLED:-false}"
@@ -50,7 +51,7 @@ services:
       MAIL_USERNAME: "${MAIL_USERNAME:-}"
       MAIL_PASSWORD: "${MAIL_PASSWORD:-}"
       MAIL_FROM_ADDRESS: "${MAIL_FROM_ADDRESS:-hibrido@localhost}"
-      MAIL_FROM_NAME: "${MAIL_FROM_NAME:-Híbrido | Mix Fiscal}"
+      MAIL_FROM_NAME: "${MAIL_FROM_NAME:-MixHome | Mix Fiscal}"
     volumes:
       - hibrido_laravel_data:/var/www/html/legacy:ro
     depends_on:
@@ -60,6 +61,7 @@ services:
     restart: unless-stopped
     command: php artisan queue:work database --sleep=3 --tries=3 --timeout=120
     environment: &app_environment
+      APP_NAME: "MixHome | Mix Fiscal"
       APP_ENV: production
       APP_DEBUG: "false"
       APP_URL: "${APP_URL:-http://localhost:8081}"
@@ -80,7 +82,7 @@ services:
       MAIL_USERNAME: "${MAIL_USERNAME:-}"
       MAIL_PASSWORD: "${MAIL_PASSWORD:-}"
       MAIL_FROM_ADDRESS: "${MAIL_FROM_ADDRESS:-hibrido@localhost}"
-      MAIL_FROM_NAME: "${MAIL_FROM_NAME:-Híbrido | Mix Fiscal}"
+      MAIL_FROM_NAME: "${MAIL_FROM_NAME:-MixHome | Mix Fiscal}"
     depends_on:
       - postgres
   scheduler:

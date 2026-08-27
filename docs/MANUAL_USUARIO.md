@@ -1,4 +1,4 @@
-# Manual de usuário — HÍBRIDO
+# Manual de usuário — MixHome
 
 ## 1. Acesso ao sistema
 

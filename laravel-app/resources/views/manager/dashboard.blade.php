@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Gestor — Híbrido')
+@section('title','Gestor — MixHome')
 @section('bodyClass','manager-page')
 
 @section('content')

@@ -6,7 +6,7 @@ Adicionar favicon e substituir o nome público Híbrido por MixHome.
 
 ## Estado atual
 
-Implementação local concluída em 2026-08-27. Publicação autorizada pelo usuário; CI e deploy em homologação e produção em andamento.
+Publicação concluída em 2026-08-27, autorizada pelo usuário. Código efe6c2b publicado na main e implantado em homologação e produção.
 
 ## Alterações
 
@@ -22,10 +22,14 @@ Implementação local concluída em 2026-08-27. Publicação autorizada pelo usu
 - PHPUnit: 22 testes, 102 assertions, todos aprovados.
 - Favicon validado como XML.
 - git diff --check: aprovado.
+- CI 33113736323: aprovado, incluindo build da imagem.
+- Deploy homologação 33113893253 e produção 33114013837: aprovados, incluindo smoke tests públicos.
+- Login com título MixHome e favicon SVG retornando HTTP 200 verificados nos dois ambientes.
+- Smoke autenticado permanece fora desta validação, sem conta técnica configurada.
 
 ## Próximo passo
 
-Concluir CI e deploy, verificando favicon e nome em produção e em /homologacao. Nenhuma migration de banco é necessária.
+Nenhuma etapa de publicação pendente para esta mudança. Nenhuma migration de banco foi adicionada.
 
 ## Pendências operacionais preexistentes
 

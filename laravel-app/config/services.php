@@ -39,8 +39,6 @@ return [
         'url' => env('HOLIDAYS_API_URL', 'https://feriadosapi.com'),
         'token' => env('HOLIDAYS_API_TOKEN'),
         'state' => env('HOLIDAYS_STATE', 'SP'),
-        'city' => env('HOLIDAYS_CITY', 'Campinas'),
-        'city_ibge' => env('HOLIDAYS_CITY_IBGE', '3509502'),
     ],
 
 ];

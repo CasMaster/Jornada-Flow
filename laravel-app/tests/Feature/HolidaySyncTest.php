@@ -11,12 +11,12 @@ class HolidaySyncTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_it_syncs_campinas_holidays_and_preserves_manual_dates(): void
+    public function test_it_syncs_sao_paulo_holidays_and_preserves_manual_dates(): void
     {
         config([
             'services.holidays.url' => 'https://holidays.test',
             'services.holidays.token' => 'test-token',
-            'services.holidays.city_ibge' => '3509502',
+            'services.holidays.state' => 'SP',
         ]);
 
         Holiday::create([
@@ -26,7 +26,7 @@ class HolidaySyncTest extends TestCase
         ]);
 
         Http::fake([
-            'https://holidays.test/api/v1/feriados/cidade/3509502*' => Http::response([
+            'https://holidays.test/api/v1/feriados/estado/SP*' => Http::response([
                 'feriados' => [
                     ['id' => 'a', 'data' => '09/07/2026', 'nome' => 'Revolução Constitucionalista', 'tipo' => 'ESTADUAL'],
                     ['id' => 'b', 'data' => '20/11/2026', 'nome' => 'Consciência Negra', 'tipo' => 'NACIONAL'],
@@ -53,7 +53,7 @@ class HolidaySyncTest extends TestCase
             'name' => 'Evento corporativo', 'source' => 'manual',
         ])->exists());
 
-        Http::assertSent(fn ($request) => $request->url() === 'https://holidays.test/api/v1/feriados/cidade/3509502?ano=2026'
+        Http::assertSent(fn ($request) => $request->url() === 'https://holidays.test/api/v1/feriados/estado/SP?ano=2026'
             && $request->hasHeader('Authorization', 'Bearer test-token'));
     }
 

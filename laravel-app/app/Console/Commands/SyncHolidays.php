@@ -10,7 +10,7 @@ class SyncHolidays extends Command
 {
     protected $signature = 'hibrido:sync-holidays {years?* : Anos que serão sincronizados}';
 
-    protected $description = 'Sincroniza feriados de Campinas/SP com a fonte configurada';
+    protected $description = 'Sincroniza feriados nacionais e estaduais de São Paulo';
 
     public function handle(HolidaySyncService $service): int
     {

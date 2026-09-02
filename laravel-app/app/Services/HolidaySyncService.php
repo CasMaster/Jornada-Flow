@@ -21,7 +21,7 @@ class HolidaySyncService
             ->acceptJson()
             ->retry(3, 500)
             ->timeout(15)
-            ->get('/api/v1/feriados/cidade/'.config('services.holidays.city_ibge'), ['ano' => $year])
+            ->get('/api/v1/feriados/estado/'.config('services.holidays.state'), ['ano' => $year])
             ->throw()
             ->json();
 

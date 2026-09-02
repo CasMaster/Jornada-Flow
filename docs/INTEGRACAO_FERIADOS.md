@@ -1,6 +1,6 @@
 # Integração de feriados
 
-O MixHome sincroniza feriados nacionais, estaduais e municipais aplicáveis a Campinas/SP por meio da Feriados API. A localidade padrão é identificada pelo código IBGE `3509502`.
+O MixHome sincroniza os feriados nacionais e estaduais aplicáveis ao estado de São Paulo por meio da Feriados API. O endpoint estadual inclui também os feriados nacionais e está disponível no plano gratuito do provedor.
 
 ## Configuração
 
@@ -10,8 +10,6 @@ Configure somente no `.env` de cada ambiente:
 HOLIDAYS_API_URL=https://feriadosapi.com
 HOLIDAYS_API_TOKEN=token-fornecido-pelo-provedor
 HOLIDAYS_STATE=SP
-HOLIDAYS_CITY=Campinas
-HOLIDAYS_CITY_IBGE=3509502
 ```
 
 O token é obrigatório e nunca deve ser versionado. Após alterar o `.env`, recrie `hibrido_laravel`, `queue_worker` e `scheduler` para renovar o cache de configuração.

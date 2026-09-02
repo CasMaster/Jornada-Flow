@@ -30,3 +30,4 @@ Artisan::command('hibrido:notify-pending', function () {
 })->purpose('Notifica gestores sobre pendências próximas ao fechamento');
 
 Schedule::command('hibrido:notify-pending')->dailyAt('08:00')->withoutOverlapping();
+Schedule::command('hibrido:sync-holidays')->monthlyOn(1, '03:00')->withoutOverlapping()->onOneServer();

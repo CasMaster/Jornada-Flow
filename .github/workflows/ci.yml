@@ -21,3 +21,41 @@ jobs:
       - run: vendor/bin/pint --test
       - run: php artisan test
       - run: docker build -t hibrido-home-office:${{ github.sha }} .
+  postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: mixhome_test
+          POSTGRES_USER: mixhome
+          POSTGRES_PASSWORD: mixhome_test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mixhome -d mixhome_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: laravel-app
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_pgsql, gd, zip
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist
+      - run: cp .env.example .env && php artisan key:generate
+      - name: Testar migrations e fluxos no PostgreSQL 16
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: mixhome_test
+          DB_USERNAME: mixhome
+          DB_PASSWORD: mixhome_test_password
+          CACHE_STORE: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
+        run: php artisan test

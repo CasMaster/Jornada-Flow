@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Holiday;
+use App\Models\ManagerDelegation;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\WorkRequest;
@@ -11,6 +12,7 @@ use App\Support\ReportingCycle;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
@@ -23,7 +25,17 @@ class ManagerController extends Controller
 
     private function allowedTeams(User $user): array
     {
-        return $user->role === 'super_admin' ? Team::pluck('name')->all() : $user->managedTeams()->pluck('name')->all();
+        if ($user->role === 'super_admin') {
+            return Team::pluck('name')->all();
+        }
+
+        $delegatedManagerIds = $user->receivedDelegations()
+            ->whereDate('starts_on', '<=', today())
+            ->whereDate('ends_on', '>=', today())
+            ->pluck('manager_id');
+
+        return Team::whereHas('managers', fn (Builder $query) => $query->whereKey([$user->id, ...$delegatedManagerIds]))
+            ->pluck('name')->all();
     }
 
     private function selectedTeams(Request $request, array $allowedTeams): array
@@ -68,28 +80,42 @@ class ManagerController extends Controller
         $metrics = (clone $base)->selectRaw('COUNT(*) total')->selectRaw("SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) pending")->selectRaw('COUNT(DISTINCT user_id) collaborators')->first();
         $employeeTeams = ($request->has('teams') || $request->filled('team')) ? $selectedTeams : $allowed;
 
-        return view('manager.dashboard', ['records' => $base->orderBy('work_date')->paginate(25)->withQueryString(), 'metrics' => $metrics, 'teams' => Team::whereIn('name', $allowed)->orderBy('name')->get(), 'employees' => User::where('active', true)->where('team', '<>', '')->whereIn('team', $employeeTeams)->orderBy('name')->get(), 'cycles' => ReportingCycle::options(), 'start' => $start, 'end' => $end, 'allTeams' => Team::orderBy('name')->get(), 'holidays' => Holiday::whereBetween('date', [$start, $end])->orderBy('date')->get()]);
+        $sorts = ['date_asc' => ['work_date', 'asc'], 'date_desc' => ['work_date', 'desc'], 'created_desc' => ['created_at', 'desc'], 'status' => ['status', 'asc']];
+        [$sortColumn, $sortDirection] = $sorts[$request->string('sort')->toString()] ?? $sorts['date_asc'];
+        $perPage = in_array($request->integer('per_page'), [25, 50, 100], true) ? $request->integer('per_page') : 25;
+        $isAdmin = $request->user()->role === 'super_admin';
+        $holidays = $isAdmin ? Holiday::whereBetween('date', [$start, $end])->orderBy('date')->get() : collect();
+
+        return view('manager.dashboard', [
+            'records' => $base->orderBy($sortColumn, $sortDirection)->paginate($perPage)->withQueryString(),
+            'metrics' => $metrics,
+            'teams' => Team::whereIn('name', $allowed)->orderBy('name')->get(),
+            'employees' => User::where('active', true)->where('team', '<>', '')->whereIn('team', $employeeTeams)->orderBy('name')->get(),
+            'cycles' => ReportingCycle::options(), 'start' => $start, 'end' => $end,
+            'allTeams' => $isAdmin ? Team::orderBy('name')->get() : collect(), 'holidays' => $holidays,
+            'holidayLastSync' => $holidays->whereNotNull('last_synced_at')->max('last_synced_at'),
+            'managers' => $isAdmin ? User::where('active', true)->whereIn('role', ['manager', 'super_admin'])->orderBy('name')->get() : collect(),
+            'delegations' => $isAdmin ? ManagerDelegation::with(['manager', 'delegate'])->whereDate('ends_on', '>=', today())->orderBy('starts_on')->get() : collect(),
+        ]);
     }
 
     public function review(Request $request, WorkRequest $workRequest): RedirectResponse
     {
-        $data = $request->validate(['decision' => ['required', 'in:approved,rejected']]);
+        $data = $request->validate(['decision' => ['required', 'in:approved,rejected'], 'review_note' => ['nullable', 'string', 'max:1000']]);
         $this->authorize('review', $workRequest);
-        $this->workRequests->review($request->user(), $workRequest, $data['decision']);
+        $this->workRequests->review($request->user(), $workRequest, $data['decision'], $data['review_note'] ?? null);
 
         return back()->with('success', 'Solicitação analisada.');
     }
 
     public function reviewBatch(Request $request): RedirectResponse
     {
-        $data = $request->validate(['requests' => ['required', 'array', 'min:1', 'max:100'], 'requests.*' => ['integer', 'exists:work_requests,id'], 'decision' => ['required', 'in:approved,rejected']]);
+        $data = $request->validate(['requests' => ['required', 'array', 'min:1', 'max:100'], 'requests.*' => ['integer', 'exists:work_requests,id'], 'decision' => ['required', 'in:approved,rejected'], 'review_note' => ['nullable', 'string', 'max:1000']]);
         $records = WorkRequest::with('user')->whereIn('id', $data['requests'])->get();
         foreach ($records as $record) {
             $this->authorize('review', $record);
         }
-        foreach ($records as $record) {
-            $this->workRequests->review($request->user(), $record, $data['decision']);
-        }
+        DB::transaction(fn () => $records->each(fn (WorkRequest $record) => $this->workRequests->review($request->user(), $record, $data['decision'], $data['review_note'] ?? null)));
 
         return back()->with('success', $records->count().' solicitação(ões) analisada(s).');
     }

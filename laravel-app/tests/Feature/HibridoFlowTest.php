@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\AuditLog;
 use App\Models\Holiday;
+use App\Models\ManagerDelegation;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\WorkRequest;
@@ -237,7 +238,57 @@ class HibridoFlowTest extends TestCase
 
     public function test_readiness_endpoint_checks_database(): void
     {
-        $this->get('/health/ready')->assertOk()->assertJsonPath('database', 'ok');
+        $this->get('/health/ready')->assertOk()->assertJsonPath('database', 'ok')->assertHeader('Server-Timing');
+    }
+
+    public function test_super_admin_can_delegate_manager_teams_temporarily(): void
+    {
+        $team = Team::create(['name' => 'Fiscal']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $owner = User::factory()->create(['role' => 'manager']);
+        $delegate = User::factory()->create(['role' => 'manager']);
+        $owner->managedTeams()->attach($team);
+        $employee = User::factory()->create(['team' => 'Fiscal']);
+        $record = WorkRequest::create(['user_id' => $employee->id, 'work_date' => today()]);
+
+        $this->actingAs($admin)->post('/admin/delegacoes', [
+            'manager_id' => $owner->id, 'delegate_id' => $delegate->id,
+            'starts_on' => today()->subDay()->toDateString(), 'ends_on' => today()->addDay()->toDateString(),
+        ])->assertRedirect();
+
+        $this->actingAs($delegate)->get('/gestor')->assertOk()->assertSee($employee->name);
+        $this->post("/gestor/solicitacoes/{$record->id}/analisar", ['decision' => 'approved', 'review_note' => 'Cobertura de férias.'])->assertRedirect();
+        $this->assertDatabaseHas('work_requests', ['id' => $record->id, 'status' => 'approved', 'review_note' => 'Cobertura de férias.']);
+        $this->assertDatabaseCount('manager_delegations', 1);
+    }
+
+    public function test_expired_delegation_does_not_grant_access(): void
+    {
+        $team = Team::create(['name' => 'Fiscal']);
+        $owner = User::factory()->create(['role' => 'manager']);
+        $delegate = User::factory()->create(['role' => 'manager']);
+        $owner->managedTeams()->attach($team);
+        $record = WorkRequest::create(['user_id' => User::factory()->create(['team' => 'Fiscal'])->id, 'work_date' => today()]);
+        ManagerDelegation::create([
+            'manager_id' => $owner->id, 'delegate_id' => $delegate->id,
+            'starts_on' => today()->subDays(3), 'ends_on' => today()->subDay(),
+        ]);
+
+        $this->actingAs($delegate)->post("/gestor/solicitacoes/{$record->id}/analisar", ['decision' => 'approved'])->assertForbidden();
+    }
+
+    public function test_manager_can_order_and_resize_filtered_results(): void
+    {
+        $team = Team::create(['name' => 'Fiscal']);
+        $manager = User::factory()->create(['role' => 'manager']);
+        $manager->managedTeams()->attach($team);
+        $employee = User::factory()->create(['team' => 'Fiscal']);
+        WorkRequest::create(['user_id' => $employee->id, 'work_date' => '2026-09-01']);
+        WorkRequest::create(['user_id' => $employee->id, 'work_date' => '2026-09-02']);
+
+        $records = $this->actingAs($manager)->get('/gestor?cycle=2026-08-20&sort=date_desc&per_page=50')->viewData('records');
+        $this->assertSame(50, $records->perPage());
+        $this->assertSame('2026-09-02', $records->first()->work_date->toDateString());
     }
 
     public function test_https_proxy_is_trusted_and_session_cookie_is_secure(): void

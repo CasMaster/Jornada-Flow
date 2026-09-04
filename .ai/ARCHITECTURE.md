@@ -51,6 +51,7 @@ O `compose.yaml` define quatro serviços: `postgres`, `hibrido_laravel`, `queue_
 
 - `users.team` representa a equipe própria do usuário.
 - `manager_team` representa equipes administradas; são conceitos distintos.
+- `manager_delegations` concede temporariamente ao substituto o escopo de equipes do gestor de origem, entre datas inclusivas.
 - Rotas usam `auth` e `role:*`; ações sensíveis também usam Form Requests ou Policy.
 - Super Admin acessa todas as equipes; gestor fica restrito aos vínculos.
 
@@ -75,6 +76,7 @@ O entrypoint aguarda o banco e executa `php artisan migrate --force`, exceto qua
 - Não duplique regras de domínio em controllers ou JavaScript.
 - Preserve autorização no servidor em qualquer novo filtro ou ação.
 - Web, worker e scheduler devem usar código/configuração compatíveis.
+- `MeasureRequest` adiciona `Server-Timing` e registra requisições lentas; `AppServiceProvider` registra consultas lentas sem valores dos parâmetros.
 - Alterações em rotas devem considerar `APP_ROUTE_PREFIX` da homologação.
 - Assets usam query string baseada em `filemtime`; preserve esse mecanismo ou documente sua substituição.
 - O deploy automatizado usa `deploy.sh` para reconstruir a imagem e recriar web, worker e scheduler sem remover o PostgreSQL.

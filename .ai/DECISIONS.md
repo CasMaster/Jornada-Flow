@@ -2,6 +2,14 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-09-04 — Delegação temporária e justificativa de análise
+
+Somente o Super Admin programa ou encerra delegações entre gestores ativos. Durante o intervalo inclusivo, o substituto recebe o escopo das equipes do gestor de origem; a Policy continua sendo a autoridade no servidor. Aprovações e recusas aceitam observação de até 1.000 caracteres, preservada na solicitação e na auditoria.
+
+## 2026-09-04 — Observabilidade e validação operacional
+
+Respostas web incluem `Server-Timing`; requisições e consultas acima dos limites configuráveis são registradas sem parâmetros SQL. O CI passa a executar a suíte também em PostgreSQL 16. O deploy cria dump e checksum antes da recriação, valida o healthcheck e tenta restaurar a imagem anterior se a nova não ficar saudável. O smoke externo de produção roda a cada 15 minutos.
+
 ## 2026-08-28 — Provisionamento explícito de conta sintética para smoke test
 
 `hibrido:create-smoke-user` cria uma identidade fixa por ambiente em `mixhome.invalid`,

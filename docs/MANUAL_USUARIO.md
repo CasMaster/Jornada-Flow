@@ -63,10 +63,11 @@ O painel exibe solicitações somente das equipes vinculadas ao gestor. O Super 
 - uma ou várias equipes permitidas;
 - estado;
 - um ou vários colaboradores.
+- ordenação e quantidade de resultados por página.
 
 Nas seleções de equipes e colaboradores, clique nos nomes desejados. Cada escolha vira uma etiqueta. Use o **X** vermelho para removê-la; não é necessário usar `Ctrl` ou `Cmd`. Ao escolher equipes, a lista de colaboradores passa a mostrar somente pessoas dessas equipes.
 
-Clique em **Aplicar filtros** para atualizar os resultados ou em **Limpar** para retornar ao período vigente sem filtros adicionais.
+Clique em **Aplicar filtros** para atualizar os resultados ou em **Limpar** para retornar ao período vigente sem filtros adicionais. Use **Salvar preferência** para guardar no navegador ciclo, equipes, estado, ordenação e quantidade por página. Nome pesquisado e colaboradores específicos não são armazenados.
 
 ### Ciclo 20–19
 
@@ -75,10 +76,11 @@ O período começa no dia 20 de um mês e termina no dia 19 do mês seguinte. Ex
 ### Aprovar ou recusar
 
 1. Localize a solicitação.
-2. Clique em **Aprovar** ou **Recusar**.
-3. Confirme a recusa quando solicitado.
+2. Se desejar, escreva uma justificativa ou orientação para o colaborador.
+3. Clique em **Aprovar** ou **Recusar**.
+4. Confirme a recusa quando solicitado.
 
-A recusa arquiva a solicitação; ela não apaga a data. A decisão pode ser atualizada posteriormente por um gestor autorizado.
+A recusa arquiva a solicitação; ela não apaga a data. A decisão pode ser atualizada posteriormente por um gestor autorizado. O colaborador vê a justificativa no próprio histórico. Nas ações em lote, a observação informada é aplicada a todas as solicitações selecionadas.
 
 ### Exportar Excel
 
@@ -131,6 +133,10 @@ Quando o envio por e-mail estiver habilitado, use **Enviar acesso por e-mail**.
 O usuário receberá um link individual, válido por 60 minutos e utilizável uma
 única vez.
 
+### Delegar equipes temporariamente
+
+Na área **Delegação de gestores**, escolha o gestor de origem, o substituto e o período. Durante essas datas, o substituto poderá consultar e analisar as equipes administradas pelo gestor de origem. Somente o Super Admin cria ou encerra delegações, e todas as ações continuam registradas na auditoria.
+
 ## 7. Sair e trocar de usuário
 
 - **Sair**, no cabeçalho, encerra a sessão.
@@ -179,11 +185,11 @@ Use a recuperação de senha ou procure o Super Admin. Colaboradores não podem 
 
 ## 9. Calendário, notificações e histórico
 
-Datas bloqueadas pela empresa aparecem marcadas no calendário e não podem ser selecionadas. O histórico informa envio, análise e gestor responsável. Aprovações e recusas aparecem também em “Notificações recentes”.
+Datas bloqueadas pela empresa aparecem marcadas no calendário e não podem ser selecionadas. Feriados nacionais e estaduais são atualizados automaticamente; datas municipais de Campinas ou eventos corporativos podem ser mantidos manualmente pelo Super Admin. A gestão exibe a data da última sincronização e alerta quando estiver desatualizada. O histórico informa envio, análise, gestor responsável e eventual justificativa. Aprovações e recusas aparecem também em “Notificações recentes”.
 
 ## 10. Pesquisa e análise em lote
 
-O gestor pode pesquisar por nome ou e-mail e combinar ciclo, equipe, status e colaboradores. Os resultados são paginados em grupos de 25. Para analisar vários, marque as caixas e use a barra “Ações em lote”. Todas as permissões são verificadas novamente no servidor.
+O gestor pode pesquisar por nome ou e-mail e combinar ciclo, equipe, status e colaboradores. Os resultados podem ser ordenados e exibidos em grupos de 25, 50 ou 100. Para analisar vários, marque as caixas e use a barra “Ações em lote”. Todas as permissões são verificadas novamente no servidor.
 
 O cartão “Aguardando sua ação” destaca pendências do filtro atual. Próximo ao fechamento, o sistema envia lembretes automáticos aos gestores.
 

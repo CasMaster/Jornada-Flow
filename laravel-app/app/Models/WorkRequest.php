@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WorkRequest extends Model
 {
-    protected $fillable = ['user_id', 'work_date', 'status', 'reviewed_by', 'reviewed_at'];
+    protected $fillable = ['user_id', 'work_date', 'status', 'reviewed_by', 'reviewed_at', 'review_note'];
 
     protected $casts = ['work_date' => 'date', 'reviewed_at' => 'datetime'];
 

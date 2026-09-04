@@ -1,5 +1,7 @@
 name: Smoke test
 on:
+  schedule:
+    - cron: '*/15 * * * *'
   workflow_dispatch:
     inputs:
       environment:
@@ -8,7 +10,10 @@ on:
         required: true
 jobs:
   smoke:
-    environment: ${{ inputs.environment }}
+    environment: ${{ github.event_name == 'schedule' && 'producao' || inputs.environment }}
+    concurrency:
+      group: smoke-${{ github.event_name == 'schedule' && 'producao' || inputs.environment }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -18,7 +23,7 @@ jobs:
           SMOKE_EMAIL: ${{ secrets.SMOKE_EMAIL }}
           SMOKE_PASSWORD: ${{ secrets.SMOKE_PASSWORD }}
         run: |
-          if [ "${{ inputs.environment }}" = "homologacao" ]; then
+          if [ "${{ github.event_name == 'schedule' && 'producao' || inputs.environment }}" = "homologacao" ]; then
             export SMOKE_ROUTE_PREFIX=/homologacao
           fi
           sh scripts/smoke-environment.sh

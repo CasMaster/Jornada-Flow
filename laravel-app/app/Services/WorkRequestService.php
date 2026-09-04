@@ -38,11 +38,11 @@ class WorkRequestService
         return $added;
     }
 
-    public function review(User $manager, WorkRequest $record, string $decision): void
+    public function review(User $manager, WorkRequest $record, string $decision, ?string $note = null): void
     {
-        $old = $record->only(['status', 'reviewed_by', 'reviewed_at']);
-        $record->update(['status' => $decision, 'reviewed_by' => $manager->id, 'reviewed_at' => now()]);
-        $this->audit->record('work_request.'.$decision, $record, $old, $record->only(['status', 'reviewed_by', 'reviewed_at']));
+        $old = $record->only(['status', 'reviewed_by', 'reviewed_at', 'review_note']);
+        $record->update(['status' => $decision, 'reviewed_by' => $manager->id, 'reviewed_at' => now(), 'review_note' => $note ?: null]);
+        $this->audit->record('work_request.'.$decision, $record, $old, $record->only(['status', 'reviewed_by', 'reviewed_at', 'review_note']));
         $record->user->notify(new WorkRequestStatusChanged($record));
     }
 }

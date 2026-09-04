@@ -52,6 +52,18 @@ SMTP e recuperação de senha estão deliberadamente adiados: HTTPS, conta de
 smoke test ou secrets cadastrados não autorizam habilitá-los. O provisionamento
 abaixo não envia e-mail, convite ou token de recuperação e não altera configuração.
 
+## Desempenho e monitoramento
+
+Toda resposta web inclui o cabeçalho `Server-Timing` com o tempo interno do Laravel. Requisições acima de `SLOW_REQUEST_MS` (750 ms por padrão) e consultas acima de `SLOW_QUERY_MS` (250 ms) são registradas como `slow_request` e `slow_query`. Consultas são gravadas sem os valores dos parâmetros, evitando dados pessoais nos logs.
+
+Consulte os eventos com `podman logs hibrido-home-office-prod` e os processos worker/scheduler correspondentes. O workflow `Smoke test` valida produção a cada 15 minutos; falhas aparecem no GitHub Actions. `scripts/monitor-production.sh` também mede o endpoint de prontidão e falha quando ultrapassa `MAX_RESPONSE_SECONDS` (2 segundos por padrão).
+
+## Deploy seguro e rollback
+
+`deploy.sh` cria um dump PostgreSQL com checksum e permissão restrita antes de reconstruir os serviços. Depois da recriação, executa repetidamente o healthcheck da imagem. Se a aplicação não ficar saudável, volta a apontar os serviços para a imagem anterior e encerra com erro. O smoke HTTPS externo ainda é obrigatório depois desse processo.
+
+O retorno da imagem não desfaz migrations. Toda migration de produção deve ser progressiva e compatível com a versão anterior; se uma mudança de schema impedir o retorno, interrompa a operação e use o backup pré-deploy somente mediante autorização explícita do Super Admin.
+
 ## Acesso administrativo pelo DBeaver
 
 O PostgreSQL é publicado somente no loopback do servidor em

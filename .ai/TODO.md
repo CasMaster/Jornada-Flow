@@ -13,6 +13,10 @@
 - Deploy passou a reconstruir e recriar explicitamente web, worker e scheduler, preservando PostgreSQL.
 - Backup agora usa `umask 077` e força permissão `600` no dump e checksum.
 - Foram adicionados testes Unit separados para `ReportingCycle`.
+- CI valida a suíte em PostgreSQL 16, além do SQLite rápido.
+- Deploy cria backup prévio, verifica saúde e preserva referência para retorno à imagem anterior.
+- Monitoramento externo de produção roda a cada 15 minutos e mede tempo de resposta.
+- Solicitações aceitam justificativa, gestores podem delegar equipes temporariamente e filtros suportam ordenação, tamanho de página e preferência local.
 
 ## Sugestão
 

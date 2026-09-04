@@ -2,34 +2,39 @@
 
 ## Objetivo atual
 
-Implementar provisionamento seguro de conta técnica sintética para smoke test e documentar secrets separados por ambiente.
+Aplicar melhorias operacionais e funcionais selecionadas: concluir pendências, deploy seguro, observabilidade, CI PostgreSQL, monitoramento, delegação, calendário, justificativas e filtros.
 
 ## Estado atual
 
-Implementação local concluída, sem commit, push, deploy, criação de contas nos servidores ou cadastro de secrets no GitHub. Nenhuma migration adicionada. Recuperação de senha permanece desabilitada por padrão, sem alteração de configuração.
+Implementação e validação local concluídas, ainda sem push ou deploy. Os trabalhos anteriores foram preservados em `d97df74` (conta sintética) e `bdf0b36` (apresentação de feriados). A mudança atual contém uma migration progressiva. Recuperação de senha permanece desabilitada.
 
-## Alterações
+## Alterações atuais
 
-- `laravel-app/app/Console/Commands/CreateSmokeUser.php`: comando interativo `hibrido:create-smoke-user`, identidade fixa por ambiente, validação do prefixo, senha oculta confirmada e hash, perfil employee sem equipe; recusa sobrescrita e registra auditoria transacional sem secrets.
-- `laravel-app/tests/Feature/CreateSmokeUserTest.php`: criação nos dois ambientes, login/permissões, recuperação desabilitada, colisão sem alteração, ambiente inválido, execução não interativa, cancelamento, senha inválida e rollback por falha de auditoria.
-- `docs/OPERACAO.md`: comandos exatos por container, cadastro separado de Environment secrets, verificação autenticada e limites operacionais.
-- `.ai/ENVIRONMENT.md`, `.ai/DECISIONS.md` e `.ai/TODO.md`: contexto e pendência de ativação operacional.
+- Delegação temporária entre gestores, administrada exclusivamente pelo Super Admin, com autorização aplicada na Policy.
+- Justificativa opcional individual ou em lote, visível no histórico do colaborador e registrada na auditoria.
+- Ordenação, 25/50/100 registros por página e preferência não pessoal de filtros salva no navegador.
+- Indicador de última sincronização de feriados e manutenção manual para datas municipais/corporativas.
+- Cabeçalho `Server-Timing`, logs de requisições e SQL lentos com limites configuráveis e sem valores dos parâmetros.
+- CI adicional em PostgreSQL 16 e smoke externo de produção a cada 15 minutos.
+- Deploy com dump/checksum prévio, verificação de saúde e tentativa de retorno à imagem anterior.
+- `.dockerignore` evita copiar cache local de descoberta de pacotes para a imagem de produção.
 
 ## Validação
 
-- Laravel Pint: aprovado após ajuste automático dos imports do teste.
-- PHPUnit: 29 testes, 204 assertions, todos aprovados (PHP 8.5.8 local, SQLite em memória).
+- Laravel Pint: aprovado.
+- PHPUnit/SQLite: 35 testes, 233 assertions, todos aprovados.
+- Migration completa executada com sucesso em PostgreSQL 16 temporário.
+- Build da imagem de produção: aprovado.
+- Sintaxe JavaScript e scripts shell: aprovada.
 - `git diff --check`: aprovado.
-- Build de imagem e execução em PostgreSQL/servidores não realizados nesta tarefa.
 
 ## Próximo passo
 
-Após autorização de publicação, disponibilizar o comando na imagem e seguir `docs/OPERACAO.md`: provisionar homologação, cadastrar seus dois secrets e executar Smoke test; depois repetir separadamente em produção sob autorização operacional. Não reutilizar senhas entre ambientes.
+Criar commit da mudança atual, enviar a `main`, aguardar CI (incluindo PostgreSQL), publicar primeiro em homologação, validar smoke e interface, e somente então publicar em produção. A migration não deve ser aplicada em produção sem o backup pré-deploy confirmado.
 
-## Limites e pendências
+## Limites
 
-- Conta tem permissões normais de employee; uso exclusivo para login/leitura é uma restrição operacional, não um perfil somente leitura.
-- Comando somente cria; rotação/revogação exige procedimento controlado, preservando sessões/auditoria e retenção de dois anos.
-- Proteção de produção por reviewer depende do plano GitHub; não contornar controles existentes.
-- Integração OneDrive e expurgo/anonimização permanecem pendentes.
-- SMTP/recuperação de senha continuam adiados.
+- O rollback automático restaura a imagem, não desfaz migrations; migrations devem permanecer compatíveis com a versão anterior.
+- Alertas do smoke dependem das notificações configuradas no GitHub.
+- Datas municipais continuam sob manutenção manual enquanto o endpoint contratado não as fornecer.
+- Provisionamento das contas sintéticas e cadastro dos secrets ainda exigem execução operacional separada.

@@ -60,6 +60,11 @@ class User extends Authenticatable
         return $this->hasMany(WorkRequest::class);
     }
 
+    public function receivedDelegations(): HasMany
+    {
+        return $this->hasMany(ManagerDelegation::class, 'delegate_id');
+    }
+
     public function isManager(): bool
     {
         return in_array($this->role, ['manager', 'super_admin'], true);

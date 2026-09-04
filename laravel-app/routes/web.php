@@ -47,6 +47,8 @@ Route::prefix(config('app.route_prefix'))->group(function () {
         Route::patch('/equipes/{team}', [AdminController::class, 'toggleTeam'])->name('admin.teams.toggle');
         Route::post('/calendario', [AdminController::class, 'holiday'])->name('admin.holidays.store');
         Route::delete('/calendario/{holiday}', [AdminController::class, 'deleteHoliday'])->name('admin.holidays.destroy');
+        Route::post('/delegacoes', [AdminController::class, 'delegation'])->name('admin.delegations.store');
+        Route::delete('/delegacoes/{delegation}', [AdminController::class, 'deleteDelegation'])->name('admin.delegations.destroy');
         Route::get('/auditoria', [AdminController::class, 'audits'])->name('admin.audits');
         Route::get('/usuarios', [UserDirectoryController::class, 'index'])->name('admin.users.index');
         Route::post('/usuarios', [UserDirectoryController::class, 'store'])->name('admin.users.store');

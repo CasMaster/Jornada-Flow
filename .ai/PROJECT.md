@@ -32,6 +32,8 @@ O MixHome é um sistema interno da Mix Fiscal para controlar dias de home office
 - Diretório paginado de usuários e vínculos gestor–equipe.
 - Recuperação de senha condicionada à configuração de SMTP/HTTPS.
 - Auditoria administrativa, calendário corporativo, filas e lembretes agendados.
+- Delegação temporária entre gestores, justificativas de análise e preferências locais de filtros.
+- Telemetria de requisições/consultas lentas e monitoramento externo agendado.
 - Endpoint de prontidão e scripts de backup/monitoramento.
 - Importadores SQLite apenas para instalações históricas.
 

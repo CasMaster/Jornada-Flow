@@ -13,6 +13,18 @@ class WorkRequestPolicy
             return true;
         }
 
-        return $user->isManager() && $user->managedTeams()->where('name', $record->user->team)->exists();
+        if (! $user->isManager()) {
+            return false;
+        }
+
+        if ($user->managedTeams()->where('name', $record->user->team)->exists()) {
+            return true;
+        }
+
+        return $user->receivedDelegations()
+            ->whereDate('starts_on', '<=', today())
+            ->whereDate('ends_on', '>=', today())
+            ->whereHas('manager.managedTeams', fn ($query) => $query->where('name', $record->user->team))
+            ->exists();
     }
 }

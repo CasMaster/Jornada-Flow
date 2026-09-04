@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use App\Models\Holiday;
+use App\Models\ManagerDelegation;
 use App\Models\Team;
+use App\Models\User;
 use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -47,6 +49,32 @@ class AdminController extends Controller
         $holiday->delete();
 
         return back()->with('success', 'Data corporativa removida.');
+    }
+
+    public function delegation(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'manager_id' => ['required', 'integer', 'different:delegate_id', 'exists:users,id'],
+            'delegate_id' => ['required', 'integer', 'exists:users,id'],
+            'starts_on' => ['required', 'date'],
+            'ends_on' => ['required', 'date', 'after_or_equal:starts_on'],
+        ]);
+        $manager = User::findOrFail($data['manager_id']);
+        $delegate = User::findOrFail($data['delegate_id']);
+        abort_unless($manager->isManager() && $delegate->isManager() && $manager->active && $delegate->active, 422, 'Selecione gestores ativos.');
+
+        $delegation = ManagerDelegation::create([...$data, 'created_by' => $request->user()->id]);
+        $this->audit->record('manager_delegation.created', $delegation, [], $delegation->only(['manager_id', 'delegate_id', 'starts_on', 'ends_on']));
+
+        return back()->with('success', 'Delegação programada.');
+    }
+
+    public function deleteDelegation(ManagerDelegation $delegation): RedirectResponse
+    {
+        $this->audit->record('manager_delegation.deleted', $delegation, $delegation->toArray(), []);
+        $delegation->delete();
+
+        return back()->with('success', 'Delegação encerrada.');
     }
 
     public function audits(Request $request): View

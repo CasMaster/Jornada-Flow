@@ -1,3 +1,22 @@
+const filterStorageKey = 'mixhome.manager.filters.v1';
+const managerFilters = document.querySelector('[data-manager-filters]');
+if (managerFilters && !window.location.search) {
+  try {
+    const preference = JSON.parse(localStorage.getItem(filterStorageKey) || 'null');
+    if (preference) {
+      ['cycle', 'status', 'sort', 'per_page'].forEach((name) => {
+        const field = managerFilters.elements.namedItem(name);
+        if (field && preference[name]) field.value = preference[name];
+      });
+      [...managerFilters.querySelectorAll('select[name="teams[]"] option')].forEach((option) => {
+        option.selected = (preference.teams || []).includes(option.value);
+      });
+    }
+  } catch (_) {
+    localStorage.removeItem(filterStorageKey);
+  }
+}
+
 document.querySelectorAll('select[multiple].click-multi').forEach((select) => {
   select.classList.add('is-enhanced');
 
@@ -163,4 +182,17 @@ document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
   document.querySelectorAll('.click-multi-options').forEach((area) => { area.hidden = true; });
   document.querySelectorAll('.click-multi-trigger').forEach((button) => button.setAttribute('aria-expanded', 'false'));
+});
+
+const saveFilters = document.querySelector('[data-save-filters]');
+saveFilters?.addEventListener('click', () => {
+  if (!managerFilters) return;
+  const data = new FormData(managerFilters);
+  const preference = {
+    cycle: data.get('cycle') || '', status: data.get('status') || '', sort: data.get('sort') || 'date_asc',
+    per_page: data.get('per_page') || '25', teams: data.getAll('teams[]'),
+  };
+  localStorage.setItem(filterStorageKey, JSON.stringify(preference));
+  saveFilters.textContent = 'Preferência salva ✓';
+  window.setTimeout(() => { saveFilters.textContent = 'Salvar preferência'; }, 1800);
 });

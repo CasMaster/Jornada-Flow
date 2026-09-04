@@ -42,6 +42,8 @@ QUEUE_CONNECTION
 PASSWORD_RECOVERY_ENABLED
 LOG_CHANNEL
 LOG_LEVEL
+SLOW_REQUEST_MS
+SLOW_QUERY_MS
 MAIL_MAILER
 MAIL_SCHEME
 MAIL_HOST
@@ -133,7 +135,7 @@ Em homologação com prefixo, use `/homologacao/health/ready` através do roteam
 
 ## Testes e CI
 
-`phpunit.xml` usa SQLite `:memory:`, fila síncrona, sessão/cache em memória e mailer de teste. O GitHub Actions instala dependências, gera `APP_KEY`, executa Pint, PHPUnit e build Docker.
+`phpunit.xml` usa SQLite `:memory:`, fila síncrona, sessão/cache em memória e mailer de teste. O GitHub Actions instala dependências, gera `APP_KEY`, executa Pint, PHPUnit, a mesma suíte em PostgreSQL 16 e o build Docker. O smoke de produção roda automaticamente a cada 15 minutos e permanece disponível manualmente para os dois ambientes.
 
 ```bash
 cd laravel-app

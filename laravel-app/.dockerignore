@@ -6,3 +6,4 @@ database/*.sqlite
 storage/logs/*
 storage/framework/cache/*
 bootstrap/cache/*.php
+backups

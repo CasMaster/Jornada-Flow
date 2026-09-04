@@ -7,7 +7,7 @@ if [ -z "$APP_CONTAINER" ]; then
     APP_CONTAINER="$(podman ps -aq --filter "label=io.podman.compose.project=$PROJECT_NAME" --filter "label=com.docker.compose.service=hibrido_laravel" | head -n 1)"
 fi
 [ -n "$APP_CONTAINER" ] || APP_CONTAINER="hibrido-home-office-laravel"
-BACKUP_DIR="${BACKUP_DIR:-/opt/backups/hibrido-home-office}"
+BACKUP_DIR="${BACKUP_DIR:-$PWD/backups}"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 BACKUP_FILE="$BACKUP_DIR/pre-deploy-$STAMP.dump"
 BACKUP_TEMP="$BACKUP_FILE.tmp"

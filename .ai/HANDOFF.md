@@ -6,7 +6,7 @@ Aplicar melhorias operacionais e funcionais selecionadas: concluir pendências, 
 
 ## Estado atual
 
-Implementação e validação local concluídas, ainda sem push ou deploy. Os trabalhos anteriores foram preservados em `d97df74` (conta sintética) e `bdf0b36` (apresentação de feriados). A mudança atual contém uma migration progressiva. Recuperação de senha permanece desabilitada.
+Implementação publicada na `main` e implantada em homologação e produção em 2026-09-04. Os trabalhos foram preservados em `d97df74` (conta sintética), `bdf0b36` (apresentação de feriados), `f9cbef0` (fluxos e confiabilidade) e `e7b8b33` (destino seguro do backup). A migration progressiva foi aplicada pelos deploys. Recuperação de senha permanece desabilitada.
 
 ## Alterações atuais
 
@@ -27,10 +27,14 @@ Implementação e validação local concluídas, ainda sem push ou deploy. Os tr
 - Build da imagem de produção: aprovado.
 - Sintaxe JavaScript e scripts shell: aprovada.
 - `git diff --check`: aprovado.
+- CI `33905163885`: aprovado, incluindo PostgreSQL 16 e build.
+- Homologação `33905331399`: deploy, backup, healthcheck e smoke aprovados.
+- Produção `33905491385`: deploy, backup, healthcheck e smoke aprovados.
+- Cinco medições externas de produção retornaram HTTP 200 entre 63 ms e 223 ms; `Server-Timing` observado em 9,48 ms.
 
 ## Próximo passo
 
-Criar commit da mudança atual, enviar a `main`, aguardar CI (incluindo PostgreSQL), publicar primeiro em homologação, validar smoke e interface, e somente então publicar em produção. A migration não deve ser aplicada em produção sem o backup pré-deploy confirmado.
+Provisionar as contas sintéticas e cadastrar os secrets separados de homologação e produção para que o smoke passe a validar autenticação, seguindo `docs/OPERACAO.md`. Acompanhar os primeiros eventos `slow_request` e `slow_query` para calibrar os limites com tráfego real.
 
 ## Limites
 

@@ -31,6 +31,8 @@ Implementação publicada na `main` e implantada em homologação e produção e
 - Homologação `33905331399`: deploy, backup, healthcheck e smoke aprovados.
 - Produção `33905491385`: deploy, backup, healthcheck e smoke aprovados.
 - Cinco medições externas de produção retornaram HTTP 200 entre 63 ms e 223 ms; `Server-Timing` observado em 9,48 ms.
+- Contas sintéticas e secrets separados provisionados nos dois ambientes; smokes autenticados `33907539221` (homologação) e `33907612711` (produção) aprovados.
+- A credencial inicialmente usada na criação de homologação foi imediatamente rotacionada por ter sido ecoada pelo terminal; sessões foram revogadas, a rotação foi auditada e somente a substituta não exibida permanece válida.
 
 ## Próximo passo
 
@@ -41,4 +43,3 @@ Provisionar as contas sintéticas e cadastrar os secrets separados de homologaç
 - O rollback automático restaura a imagem, não desfaz migrations; migrations devem permanecer compatíveis com a versão anterior.
 - Alertas do smoke dependem das notificações configuradas no GitHub.
 - Datas municipais continuam sob manutenção manual enquanto o endpoint contratado não as fornecer.
-- Provisionamento das contas sintéticas e cadastro dos secrets ainda exigem execução operacional separada.

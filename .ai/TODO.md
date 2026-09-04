@@ -2,7 +2,6 @@
 
 ## Confirmado
 
-- Executar o provisionamento sintético e cadastrar `SMOKE_EMAIL`/`SMOKE_PASSWORD` separadamente nos environments após publicação autorizada do comando; validar o workflow `Smoke test` autenticado nos dois ambientes conforme `docs/OPERACAO.md`.
 - Configurar a cópia externa dos dumps no OneDrive, sem versionar credenciais, e testar restauração a partir dessa cópia.
 - Implementar expurgo/anonimização após dois anos para auditoria, sessões, notificações, solicitações recusadas e contas desativadas, com regras seguras para relacionamentos.
 - Configurar proteção de ambiente no GitHub/servidor para que somente o Super Admin autorize produção, schema e restauração.

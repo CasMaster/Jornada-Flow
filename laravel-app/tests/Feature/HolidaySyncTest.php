@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Holiday;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -66,5 +67,31 @@ class HolidaySyncTest extends TestCase
             ->assertFailed();
 
         Http::assertNothingSent();
+    }
+
+    public function test_holiday_dates_have_accessible_visual_context(): void
+    {
+        $holiday = Holiday::create([
+            'date' => now()->startOfDay(),
+            'name' => 'Revolução Constitucionalista',
+            'blocks_requests' => true,
+            'source' => 'feriados_api',
+            'scope' => 'estadual',
+        ]);
+
+        $employee = User::factory()->create(['role' => 'employee']);
+        $this->actingAs($employee)->get('/painel')
+            ->assertOk()
+            ->assertSee('Legenda do calendário')
+            ->assertSee('window.HIBRIDO_HOLIDAYS=JSON.parse', false)
+            ->assertSee('estadual')
+            ->assertSee('feriados_api');
+
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $this->actingAs($admin)->get('/gestor')
+            ->assertOk()
+            ->assertSee('holiday-date-tile', false)
+            ->assertSee('holiday-scope-estadual', false)
+            ->assertSee($holiday->name);
     }
 }

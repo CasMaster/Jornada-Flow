@@ -10,8 +10,33 @@ function renderCalendar() {
   $('#monthLabel').textContent = `${months[month]} ${year}`;
   const first = (new Date(year, month, 1).getDay() + 6) % 7;
   const days = new Date(year, month + 1, 0).getDate();
-  $('#calendar').innerHTML = `${'<span></span>'.repeat(first)}${Array.from({length:days},(_,i)=>{const date=iso(i+1),holiday=holidays.get(date);return `<button data-date="${date}" title="${holiday?.name || ''}" ${holiday?.blocked?'disabled':''} class="${selected.has(date)?'chosen':''} ${holiday?'corporate-date':''}">${i+1}</button>`}).join('')}`;
-  $('#calendar').querySelectorAll('button:not(:disabled)').forEach(button => button.addEventListener('click', () => { selected.has(button.dataset.date) ? selected.delete(button.dataset.date) : selected.add(button.dataset.date); renderCalendar(); }));
+  const calendar = $('#calendar');
+  calendar.replaceChildren();
+  for (let i = 0; i < first; i++) calendar.append(document.createElement('span'));
+  for (let day = 1; day <= days; day++) {
+    const date = iso(day), holiday = holidays.get(date), button = document.createElement('button');
+    button.dataset.date = date;
+    button.title = holiday?.name || '';
+    button.disabled = Boolean(holiday?.blocked);
+    if (selected.has(date)) button.classList.add('chosen');
+    if (holiday) {
+      const type = holiday.source === 'manual' ? 'manual' : (holiday.scope || 'national');
+      button.classList.add('corporate-date', `holiday-${type}`);
+    }
+    const number = document.createElement('strong');
+    number.className = 'calendar-day-number';
+    number.textContent = day;
+    button.append(number);
+    if (holiday) {
+      const marker = document.createElement('span');
+      marker.className = 'calendar-holiday-marker';
+      marker.setAttribute('aria-hidden', 'true');
+      button.append(marker);
+      button.setAttribute('aria-label', `${day}, ${holiday.name}${holiday.blocked ? ', indisponível' : ', data informativa'}`);
+    }
+    calendar.append(button);
+  }
+  calendar.querySelectorAll('button:not(:disabled)').forEach(button => button.addEventListener('click', () => { selected.has(button.dataset.date) ? selected.delete(button.dataset.date) : selected.add(button.dataset.date); renderCalendar(); }));
   $('#selectedCount').textContent = selected.size;
 }
 $('#prevMonth').onclick = () => { cursor = new Date(cursor.getFullYear(), cursor.getMonth()-1, 1); renderCalendar(); };

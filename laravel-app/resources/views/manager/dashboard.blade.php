@@ -87,10 +87,11 @@
                 </article>
                 <article class="card admin-card" id="delegacoes">
                     <div class="report-head"><div><p class="eyebrow">COBERTURA TEMPORÁRIA</p><h2>Delegação de gestores</h2><p>O substituto recebe temporariamente as mesmas equipes do gestor de origem.</p></div></div>
-                    <form method="post" action="{{ route('admin.delegations.store') }}" class="holiday-form">@csrf
-                        <select name="manager_id" required><option value="">Gestor de origem</option>@foreach($managers as $manager)<option value="{{ $manager->id }}">{{ $manager->name }}</option>@endforeach</select>
-                        <select name="delegate_id" required><option value="">Gestor substituto</option>@foreach($managers as $manager)<option value="{{ $manager->id }}">{{ $manager->name }}</option>@endforeach</select>
-                        <input type="date" name="starts_on" required><input type="date" name="ends_on" required><button class="primary">Programar</button>
+                    <form method="post" action="{{ route('admin.delegations.store') }}" class="delegation-form">@csrf
+                        <label>Gestor de origem<select name="manager_id" required><option value="">Selecione o gestor</option>@foreach($managers as $manager)<option value="{{ $manager->id }}">{{ $manager->name }}</option>@endforeach</select></label>
+                        <label>Gestor substituto<select name="delegate_id" required><option value="">Selecione o substituto</option>@foreach($managers as $manager)<option value="{{ $manager->id }}">{{ $manager->name }}</option>@endforeach</select></label>
+                        <fieldset><legend>Período da cobertura</legend><label>Início<input type="date" name="starts_on" required></label><span aria-hidden="true">→</span><label>Término<input type="date" name="ends_on" required></label></fieldset>
+                        <button class="primary">Programar delegação →</button>
                     </form>
                     <div class="compact-list">@forelse($delegations as $delegation)<div><span><b>{{ $delegation->manager->name }} → {{ $delegation->delegate->name }}</b><small>{{ $delegation->starts_on->format('d/m/Y') }} a {{ $delegation->ends_on->format('d/m/Y') }}</small></span><form method="post" action="{{ route('admin.delegations.destroy',$delegation) }}">@csrf @method('DELETE')<button class="text-action">Encerrar</button></form></div>@empty<p class="empty compact-empty">Nenhuma delegação vigente ou futura.</p>@endforelse</div>
                 </article>

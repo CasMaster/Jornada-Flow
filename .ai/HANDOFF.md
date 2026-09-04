@@ -2,43 +2,34 @@
 
 ## Objetivo atual
 
-Adicionar favicon e substituir o nome público Híbrido por MixHome.
+Implementar provisionamento seguro de conta técnica sintética para smoke test e documentar secrets separados por ambiente.
 
 ## Estado atual
 
-Publicação concluída em 2026-08-27, autorizada pelo usuário. Código efe6c2b publicado na main e implantado em homologação e produção.
+Implementação local concluída, sem commit, push, deploy, criação de contas nos servidores ou cadastro de secrets no GitHub. Nenhuma migration adicionada. Recuperação de senha permanece desabilitada por padrão, sem alteração de configuração.
 
 ## Alterações
 
-- Favicon SVG autocontido com a marca existente da Mix Fiscal, referenciado pelo layout compartilhado com versionamento de cache.
-- MixHome nos títulos, cabeçalho, rodapé, configurações de nome e documentação.
-- Identificadores técnicos de banco, containers, volumes e comandos preservados.
-- Compose mantém o cookie anterior como padrão e aceita SESSION_COOKIE explícito.
-- Teste de regressão em laravel-app/tests/Feature/BrandingTest.php.
+- `laravel-app/app/Console/Commands/CreateSmokeUser.php`: comando interativo `hibrido:create-smoke-user`, identidade fixa por ambiente, validação do prefixo, senha oculta confirmada e hash, perfil employee sem equipe; recusa sobrescrita e registra auditoria transacional sem secrets.
+- `laravel-app/tests/Feature/CreateSmokeUserTest.php`: criação nos dois ambientes, login/permissões, recuperação desabilitada, colisão sem alteração, ambiente inválido, execução não interativa, cancelamento, senha inválida e rollback por falha de auditoria.
+- `docs/OPERACAO.md`: comandos exatos por container, cadastro separado de Environment secrets, verificação autenticada e limites operacionais.
+- `.ai/ENVIRONMENT.md`, `.ai/DECISIONS.md` e `.ai/TODO.md`: contexto e pendência de ativação operacional.
 
 ## Validação
 
-- Laravel Pint: aprovado.
-- PHPUnit: 22 testes, 102 assertions, todos aprovados.
-- Favicon validado como XML.
-- git diff --check: aprovado.
-- CI 33113736323: aprovado, incluindo build da imagem.
-- Deploy homologação 33113893253 e produção 33114013837: aprovados, incluindo smoke tests públicos.
-- Login com título MixHome e favicon SVG retornando HTTP 200 verificados nos dois ambientes.
-- Smoke autenticado permanece fora desta validação, sem conta técnica configurada.
+- Laravel Pint: aprovado após ajuste automático dos imports do teste.
+- PHPUnit: 29 testes, 204 assertions, todos aprovados (PHP 8.5.8 local, SQLite em memória).
+- `git diff --check`: aprovado.
+- Build de imagem e execução em PostgreSQL/servidores não realizados nesta tarefa.
 
 ## Próximo passo
 
-Nenhuma etapa de publicação pendente para esta mudança. Nenhuma migration de banco foi adicionada.
+Após autorização de publicação, disponibilizar o comando na imagem e seguir `docs/OPERACAO.md`: provisionar homologação, cadastrar seus dois secrets e executar Smoke test; depois repetir separadamente em produção sob autorização operacional. Não reutilizar senhas entre ambientes.
 
-## Pendências operacionais preexistentes
+## Limites e pendências
 
-- Conta técnica sintética e secrets SMOKE_EMAIL/SMOKE_PASSWORD para smoke test autenticado.
-- Plano atual do GitHub sem reviewer obrigatório para environment privado; deploy de produção permanece manual.
-- Integração OneDrive não configurada.
-- Expurgo/anonimização após dois anos ainda não implementado.
-- SMTP/recuperação de senha permanecem adiados.
-
-## Atenção
-
-Não versionar .env, credenciais, dumps, dados pessoais ou configuração privada do Caddy. Publicação depende de autorização explícita.
+- Conta tem permissões normais de employee; uso exclusivo para login/leitura é uma restrição operacional, não um perfil somente leitura.
+- Comando somente cria; rotação/revogação exige procedimento controlado, preservando sessões/auditoria e retenção de dois anos.
+- Proteção de produção por reviewer depende do plano GitHub; não contornar controles existentes.
+- Integração OneDrive e expurgo/anonimização permanecem pendentes.
+- SMTP/recuperação de senha continuam adiados.

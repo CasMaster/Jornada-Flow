@@ -121,6 +121,14 @@ O script também aceita `SMOKE_BASE_URL`; o padrão é `https://mixhome.app.br`.
 Sem `SMOKE_EMAIL` e `SMOKE_PASSWORD`, são executadas as verificações públicas;
 com ambos configurados, o fluxo também autentica e confirma o painel.
 
+Provisionamento inicial: `php artisan hibrido:create-smoke-user homologacao` ou
+`php artisan hibrido:create-smoke-user producao`, no container correto com terminal
+interativo. O comando usa identidade sintética fixa, valida o prefixo, solicita
+senha oculta confirmada e recusa sobrescrever contas. Não aceita senha por argumento.
+Consulte `docs/OPERACAO.md`, seção de smoke test, para os comandos completos por
+container e o cadastro separado dos Environment secrets no GitHub. Não adicione
+esses secrets ao `.env`/Compose e não habilite recuperação de senha.
+
 Em homologação com prefixo, use `/homologacao/health/ready` através do roteamento correspondente.
 
 ## Testes e CI

@@ -2,6 +2,19 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-08-28 — Provisionamento explícito de conta sintética para smoke test
+
+`hibrido:create-smoke-user` cria uma identidade fixa por ambiente em `mixhome.invalid`,
+com perfil `employee`, sem equipe ou dados de negócio. A execução é interativa,
+valida `APP_ROUTE_PREFIX` e usa senha oculta confirmada, sem argumento de senha.
+Não sobrescreve usuários existentes. Cadastro e auditoria sem senha/hash são
+transacionais; nenhuma migration, seed automático, SMTP ou recuperação é necessário.
+
+Os secrets `SMOKE_EMAIL` e `SMOKE_PASSWORD` ficam separados nos GitHub Environments
+`homologacao` e `producao`, com senhas distintas. O comando é apenas de criação,
+não de rotação. A conta mantém permissões normais de colaborador; a restrição de
+uso somente para smoke test é operacional. Procedimento em `docs/OPERACAO.md`.
+
 ## 2026-08-27 — Marca MixHome
 
 O nome público do produto passa a ser MixHome, com favicon baseado na marca existente da Mix Fiscal. Títulos, cabeçalho, rodapé, configuração de nome e documentação usam a nova marca.

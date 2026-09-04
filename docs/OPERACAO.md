@@ -47,22 +47,10 @@ ambiente. Não use `0.0.0.0` em `APP_BIND_IP` em produção.
 
 ## Recuperação de senha e SMTP
 
-Mantenha `PASSWORD_RECOVERY_ENABLED=false` enquanto o endereço público não usar
-HTTPS ou enquanto o SMTP não estiver validado. Depois de configurar domínio,
-certificado e credenciais de e-mail:
-
-1. ajuste `APP_URL` e `ASSET_URL` para a URL `https://`;
-2. defina `SESSION_SECURE_COOKIE=true` em produção;
-3. recrie os containers web, worker e scheduler para renovar o cache de configuração;
-4. confirme que o proxy envia `X-Forwarded-Proto: https` e que o cookie de sessão contém `Secure`.
-5. configure as variáveis `MAIL_*` no `.env` de produção;
-6. envie um e-mail de teste;
-7. altere `PASSWORD_RECOVERY_ENABLED=true`;
-8. recrie os containers web, worker e scheduler;
-9. teste solicitação, recebimento, expiração e redefinição.
-
-Tokens expiram em 60 minutos, são substituídos quando um novo link é solicitado
-e nunca devem aparecer em logs, chamados ou capturas de tela.
+Mantenha `PASSWORD_RECOVERY_ENABLED=false` em homologação e produção.
+SMTP e recuperação de senha estão deliberadamente adiados: HTTPS, conta de
+smoke test ou secrets cadastrados não autorizam habilitá-los. O provisionamento
+abaixo não envia e-mail, convite ou token de recuperação e não altera configuração.
 
 ## Acesso administrativo pelo DBeaver
 
@@ -113,13 +101,105 @@ valida pela entrada HTTPS pública:
 Quando `SMOKE_EMAIL` e `SMOKE_PASSWORD` estão configurados juntos, o teste
 também valida autenticação real, renovação segura da sessão e acesso ao painel.
 
-Cadastre `SMOKE_EMAIL` e `SMOKE_PASSWORD` como secrets em cada GitHub
-Environment (`homologacao` e `producao`) para ativar a etapa autenticada. A conta deve ser técnica, exclusiva
-para o smoke test, com perfil `employee`, nome claramente sintético e sem
-solicitações, equipe real ou qualquer dado pessoal. Desative interações e
-notificações que não sejam necessárias para o login. `SMOKE_BASE_URL` é uma
-variável opcional do Environment; na ausência dela, o script usa
-`https://mixhome.app.br`.
+Cadastre `SMOKE_EMAIL` e `SMOKE_PASSWORD` como **Environment secrets**, separados
+em `homologacao` e `producao`, seguindo o procedimento abaixo. Não use secrets
+compartilhados de repositório/organização com esses nomes como fallback.
+`SMOKE_BASE_URL` é uma variável opcional do Environment; na ausência dela, o
+script usa `https://mixhome.app.br` (sem `/homologacao`, acrescentado pelo workflow).
+
+#### Provisionamento inicial da conta sintética
+
+Pré-requisitos: código contendo `hibrido:create-smoke-user` já disponível na
+imagem do ambiente, acesso SSH operacional autorizado e acesso para administrar
+os secrets do repositório. A publicação desse código em produção exige autorização
+explícita do Super Admin; este procedimento não executa deploy nem migrations.
+
+1. No cofre de senhas aprovado, crie duas entradas separadas, uma para cada ambiente.
+   Gere uma senha aleatória **diferente** em cada entrada, preferencialmente com
+   32 caracteres ASCII, contendo maiúsculas, minúsculas, números e símbolos.
+   O comando exige 20–72 caracteres e no máximo 72 bytes, por compatibilidade com bcrypt.
+   Não use senhas de pessoas, e-mails pessoais ou contas existentes.
+2. Em uma sessão SSH privada, sem gravação de terminal, confira o container e seu
+   banco de destino. Não imprima `.env` ou `podman inspect` completo. Confirme com
+   o responsável a separação dos bancos; o comando verifica o prefixo de rotas,
+   mas não consegue detectar dois containers apontando indevidamente para o mesmo banco.
+3. Execute **somente o comando do ambiente em provisionamento**:
+
+| Ambiente | Comando no servidor | `SMOKE_EMAIL` sintético |
+|---|---|---|
+| Homologação | `podman exec -it hibrido-home-office-laravel php artisan hibrido:create-smoke-user homologacao` | `smoke-homologacao@mixhome.invalid` |
+| Produção | `podman exec -it hibrido-home-office-prod php artisan hibrido:create-smoke-user producao` | `smoke-producao@mixhome.invalid` |
+
+4. Confira o destino exibido, confirme a operação e cole a senha do cofre nos
+   dois prompts ocultos. Não há opção `--password`, leitura de senha do `.env` ou senha
+   gerada/impressa pelo comando. Não use pipe, `--no-interaction`, argumentos com
+   secrets, `set -x`, transcrições ou captura de tela. Sem suporte a entrada oculta,
+   interrompa e use um terminal compatível; não troque por entrada visível.
+5. Aguarde a mensagem `Conta sintética criada`. O cadastro tem nome fixo
+   `Smoke Test Sintético - <ambiente>`, perfil `employee`, ativo, equipe vazia e
+   nenhum vínculo gerencial, solicitação ou notificação. O domínio `.invalid`
+   identifica um endereço sem caixa postal real; não é necessário configurar DNS/SMTP.
+   A senha é armazenada como hash; a auditoria `smoke_user.created` contém apenas
+   referência à conta, ambiente e perfil, sem senha/hash nos valores auditados.
+
+O comando é exclusivo de criação: uma segunda execução falha sem alterar senha,
+perfil ou estado ativo, inclusive se encontrar uma conta desativada ou privilegiada.
+Não use `hibrido:create-admin`, SQL manual ou recuperação de senha para contornar
+uma colisão. Pare e peça revisão ao Super Admin. A criação e a auditoria são atômicas.
+
+#### Cadastrar os secrets em homologação
+
+1. Abra o repositório no GitHub → **Settings → Environments → homologacao**.
+   Se o ambiente não existir, crie-o com esse nome exato e configure as restrições
+   operacionais aprovadas. Não selecione **Secrets and variables → Actions** para
+   criar secrets globais do repositório.
+2. Em **Environment secrets → Add environment secret**, nome `SMOKE_EMAIL`,
+   valor `smoke-homologacao@mixhome.invalid`; salve.
+3. Adicione outro Environment secret, nome `SMOKE_PASSWORD`, com a senha da
+   entrada de **homologação** do cofre, exatamente como informada ao comando; salve.
+4. Confira apenas a presença dos dois nomes no environment `homologacao`.
+   Evite rodar smoke/deploy entre os dois cadastros: configuração parcial falha.
+5. Em **Actions → Smoke test → Run workflow**, selecione a referência aprovada
+   que contém o workflow (normalmente `main`) e `environment=homologacao`.
+   Aguarde sucesso com `Smoke test passed for https://mixhome.app.br/homologacao`.
+   A mensagem com `authenticated checks skipped` **não** valida os secrets.
+
+#### Cadastrar os secrets em produção
+
+Somente após validar homologação e obter autorização operacional para produção:
+
+1. Abra **Settings → Environments → producao** no mesmo repositório, com esse
+   nome exato (sem acento). Preserve as proteções existentes; não as desabilite.
+2. Em **Environment secrets → Add environment secret**, nome `SMOKE_EMAIL`,
+   valor `smoke-producao@mixhome.invalid`; salve.
+3. Adicione `SMOKE_PASSWORD` com a senha exclusiva da entrada de **produção** do
+   cofre, informada ao comando no container de produção. Não copie a senha de homologação.
+4. Confira a presença dos dois nomes em `producao`; execute **Actions → Smoke test
+   → Run workflow**, referência aprovada, `environment=producao`.
+5. Aguarde `Smoke test passed for https://mixhome.app.br`, sem indicação de checks
+   autenticados ignorados. Esse workflow verifica o ambiente sem fazer deploy.
+
+Os nomes sintéticos acima são identificadores públicos, não credenciais reais.
+As senhas ficam somente no cofre e no respectivo Environment secret (e como hash
+no banco), nunca em arquivos versionados, `.env`, issues, logs ou mensagens.
+Os workflows existentes já injetam os dois secrets no smoke test; não é necessário
+adicioná-los ao Compose ou aos processos Laravel.
+
+#### Limites e falhas
+
+Use a conta somente para login e leitura do próprio painel. Ela mantém as permissões
+normais de `employee`: não é um perfil especial somente leitura. Não crie solicitações,
+não associe equipe real e não promova seu perfil. O script não envia solicitações
+nem notificações, mas o login grava sessão e token de lembrança normalmente.
+
+Se houver erro de autenticação, confira ambiente, prefixo e par de secrets sem
+exibir seus valores; atualize um secret incorreto a partir do cofre. O comando
+não implementa rotação ou recuperação de senha. Se a senha original for perdida
+ou comprometida, interrompa os smokes autenticados e solicite ao Super Admin um
+procedimento controlado de revogação/rotação, incluindo sessões existentes;
+não exclua conta, sessões ou auditoria para reprovisionar. Preserve a retenção de dois anos.
+Não habilite recuperação de senha como solução. Registre somente ambiente,
+resultado e identificador da execução, sem credenciais ou conteúdo de sessão.
 
 Para executar manualmente sem registrar credenciais no histórico do shell,
 exporte-as por um mecanismo seguro e rode:

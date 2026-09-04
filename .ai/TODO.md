@@ -2,6 +2,7 @@
 
 ## Confirmado
 
+- Executar o provisionamento sintético e cadastrar `SMOKE_EMAIL`/`SMOKE_PASSWORD` separadamente nos environments após publicação autorizada do comando; validar o workflow `Smoke test` autenticado nos dois ambientes conforme `docs/OPERACAO.md`.
 - Configurar a cópia externa dos dumps no OneDrive, sem versionar credenciais, e testar restauração a partir dessa cópia.
 - Implementar expurgo/anonimização após dois anos para auditoria, sessões, notificações, solicitações recusadas e contas desativadas, com regras seguras para relacionamentos.
 - Configurar proteção de ambiente no GitHub/servidor para que somente o Super Admin autorize produção, schema e restauração.
@@ -15,7 +16,6 @@
 
 ## Sugestão
 
-- Cadastrar uma conta técnica sintética e os secrets `SMOKE_EMAIL` e `SMOKE_PASSWORD` nos environments do GitHub para ampliar o smoke test público com autenticação real.
 - Adicionar teste PostgreSQL em CI para mudanças que dependam de comportamento específico do banco, mantendo SQLite para feedback rápido.
 - Tornar o procedimento de deploy idempotente, com backup, recriação controlada, verificação de saúde e rollback de imagem.
 - Adicionar verificação automatizada de documentação/contexto para links quebrados e possíveis secrets.

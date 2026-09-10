@@ -28,6 +28,14 @@ class HibridoFlowTest extends TestCase
         $this->post('/login', ['email' => $manager->email, 'password' => 'password', 'profile' => 'manager'])->assertRedirect('/gestor');
     }
 
+    public function test_login_error_is_rendered_inside_authentication_card(): void
+    {
+        $response = $this->from('/login')->post('/login', ['email' => 'invalido@example.com', 'password' => 'errada', 'profile' => 'employee']);
+
+        $response->assertRedirect('/login');
+        $this->get('/login')->assertOk()->assertSee('auth-alert', false)->assertSee('Não foi possível entrar')->assertSee('E-mail ou senha inválidos.');
+    }
+
     public function test_authenticated_users_do_not_loop_between_root_and_login(): void
     {
         $employee = User::factory()->create(['role' => 'employee']);

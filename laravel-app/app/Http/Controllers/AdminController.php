@@ -7,6 +7,7 @@ use App\Models\Holiday;
 use App\Models\ManagerDelegation;
 use App\Models\Team;
 use App\Models\User;
+use App\Models\WorkRequest;
 use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -93,8 +94,8 @@ class AdminController extends Controller
             'queuedJobs' => DB::table('jobs')->count(),
             'failedJobs' => DB::table('failed_jobs')->count(),
             'oldestJob' => DB::table('jobs')->min('created_at'),
-            'pendingRequests' => \App\Models\WorkRequest::where('status', 'pending')->count(),
-            'staleRequests' => \App\Models\WorkRequest::where('status', 'pending')->where('created_at', '<=', now()->subDays(2))->count(),
+            'pendingRequests' => WorkRequest::where('status', 'pending')->count(),
+            'staleRequests' => WorkRequest::where('status', 'pending')->where('created_at', '<=', now()->subDays(2))->count(),
             'lastHolidaySync' => Holiday::max('last_synced_at'),
             'lastAudit' => AuditLog::max('created_at'),
             'databaseSize' => $databaseSize,

@@ -7,7 +7,9 @@ use App\Support\ReportingCycle;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schedule;
+use Illuminate\Support\Str;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -59,7 +61,7 @@ Artisan::command('hibrido:apply-retention {--execute : Confirma a aplicação da
         DB::table('sessions')->where('last_activity', '<', $cutoff->timestamp)->delete();
         DB::table('work_requests')->where('status', 'rejected')->where('updated_at', '<', $cutoff)->delete();
         DB::table('users')->where('active', false)->where('updated_at', '<', $cutoff)->orderBy('id')->eachById(function ($user) {
-            DB::table('users')->where('id', $user->id)->update(['name' => 'Usuário anonimizado', 'email' => "anonimo-{$user->id}@mixhome.invalid", 'team' => '', 'password' => \Illuminate\Support\Facades\Hash::make(\Illuminate\Support\Str::random(64)), 'remember_token' => null, 'updated_at' => now()]);
+            DB::table('users')->where('id', $user->id)->update(['name' => 'Usuário anonimizado', 'email' => "anonimo-{$user->id}@mixhome.invalid", 'team' => '', 'password' => Hash::make(Str::random(64)), 'remember_token' => null, 'updated_at' => now()]);
         });
     });
     $this->info('Política de retenção aplicada e contas elegíveis anonimizadas.');

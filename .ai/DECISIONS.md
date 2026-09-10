@@ -2,6 +2,10 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-09-10 — Retenção protegida e backup externo
+
+A rotina de dois anos opera em simulação por padrão e exige simultaneamente `--execute` e `DATA_RETENTION_ENABLED=true`. Ela remove dados operacionais vencidos e anonimiza contas inativas, preservando os relacionamentos restantes. O backup externo usa `rclone` com remoto OneDrive configurado fora do Git e valida a cópia antes de concluir.
+
 ## 2026-09-04 — Delegação temporária e justificativa de análise
 
 Somente o Super Admin programa ou encerra delegações entre gestores ativos. Durante o intervalo inclusivo, o substituto recebe o escopo das equipes do gestor de origem; a Policy continua sendo a autoridade no servidor. Aprovações e recusas aceitam observação de até 1.000 caracteres, preservada na solicitação e na auditoria.

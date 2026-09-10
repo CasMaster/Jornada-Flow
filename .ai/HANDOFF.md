@@ -2,7 +2,7 @@
 
 ## Objetivo atual
 
-Aplicar melhorias operacionais e funcionais selecionadas: concluir pendências, deploy seguro, observabilidade, CI PostgreSQL, monitoramento, delegação, calendário, justificativas e filtros.
+Validar o pacote de continuidade operacional, painéis gerenciais, exportação, calendário acessível, retenção e observabilidade antes de publicar.
 
 ## Estado atual
 
@@ -36,7 +36,7 @@ Implementação publicada na `main` e implantada em homologação e produção e
 
 ## Próximo passo
 
-Provisionar as contas sintéticas e cadastrar os secrets separados de homologação e produção para que o smoke passe a validar autenticação, seguindo `docs/OPERACAO.md`. Acompanhar os primeiros eventos `slow_request` e `slow_query` para calibrar os limites com tráfego real.
+Executar CI/PostgreSQL e validar em homologação. Configurar `rclone` e o reinício do Podman diretamente no servidor; manter retenção desabilitada até uma simulação conferida pelo Super Admin.
 
 ## Limites
 

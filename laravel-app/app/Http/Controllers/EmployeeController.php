@@ -15,7 +15,7 @@ class EmployeeController extends Controller
 
     public function index(Request $request): View
     {
-        return view('employee.dashboard', ['records' => $request->user()->workRequests()->with('reviewer')->latest('work_date')->paginate(24), 'holidays' => Holiday::where('date', '>=', now()->startOfMonth()->subMonth())->orderBy('date')->get(), 'notifications' => $request->user()->notifications()->latest()->limit(8)->get()]);
+        return view('employee.dashboard', ['records' => $request->user()->workRequests()->with('reviewer')->latest('work_date')->paginate(24), 'calendarRequests' => $request->user()->workRequests()->whereDate('work_date', '>=', now()->startOfMonth()->subMonths(2))->get(['work_date', 'status']), 'holidays' => Holiday::where('date', '>=', now()->startOfMonth()->subMonth())->orderBy('date')->get(), 'notifications' => $request->user()->notifications()->latest()->limit(8)->get()]);
     }
 
     public function store(Request $request): RedirectResponse|JsonResponse

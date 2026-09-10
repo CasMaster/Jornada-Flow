@@ -18,6 +18,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ManagerController extends Controller
 {
@@ -78,6 +79,9 @@ class ManagerController extends Controller
         $selectedTeams = $this->selectedTeams($request, $allowed);
         $base = $this->query($request);
         $metrics = (clone $base)->selectRaw('COUNT(*) total')->selectRaw("SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) pending")->selectRaw('COUNT(DISTINCT user_id) collaborators')->first();
+        $priorityRequests = (clone $base)->where('status', 'pending')->orderBy('created_at')->limit(5)->get();
+        $statusSummary = (clone $base)->select('status')->selectRaw('COUNT(*) total')->groupBy('status')->pluck('total', 'status');
+        $teamSummary = (clone $base)->join('users', 'users.id', '=', 'work_requests.user_id')->select('users.team')->selectRaw('COUNT(*) total')->selectRaw("SUM(CASE WHEN work_requests.status='pending' THEN 1 ELSE 0 END) pending")->groupBy('users.team')->orderByDesc('total')->limit(8)->get();
         $employeeTeams = ($request->has('teams') || $request->filled('team')) ? $selectedTeams : $allowed;
 
         $sorts = ['date_asc' => ['work_date', 'asc'], 'date_desc' => ['work_date', 'desc'], 'created_desc' => ['created_at', 'desc'], 'status' => ['status', 'asc']];
@@ -89,6 +93,7 @@ class ManagerController extends Controller
         return view('manager.dashboard', [
             'records' => $base->orderBy($sortColumn, $sortDirection)->paginate($perPage)->withQueryString(),
             'metrics' => $metrics,
+            'priorityRequests' => $priorityRequests, 'statusSummary' => $statusSummary, 'teamSummary' => $teamSummary,
             'teams' => Team::whereIn('name', $allowed)->orderBy('name')->get(),
             'employees' => User::where('active', true)->where('team', '<>', '')->whereIn('team', $employeeTeams)->orderBy('name')->get(),
             'cycles' => ReportingCycle::options(), 'start' => $start, 'end' => $end,
@@ -120,10 +125,23 @@ class ManagerController extends Controller
         return back()->with('success', $records->count().' solicitação(ões) analisada(s).');
     }
 
-    public function export(Request $request)
+    public function export(Request $request): StreamedResponse
     {
         [$start,$end] = ReportingCycle::bounds($request->string('cycle')->toString() ?: null);
-        $approved = $this->query($request, false)->where('status', 'approved')->get();
+        $format = $request->string('format')->toString() === 'csv' ? 'csv' : 'xlsx';
+        $exportStatus = in_array($request->string('export_status')->toString(), ['pending', 'approved', 'rejected', 'all'], true) ? $request->string('export_status')->toString() : 'approved';
+        $exportRecords = $this->query($request, false)->with('reviewer')->when($exportStatus !== 'all', fn (Builder $query) => $query->where('status', $exportStatus))->orderBy('work_date')->get();
+        if ($format === 'csv') {
+            return response()->streamDownload(function () use ($exportRecords) {
+                $output = fopen('php://output', 'w');
+                fwrite($output, "\xEF\xBB\xBF");
+                fputcsv($output, ['Colaborador', 'E-mail', 'Equipe', 'Data', 'Status', 'Analisado por', 'Analisado em'], ';');
+                foreach ($exportRecords as $record) {
+                    fputcsv($output, [$record->user->name, $record->user->email, $record->user->team, $record->work_date->format('d/m/Y'), ['pending' => 'Pendente', 'approved' => 'Aprovada', 'rejected' => 'Recusada'][$record->status], $record->reviewer?->name ?? '', $record->reviewed_at?->timezone(config('app.timezone'))->format('d/m/Y H:i') ?? ''], ';');
+                }
+                fclose($output);
+            }, 'mixhome-'.$start->format('Y-m-d').'-a-'.$end->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        }
         $allowed = $this->allowedTeams($request->user());
         $people = User::where('active', true)->where('team', '<>', '')->whereIn('team', $allowed);
         if ($request->has('teams') || $request->filled('team')) {
@@ -132,8 +150,8 @@ class ManagerController extends Controller
             $people->whereIn('email', $emails);
         } $people = $people->orderBy('name')->get();
         $map = [];
-        foreach ($approved as $record) {
-            $map[strtolower($record->user->email)][$record->work_date->format('Y-m-d')] = true;
+        foreach ($exportRecords as $record) {
+            $map[strtolower($record->user->email)][$record->work_date->format('Y-m-d')] = $record->status;
         }
 
         return response()->streamDownload(function () use ($start, $end, $people, $map) {
@@ -159,11 +177,13 @@ class ManagerController extends Controller
                 $row = $i + 4;
                 $sheet->setCellValue('A'.$row, $person->name);
                 foreach ($dates as $d => $date) {
-                    if (! empty($map[strtolower($person->email)][$date->format('Y-m-d')])) {
+                    if ($status = $map[strtolower($person->email)][$date->format('Y-m-d')] ?? null) {
                         $column = Coordinate::stringFromColumnIndex($d + 2);
                         $cell = $column.$row;
-                        $sheet->setCellValue($cell, 'HOME');
-                        $sheet->getStyle($cell)->applyFromArray(['font' => ['bold' => true, 'color' => ['rgb' => '9C0006']], 'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'F4CCCC']], 'alignment' => ['horizontal' => 'center']]);
+                        $styles = ['approved' => ['HOME', '375623', 'E2F0D9'], 'pending' => ['PENDENTE', '7F6000', 'FFF2CC'], 'rejected' => ['RECUSADA', '9C0006', 'F4CCCC']];
+                        [$label, $font, $fill] = $styles[$status];
+                        $sheet->setCellValue($cell, $label);
+                        $sheet->getStyle($cell)->applyFromArray(['font' => ['bold' => true, 'color' => ['rgb' => $font]], 'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => $fill]], 'alignment' => ['horizontal' => 'center']]);
                     }
                 }
             }

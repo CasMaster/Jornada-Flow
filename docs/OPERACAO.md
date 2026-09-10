@@ -246,6 +246,22 @@ gh workflow run "Smoke test" --ref main -f environment=producao
 
 ## Backup
 
+### Cópia externa no OneDrive
+
+O script aceita `ONEDRIVE_REMOTE`, apontando para um remoto do `rclone` configurado
+exclusivamente no servidor. Ele envia o dump e o checksum e executa uma conferência
+do arquivo remoto antes de concluir:
+
+```bash
+rclone config
+ONEDRIVE_REMOTE=onedrive:MixHome/producao \
+  /opt/hibrido-home-office-prod/scripts/backup-postgres.sh
+```
+
+Não coloque tokens do OneDrive no `.env` do projeto. Use o arquivo protegido do
+`rclone` ou o cofre operacional. Monitore a saída do cron e faça restauração
+trimestral em banco descartável.
+
 Crie o dump dentro do PostgreSQL e copie-o para fora do container:
 
 ```bash
@@ -271,6 +287,30 @@ A cópia externa definida para este projeto é o OneDrive. A ferramenta de sincr
 Somente o Super Admin pode autorizar deploy em produção, migrations de schema e restauração de dados. Configure proteção equivalente nos ambientes do GitHub e nos acessos ao servidor.
 
 Logs de auditoria, sessões, notificações, solicitações recusadas e contas desativadas têm retenção definida de dois anos. Até existir rotina segura de expurgo/anonimização, não faça exclusões manuais dessas categorias.
+
+### Retenção de dois anos
+
+O comando é somente simulação por padrão:
+
+```bash
+podman exec hibrido-home-office-prod php artisan hibrido:apply-retention
+```
+
+Após backup, conferência da simulação e autorização do Super Admin, defina
+`DATA_RETENTION_ENABLED=true`, recrie web/worker/scheduler e execute com
+`--execute`. A rotina remove auditorias, notificações, sessões e recusas elegíveis,
+e anonimiza contas inativas. Com a flag habilitada, roda mensalmente no dia 5.
+
+### Retorno automático após reboot
+
+Para Podman rootless, além de `restart: unless-stopped`, habilite o serviço do usuário:
+
+```bash
+sudo loginctl enable-linger admin
+PODMAN_USER=admin /opt/hibrido-home-office-prod/scripts/configure-podman-autostart.sh
+```
+
+Valide em janela de manutenção e confirme aplicação, PostgreSQL, worker e scheduler.
 
 ## Restauração
 

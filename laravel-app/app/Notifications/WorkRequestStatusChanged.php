@@ -19,7 +19,7 @@ class WorkRequestStatusChanged extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return config('app.mail_notifications_enabled') ? ['database', 'mail'] : ['database'];
     }
 
     public function toArray(object $notifiable): array

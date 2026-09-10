@@ -68,6 +68,10 @@ return [
     'timezone' => env('APP_TIMEZONE', 'America/Sao_Paulo'),
 
     'route_prefix' => trim((string) env('APP_ROUTE_PREFIX', ''), '/'),
+    'slow_request_ms' => (int) env('SLOW_REQUEST_MS', 750),
+    'slow_query_ms' => (int) env('SLOW_QUERY_MS', 250),
+    'data_retention_enabled' => (bool) env('DATA_RETENTION_ENABLED', false),
+    'mail_notifications_enabled' => (bool) env('MAIL_NOTIFICATIONS_ENABLED', false),
 
     /*
     |--------------------------------------------------------------------------

@@ -11,7 +11,7 @@
                 <h1>Gestão do <em>trabalho remoto.</em></h1>
                 <p>Ciclo {{ $start->format('d/m/Y') }} até {{ $end->format('d/m/Y') }}.</p>
             </div>
-            <a class="primary button-link" href="{{ route('manager.export',request()->query()) }}">Exportar dados ↓</a>
+            <form class="export-menu" method="get" action="{{ route('manager.export') }}">@foreach(request()->except(['format','export_status']) as $key=>$value)@if(is_array($value))@foreach($value as $item)<input type="hidden" name="{{ $key }}[]" value="{{ $item }}">@endforeach @else<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif @endforeach<label>Formato<select name="format"><option value="xlsx">Excel matricial</option><option value="csv">CSV detalhado</option></select></label><label>Status<select name="export_status"><option value="approved">Aprovadas</option><option value="pending">Pendentes</option><option value="rejected">Recusadas</option><option value="all">Todos</option></select></label><button class="primary">Exportar ↓</button></form>
         </div>
 
         <nav class="manager-sections">
@@ -19,7 +19,7 @@
             @if(auth()->user()->role==='super_admin')
                 <a href="#equipes">Equipes</a>
                 <a href="{{ route('admin.users.index') }}">Diretório de usuários</a>
-                <a href="{{ route('admin.audits') }}">Auditoria</a>
+                <a href="{{ route('admin.audits') }}">Auditoria</a><a href="{{ route('admin.operations') }}">Operação</a>
             @endif
         </nav>
 
@@ -48,6 +48,8 @@
             <div class="pending-highlight"><span>AGUARDANDO SUA AÇÃO</span><strong>{{ $metrics->pending ?? 0 }}</strong></div>
             <div><span>COLABORADORES</span><strong>{{ $metrics->collaborators ?? 0 }}</strong></div>
         </div>
+
+        <section class="manager-insights" aria-label="Resumo gerencial"><article class="card priority-card"><div class="report-head"><div><p class="eyebrow">PRIORIDADE</p><h2>Pendências mais antigas</h2></div><a href="{{ route('manager.dashboard',[...request()->query(),'status'=>'pending']) }}">Ver todas</a></div><div class="priority-list">@forelse($priorityRequests as $record)<div><span><b>{{ $record->user->name }}</b><small>{{ $record->user->team }} · {{ $record->work_date->format('d/m/Y') }}</small></span><strong>{{ $record->created_at->diffForHumans() }}</strong></div>@empty<p class="empty compact-empty">Nenhuma pendência no filtro atual.</p>@endforelse</div></article><article class="card executive-card"><div class="report-head"><div><p class="eyebrow">VISÃO EXECUTIVA</p><h2>Distribuição do ciclo</h2></div></div>@php($summaryTotal=max(1,(int)$statusSummary->sum()))<div class="status-bars">@foreach(['pending'=>'Pendentes','approved'=>'Aprovadas','rejected'=>'Recusadas'] as $status=>$label)@php($amount=(int)($statusSummary[$status]??0))<div><span><b>{{ $label }}</b><small>{{ $amount }}</small></span><i><em class="bar-{{ $status }}" style="width:{{ round($amount/$summaryTotal*100) }}%"></em></i></div>@endforeach</div><div class="team-ranking">@foreach($teamSummary as $team)<span><b>{{ $team->team ?: 'Sem equipe' }}</b><small>{{ $team->total }} registros · {{ $team->pending }} pendentes</small></span>@endforeach</div></article></section>
 
         <details class="card report requests-accordion" @if(request()->hasAny(['cycle','team','teams','status','employees'])) open @endif>
             <summary class="requests-accordion-summary">

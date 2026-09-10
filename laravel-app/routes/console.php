@@ -6,6 +6,7 @@ use App\Notifications\PendingRequestsDigest;
 use App\Support\ReportingCycle;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
@@ -31,3 +32,37 @@ Artisan::command('hibrido:notify-pending', function () {
 
 Schedule::command('hibrido:notify-pending')->dailyAt('08:00')->withoutOverlapping();
 Schedule::command('hibrido:sync-holidays')->monthlyOn(1, '03:00')->withoutOverlapping()->onOneServer();
+
+Artisan::command('hibrido:apply-retention {--execute : Confirma a aplicação das alterações}', function () {
+    $cutoff = now()->subYears(2);
+    $counts = [
+        'audit_logs' => DB::table('audit_logs')->where('created_at', '<', $cutoff)->count(),
+        'notifications' => DB::table('notifications')->where('created_at', '<', $cutoff)->count(),
+        'sessions' => DB::table('sessions')->where('last_activity', '<', $cutoff->timestamp)->count(),
+        'rejected_requests' => DB::table('work_requests')->where('status', 'rejected')->where('updated_at', '<', $cutoff)->count(),
+        'inactive_users' => DB::table('users')->where('active', false)->where('updated_at', '<', $cutoff)->count(),
+    ];
+    $this->table(['Categoria', 'Registros elegíveis'], collect($counts)->map(fn ($count, $name) => [$name, $count]));
+    if (! $this->option('execute')) {
+        $this->warn('Simulação concluída. Use --execute somente após backup e autorização do Super Admin.');
+
+        return;
+    }
+    if (! config('app.data_retention_enabled')) {
+        $this->error('DATA_RETENTION_ENABLED não está habilitado.');
+
+        return 1;
+    }
+    DB::transaction(function () use ($cutoff) {
+        DB::table('audit_logs')->where('created_at', '<', $cutoff)->delete();
+        DB::table('notifications')->where('created_at', '<', $cutoff)->delete();
+        DB::table('sessions')->where('last_activity', '<', $cutoff->timestamp)->delete();
+        DB::table('work_requests')->where('status', 'rejected')->where('updated_at', '<', $cutoff)->delete();
+        DB::table('users')->where('active', false)->where('updated_at', '<', $cutoff)->orderBy('id')->eachById(function ($user) {
+            DB::table('users')->where('id', $user->id)->update(['name' => 'Usuário anonimizado', 'email' => "anonimo-{$user->id}@mixhome.invalid", 'team' => '', 'password' => \Illuminate\Support\Facades\Hash::make(\Illuminate\Support\Str::random(64)), 'remember_token' => null, 'updated_at' => now()]);
+        });
+    });
+    $this->info('Política de retenção aplicada e contas elegíveis anonimizadas.');
+})->purpose('Simula ou aplica a retenção de dados de dois anos');
+
+Schedule::command('hibrido:apply-retention --execute')->monthlyOn(5, '02:30')->when(fn () => config('app.data_retention_enabled'))->withoutOverlapping()->onOneServer();

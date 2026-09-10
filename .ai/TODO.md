@@ -2,8 +2,8 @@
 
 ## Confirmado
 
-- Configurar a cópia externa dos dumps no OneDrive, sem versionar credenciais, e testar restauração a partir dessa cópia.
-- Implementar expurgo/anonimização após dois anos para auditoria, sessões, notificações, solicitações recusadas e contas desativadas, com regras seguras para relacionamentos.
+- Configurar no servidor o remoto `rclone` do OneDrive, agendar a cópia implementada e testar restauração a partir dela.
+- Validar em homologação a rotina conservadora de retenção e somente então autorizar `DATA_RETENTION_ENABLED=true` em produção.
 - Configurar proteção de ambiente no GitHub/servidor para que somente o Super Admin autorize produção, schema e restauração.
 
 ## Corrigido
@@ -16,6 +16,8 @@
 - Deploy cria backup prévio, verifica saúde e preserva referência para retorno à imagem anterior.
 - Monitoramento externo de produção roda a cada 15 minutos e mede tempo de resposta.
 - Solicitações aceitam justificativa, gestores podem delegar equipes temporariamente e filtros suportam ordenação, tamanho de página e preferência local.
+- O calendário distingue solicitações por estado; painel gerencial ganhou prioridades, visão executiva, CSV e área operacional.
+- Retenção de dois anos possui simulação, trava explícita e agendamento; backup suporta OneDrive via `rclone`.
 
 ## Sugestão
 

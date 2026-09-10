@@ -196,3 +196,11 @@ O cartão “Aguardando sua ação” destaca pendências do filtro atual. Próx
 ## 11. Calendário corporativo e auditoria
 
 O Super Admin pode cadastrar datas informativas ou bloquear solicitações. A tela “Auditoria” mostra aprovações, recusas e mudanças administrativas, com responsável, horário e IP.
+
+## 12. Prioridades, visão executiva e exportação
+
+O painel do gestor destaca as pendências mais antigas e resume a distribuição entre pendentes, aprovadas e recusadas por equipe. A exportação respeita os filtros aplicados: **Excel matricial** é indicado para a consolidação mensal e **CSV detalhado** para análises ou integrações. Escolha também o status antes de exportar.
+
+## 13. Saúde operacional
+
+O menu **Operação**, exclusivo do Super Admin, apresenta fila, falhas de processamento, pendências antigas, disponibilidade e tamanho do banco. Esses indicadores complementam o monitoramento externo e não substituem os alertas do servidor.

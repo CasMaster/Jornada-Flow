@@ -2,6 +2,7 @@ const $ = (s) => document.querySelector(s);
 const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const selected = new Set();
 const holidays = new Map((window.HIBRIDO_HOLIDAYS || []).map(item => [item.date, item]));
+const requests = new Map((window.HIBRIDO_REQUESTS || []).map(item => [item.date, item.status]));
 let cursor = new Date();
 
 function iso(day) { return `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`; }
@@ -14,15 +15,17 @@ function renderCalendar() {
   calendar.replaceChildren();
   for (let i = 0; i < first; i++) calendar.append(document.createElement('span'));
   for (let day = 1; day <= days; day++) {
-    const date = iso(day), holiday = holidays.get(date), button = document.createElement('button');
+    const date = iso(day), holiday = holidays.get(date), requestStatus = requests.get(date), button = document.createElement('button');
     button.dataset.date = date;
     button.title = holiday?.name || '';
-    button.disabled = Boolean(holiday?.blocked);
+    button.disabled = Boolean(holiday?.blocked || requestStatus);
+    if (requestStatus) button.classList.add('registered-date', `registered-${requestStatus}`);
     if (selected.has(date)) button.classList.add('chosen');
     if (holiday) {
       const type = holiday.source === 'manual' ? 'manual' : (holiday.scope || 'national');
       button.classList.add('corporate-date', `holiday-${type}`);
     }
+    if (requestStatus) button.setAttribute('aria-label', `${day}, solicitação ${requestStatus === 'pending' ? 'pendente' : requestStatus === 'approved' ? 'aprovada' : 'recusada'}`);
     const number = document.createElement('strong');
     number.className = 'calendar-day-number';
     number.textContent = day;

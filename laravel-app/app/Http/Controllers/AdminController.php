@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class AdminController extends Controller
@@ -80,5 +81,23 @@ class AdminController extends Controller
     public function audits(Request $request): View
     {
         return view('admin.audits', ['logs' => AuditLog::with('actor')->latest()->paginate(50)]);
+    }
+
+    public function operations(): View
+    {
+        $databaseSize = DB::getDriverName() === 'pgsql'
+            ? DB::selectOne('select pg_size_pretty(pg_database_size(current_database())) as size')?->size
+            : null;
+
+        return view('admin.operations', [
+            'queuedJobs' => DB::table('jobs')->count(),
+            'failedJobs' => DB::table('failed_jobs')->count(),
+            'oldestJob' => DB::table('jobs')->min('created_at'),
+            'pendingRequests' => \App\Models\WorkRequest::where('status', 'pending')->count(),
+            'staleRequests' => \App\Models\WorkRequest::where('status', 'pending')->where('created_at', '<=', now()->subDays(2))->count(),
+            'lastHolidaySync' => Holiday::max('last_synced_at'),
+            'lastAudit' => AuditLog::max('created_at'),
+            'databaseSize' => $databaseSize,
+        ]);
     }
 }

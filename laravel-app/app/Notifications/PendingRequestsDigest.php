@@ -18,12 +18,12 @@ class PendingRequestsDigest extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return config('app.mail_notifications_enabled') ? ['database', 'mail'] : ['database'];
     }
 
     public function toArray(object $notifiable): array
     {
-        return ['type' => 'pending_digest', 'count' => $this->count];
+        return ['type' => 'pending_digest', 'count' => $this->count, 'action_url' => route('manager.dashboard', ['status' => 'pending'])];
     }
 
     public function toMail(object $notifiable): MailMessage

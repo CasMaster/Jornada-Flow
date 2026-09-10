@@ -118,6 +118,64 @@ class HibridoFlowTest extends TestCase
         $this->assertStringStartsWith('PK', $response->streamedContent());
     }
 
+    public function test_manager_can_export_scoped_detailed_csv(): void
+    {
+        $team = Team::create(['name' => 'Fiscal']);
+        $manager = User::factory()->create(['role' => 'manager']);
+        $manager->managedTeams()->attach($team);
+        $employee = User::factory()->create(['name' => 'Pessoa CSV', 'role' => 'employee', 'team' => 'Fiscal']);
+        WorkRequest::create(['user_id' => $employee->id, 'work_date' => '2026-07-21', 'status' => 'pending']);
+
+        $response = $this->actingAs($manager)->get('/gestor/exportar?cycle=2026-07-20&format=csv&export_status=all');
+
+        $response->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8');
+        $this->assertStringContainsString('Pessoa CSV', $response->streamedContent());
+    }
+
+    public function test_employee_calendar_exposes_request_status_accessibly(): void
+    {
+        $employee = User::factory()->create(['role' => 'employee']);
+        WorkRequest::create(['user_id' => $employee->id, 'work_date' => now()->startOfMonth()->addDay(), 'status' => 'approved']);
+
+        $this->actingAs($employee)->get('/painel')->assertOk()
+            ->assertSee('role="grid"', false)
+            ->assertSee('window.HIBRIDO_REQUESTS=JSON.parse', false)
+            ->assertSee('Aprovada');
+    }
+
+    public function test_only_super_admin_can_view_operations_dashboard(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $manager = User::factory()->create(['role' => 'manager']);
+
+        $this->actingAs($admin)->get('/admin/operacao')->assertOk()->assertSee('Saúde da')->assertSee('FALHAS NA FILA');
+        $this->actingAs($manager)->get('/admin/operacao')->assertForbidden();
+    }
+
+    public function test_retention_is_dry_run_and_requires_feature_flag(): void
+    {
+        AuditLog::create(['event' => 'old.event', 'created_at' => now()->subYears(3), 'updated_at' => now()->subYears(3)]);
+
+        $this->artisan('hibrido:apply-retention')->assertSuccessful();
+        $this->assertDatabaseHas('audit_logs', ['event' => 'old.event']);
+        $this->artisan('hibrido:apply-retention', ['--execute' => true])->assertFailed();
+        $this->assertDatabaseHas('audit_logs', ['event' => 'old.event']);
+    }
+
+    public function test_authorized_retention_anonymizes_old_inactive_accounts(): void
+    {
+        config(['app.data_retention_enabled' => true]);
+        $inactive = User::factory()->create(['active' => false, 'updated_at' => now()->subYears(3)]);
+        $expiredAudit = AuditLog::create(['event' => 'expired.event']);
+        $expiredAudit->timestamps = false;
+        $expiredAudit->forceFill(['created_at' => now()->subYears(3), 'updated_at' => now()->subYears(3)])->save();
+
+        $this->artisan('hibrido:apply-retention', ['--execute' => true])->assertSuccessful();
+
+        $this->assertDatabaseMissing('audit_logs', ['event' => 'expired.event']);
+        $this->assertDatabaseHas('users', ['id' => $inactive->id, 'name' => 'Usuário anonimizado', 'email' => "anonimo-{$inactive->id}@mixhome.invalid"]);
+    }
+
     public function test_super_admin_uses_paginated_user_directory_and_creates_invited_user(): void
     {
         config(['auth.password_recovery_enabled' => true]);

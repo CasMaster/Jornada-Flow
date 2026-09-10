@@ -50,6 +50,7 @@ Route::prefix(config('app.route_prefix'))->group(function () {
         Route::post('/delegacoes', [AdminController::class, 'delegation'])->name('admin.delegations.store');
         Route::delete('/delegacoes/{delegation}', [AdminController::class, 'deleteDelegation'])->name('admin.delegations.destroy');
         Route::get('/auditoria', [AdminController::class, 'audits'])->name('admin.audits');
+        Route::get('/operacao', [AdminController::class, 'operations'])->name('admin.operations');
         Route::get('/usuarios', [UserDirectoryController::class, 'index'])->name('admin.users.index');
         Route::post('/usuarios', [UserDirectoryController::class, 'store'])->name('admin.users.store');
         Route::put('/usuarios/{user}', [UserDirectoryController::class, 'update'])->name('admin.users.update');

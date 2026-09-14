@@ -12,6 +12,8 @@ Em 2026-09-14, o destino externo foi alterado para Backblaze B2. O remoto `b2-mi
 
 O primeiro teste de restauração a partir do B2 foi aprovado em um PostgreSQL 16 descartável: checksum válido, oito migrations e 18 usuários recuperados. O container e os arquivos temporários foram removidos ao final, sem alteração do banco de produção.
 
+Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e notificação interna diretamente aos Super Admins ativos. Produção deve manter um único cron às 05:15 UTC; o alerta depende da aplicação, PostgreSQL e SMTP.
+
 ## Alterações atuais
 
 - Delegação temporária entre gestores, administrada exclusivamente pelo Super Admin, com autorização aplicada na Policy.
@@ -40,7 +42,7 @@ O primeiro teste de restauração a partir do B2 foi aprovado em um PostgreSQL 1
 
 ## Próximo passo
 
-Repetir trimestralmente a restauração em banco descartável, mediante autorização do Super Admin, e definir alerta proativo para falhas do backup; manter retenção desabilitada até uma simulação conferida pelo Super Admin.
+Repetir trimestralmente a restauração em banco descartável, mediante autorização do Super Admin, e avaliar monitor externo redundante para falhas do backup; manter retenção desabilitada até uma simulação conferida pelo Super Admin.
 
 ## Limites
 

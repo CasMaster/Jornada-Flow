@@ -2,6 +2,10 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-09-14 — Alerta de falha no backup
+
+Produção mantém um único backup B2 diário às 02:15 de Campinas. Quando o script retorna erro, o cron executa `hibrido:notify-backup-failure`, que envia imediatamente e-mail e notificação interna a todos os Super Admins ativos. O mecanismo não inclui conteúdo do log na mensagem e não substitui um monitor externo, pois depende da aplicação, PostgreSQL e SMTP.
+
 ## 2026-09-14 — Backblaze B2 como cópia externa de backup
 
 Backblaze B2 substitui o OneDrive como destino externo oficial dos dumps PostgreSQL. O bucket deve ser privado, usar Object Lock e receber os arquivos por `rclone` configurado exclusivamente no servidor com uma Application Key restrita ao bucket. O script usa `BACKUP_REMOTE` e preserva `ONEDRIVE_REMOTE` apenas como compatibilidade temporária.

@@ -30,7 +30,7 @@ Consulte também `.ai/DATABASE.md`, `.ai/ENVIRONMENT.md` e `.ai/TODO.md` conform
 - Não use `podman-compose down -v`; o volume contém dados persistentes.
 - Não faça commit, push, merge, deploy ou Pull Request sem autorização explícita do usuário.
 - Caddy é restrito ao servidor: não crie uma cópia presumida do Caddyfile no repositório. Produção usa `mixhome.app.br` e homologação usa `/homologacao`.
-- SMTP/recuperação de senha permanecem adiados. Backups externos devem ir para OneDrive por integração sem credenciais versionadas.
+- SMTP/recuperação de senha estão habilitados. Backups externos devem ir para Backblaze B2 por integração sem credenciais versionadas.
 - Preserve por dois anos auditoria, sessões, notificações, solicitações recusadas e contas desativadas até existir rotina autorizada de expurgo/anonimização.
 
 ## Arquitetura e convenções

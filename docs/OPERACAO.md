@@ -261,13 +261,28 @@ BACKUP_REMOTE=b2-mixhome:mixhome-backups/producao \
 
 Em produção, execute diariamente às `05:15 UTC`, equivalente a `02:15` em
 `America/Sao_Paulo`. Registre a saída em
-`/opt/backups/hibrido-home-office/backup.log` e monitore falhas nesse arquivo.
+`/opt/backups/hibrido-home-office/backup.log`. Mantenha somente este agendamento:
+
+```cron
+15 5 * * * BACKUP_REMOTE=b2-mixhome:mixhome-backups/producao /opt/hibrido-home-office-prod/scripts/backup-postgres.sh >> /opt/backups/hibrido-home-office/backup.log 2>&1 || { status=$?; podman exec hibrido-home-office-prod php artisan hibrido:notify-backup-failure --exit-code="$status" >> /opt/backups/hibrido-home-office/backup.log 2>&1; }
+```
+
+Em caso de falha, o comando envia imediatamente e-mail e notificação interna a
+todos os Super Admins ativos. O alerta depende do PostgreSQL, da aplicação e do
+SMTP; monitore também o arquivo de log por um mecanismo externo quando disponível.
 
 Use uma Application Key restrita ao bucket, nunca a chave principal da conta. Não
 coloque `keyID` ou `applicationKey` no `.env` do projeto. Use o arquivo protegido do
 `rclone` ou o cofre operacional. O bucket deve ser privado e usar Object Lock com a
 retenção aprovada. Monitore a saída do cron e faça restauração trimestral em banco
 descartável.
+
+Teste manual do alerta, sem provocar falha no backup:
+
+```bash
+podman exec hibrido-home-office-prod \
+  php artisan hibrido:notify-backup-failure --exit-code=1
+```
 
 Crie o dump dentro do PostgreSQL e copie-o para fora do container:
 

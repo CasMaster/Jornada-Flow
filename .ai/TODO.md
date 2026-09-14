@@ -30,5 +30,5 @@
 ## A confirmar
 
 - Se recuperação de senha e SMTP estão habilitados e testados nos ambientes atuais.
-- Como falhas registradas em `/opt/backups/hibrido-home-office/backup.log` serão convertidas em alertas proativos.
+- Se será adotado um monitor externo como redundância para o alerta de backup, que hoje depende da aplicação, banco e SMTP.
 - Se a retenção de dois anos termina em exclusão ou anonimização para cada categoria de dado.

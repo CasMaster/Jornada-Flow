@@ -51,7 +51,7 @@ O MixHome é um sistema interno da Mix Fiscal para controlar dias de home office
 - Branch observada durante a criação deste contexto: `codex/laravel-migration`.
 - O worktree estava limpo antes da criação destes arquivos.
 - Trabalho funcional em andamento: nenhum identificado no repositório.
-- Recuperação de senha/SMTP: deliberadamente adiada; deve permanecer desabilitada até nova decisão.
+- Recuperação de senha/SMTP: habilitada e validada pelo responsável.
 - `mixhome.app.br` é produção e `/homologacao` continuará sendo homologação.
 - Caddy é administrado exclusivamente no servidor e não será versionado neste repositório.
 - Backblaze B2 foi escolhido como destino externo de backups; integração e credenciais permanecem fora do Git.

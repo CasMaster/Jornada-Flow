@@ -7,7 +7,7 @@
 - PHP 8.3 e Composer 2 para execução direta de comandos/testes.
 - Extensões PHP usadas pela imagem: GD, mbstring, PDO PostgreSQL, PDO SQLite e ZIP.
 - Caddy no host de produção/homologação, fora deste repositório.
-- SMTP não será configurado neste momento; recuperação de senha deve permanecer desabilitada.
+- SMTP e recuperação de senha estão habilitados; credenciais permanecem exclusivamente nos ambientes protegidos.
 
 Não há pipeline Node/Vite ativo para os assets do produto.
 
@@ -129,7 +129,7 @@ interativo. O comando usa identidade sintética fixa, valida o prefixo, solicita
 senha oculta confirmada e recusa sobrescrever contas. Não aceita senha por argumento.
 Consulte `docs/OPERACAO.md`, seção de smoke test, para os comandos completos por
 container e o cadastro separado dos Environment secrets no GitHub. Não adicione
-esses secrets ao `.env`/Compose e não habilite recuperação de senha.
+esses secrets ao Git ou ao Compose versionado.
 
 Em homologação com prefixo, use `/homologacao/health/ready` através do roteamento correspondente.
 
@@ -147,4 +147,4 @@ php artisan test
 podman build -t hibrido-home-office:local .
 ```
 
-Os secrets do GitHub Actions permanecem externos ao repositório. SMTP não está no escopo atual.
+Os secrets do GitHub Actions e SMTP permanecem externos ao repositório.

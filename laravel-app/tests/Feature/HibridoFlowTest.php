@@ -210,7 +210,13 @@ class HibridoFlowTest extends TestCase
         Notification::fake();
         $user = User::factory()->create(['email' => 'recuperar@example.com', 'active' => true]);
 
-        $this->post('/esqueci-a-senha', ['email' => $user->email])->assertSessionHas('success');
+        $this->from('/esqueci-a-senha')->post('/esqueci-a-senha', ['email' => $user->email])
+            ->assertRedirect('/esqueci-a-senha')
+            ->assertSessionHas('success');
+        $this->get('/esqueci-a-senha')
+            ->assertOk()
+            ->assertSee('flash-message flash-success', false)
+            ->assertSee('Se existir uma conta ativa para esse e-mail');
         Notification::assertSentTo($user, ResetPassword::class);
 
         $token = Password::createToken($user);
@@ -218,6 +224,10 @@ class HibridoFlowTest extends TestCase
             'token' => $token, 'email' => $user->email, 'password' => 'nova-senha-segura',
             'password_confirmation' => 'nova-senha-segura',
         ])->assertRedirect('/login');
+        $this->get('/login')
+            ->assertOk()
+            ->assertSee('flash-message flash-success', false)
+            ->assertSee('Senha redefinida');
 
         $this->assertTrue(auth()->validate(['email' => $user->email, 'password' => 'nova-senha-segura']));
     }

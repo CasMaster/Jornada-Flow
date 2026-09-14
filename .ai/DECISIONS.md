@@ -2,9 +2,13 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-09-14 — Backblaze B2 como cópia externa de backup
+
+Backblaze B2 substitui o OneDrive como destino externo oficial dos dumps PostgreSQL. O bucket deve ser privado, usar Object Lock e receber os arquivos por `rclone` configurado exclusivamente no servidor com uma Application Key restrita ao bucket. O script usa `BACKUP_REMOTE` e preserva `ONEDRIVE_REMOTE` apenas como compatibilidade temporária.
+
 ## 2026-09-10 — Retenção protegida e backup externo
 
-A rotina de dois anos opera em simulação por padrão e exige simultaneamente `--execute` e `DATA_RETENTION_ENABLED=true`. Ela remove dados operacionais vencidos e anonimiza contas inativas, preservando os relacionamentos restantes. O backup externo usa `rclone` com remoto OneDrive configurado fora do Git e valida a cópia antes de concluir.
+A rotina de dois anos opera em simulação por padrão e exige simultaneamente `--execute` e `DATA_RETENTION_ENABLED=true`. Ela remove dados operacionais vencidos e anonimiza contas inativas, preservando os relacionamentos restantes. O backup externo usa `rclone` configurado fora do Git e valida a cópia antes de concluir.
 
 ## 2026-09-04 — Delegação temporária e justificativa de análise
 
@@ -195,7 +199,7 @@ Essa é a organização operacional definida pelo responsável do projeto.
 
 O repositório documenta o contrato de proxy, mas não contém o Caddyfile. Mudanças de domínio/prefixo exigem coordenação com o servidor.
 
-## 2026-08-20 — OneDrive como cópia externa de backup
+## 2026-08-20 — OneDrive como cópia externa de backup (substituída)
 
 ### Contexto
 
@@ -203,7 +207,7 @@ Os dumps locais precisam de uma cópia fora do servidor.
 
 ### Decisão
 
-Usar OneDrive como destino externo dos backups PostgreSQL.
+Usar OneDrive como destino externo dos backups PostgreSQL. Esta decisão foi substituída em 2026-09-14 pela adoção do Backblaze B2.
 
 ### Motivo
 

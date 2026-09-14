@@ -54,4 +54,4 @@ O MixHome é um sistema interno da Mix Fiscal para controlar dias de home office
 - Recuperação de senha/SMTP: deliberadamente adiada; deve permanecer desabilitada até nova decisão.
 - `mixhome.app.br` é produção e `/homologacao` continuará sendo homologação.
 - Caddy é administrado exclusivamente no servidor e não será versionado neste repositório.
-- OneDrive foi escolhido como destino externo de backups; integração e credenciais ainda precisam ser configuradas fora do Git.
+- Backblaze B2 foi escolhido como destino externo de backups; integração e credenciais permanecem fora do Git.

@@ -246,21 +246,28 @@ gh workflow run "Smoke test" --ref main -f environment=producao
 
 ## Backup
 
-### Cópia externa no OneDrive
+### Cópia externa no Backblaze B2
 
-O script aceita `ONEDRIVE_REMOTE`, apontando para um remoto do `rclone` configurado
-exclusivamente no servidor. Ele envia o dump e o checksum e executa uma conferência
-do arquivo remoto antes de concluir:
+O script aceita `BACKUP_REMOTE`, apontando para um remoto do `rclone` configurado
+exclusivamente no servidor. O destino oficial é um bucket privado no Backblaze B2.
+Ele envia o dump e o checksum e executa uma conferência do arquivo remoto antes de
+concluir. `ONEDRIVE_REMOTE` permanece aceito apenas para compatibilidade:
 
 ```bash
 rclone config
-ONEDRIVE_REMOTE=onedrive:MixHome/producao \
+BACKUP_REMOTE=b2-mixhome:mixhome-backups/producao \
   /opt/hibrido-home-office-prod/scripts/backup-postgres.sh
 ```
 
-Não coloque tokens do OneDrive no `.env` do projeto. Use o arquivo protegido do
-`rclone` ou o cofre operacional. Monitore a saída do cron e faça restauração
-trimestral em banco descartável.
+Em produção, execute diariamente às `05:15 UTC`, equivalente a `02:15` em
+`America/Sao_Paulo`. Registre a saída em
+`/opt/backups/hibrido-home-office/backup.log` e monitore falhas nesse arquivo.
+
+Use uma Application Key restrita ao bucket, nunca a chave principal da conta. Não
+coloque `keyID` ou `applicationKey` no `.env` do projeto. Use o arquivo protegido do
+`rclone` ou o cofre operacional. O bucket deve ser privado e usar Object Lock com a
+retenção aprovada. Monitore a saída do cron e faça restauração trimestral em banco
+descartável.
 
 Crie o dump dentro do PostgreSQL e copie-o para fora do container:
 
@@ -282,7 +289,7 @@ Política recomendada:
 - pelo menos uma cópia fora do servidor;
 - teste trimestral de restauração.
 
-A cópia externa definida para este projeto é o OneDrive. A ferramenta de sincronização e suas credenciais devem ser configuradas somente no servidor ou em um cofre de secrets, nunca no repositório. O backup só deve ser considerado concluído após validar checksum no destino externo.
+A cópia externa definida para este projeto é o Backblaze B2. A ferramenta de sincronização e suas credenciais devem ser configuradas somente no servidor ou em um cofre de secrets, nunca no repositório. O backup só deve ser considerado concluído após validar checksum no destino externo.
 
 Somente o Super Admin pode autorizar deploy em produção, migrations de schema e restauração de dados. Configure proteção equivalente nos ambientes do GitHub e nos acessos ao servidor.
 

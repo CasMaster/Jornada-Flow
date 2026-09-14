@@ -6,7 +6,11 @@ Validar o pacote de continuidade operacional, painéis gerenciais, exportação,
 
 ## Estado atual
 
-Implementação publicada na `main` e implantada em homologação e produção em 2026-09-04. Os trabalhos foram preservados em `d97df74` (conta sintética), `bdf0b36` (apresentação de feriados), `f9cbef0` (fluxos e confiabilidade) e `e7b8b33` (destino seguro do backup). A migration progressiva foi aplicada pelos deploys. Recuperação de senha permanece desabilitada.
+Implementação publicada na `main` e implantada em homologação e produção em 2026-09-04. Os trabalhos foram preservados em `d97df74` (conta sintética), `bdf0b36` (apresentação de feriados), `f9cbef0` (fluxos e confiabilidade) e `e7b8b33` (destino seguro do backup). A migration progressiva foi aplicada pelos deploys. Recuperação de senha por SMTP está habilitada e foi validada pelo responsável.
+
+Em 2026-09-14, o destino externo foi alterado para Backblaze B2. O remoto `b2-mixhome` está configurado exclusivamente no servidor, o bucket privado `mixhome-backups` recebeu o primeiro dump com checksum válido e a execução diária foi agendada para 05:15 UTC (02:15 em Campinas).
+
+O primeiro teste de restauração a partir do B2 foi aprovado em um PostgreSQL 16 descartável: checksum válido, oito migrations e 18 usuários recuperados. O container e os arquivos temporários foram removidos ao final, sem alteração do banco de produção.
 
 ## Alterações atuais
 
@@ -36,7 +40,7 @@ Implementação publicada na `main` e implantada em homologação e produção e
 
 ## Próximo passo
 
-Executar CI/PostgreSQL e validar em homologação. Configurar `rclone` e o reinício do Podman diretamente no servidor; manter retenção desabilitada até uma simulação conferida pelo Super Admin.
+Repetir trimestralmente a restauração em banco descartável, mediante autorização do Super Admin, e definir alerta proativo para falhas do backup; manter retenção desabilitada até uma simulação conferida pelo Super Admin.
 
 ## Limites
 

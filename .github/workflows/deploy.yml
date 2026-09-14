@@ -25,7 +25,8 @@ jobs:
           ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
           tar -C laravel-app -czf /tmp/hibrido.tgz .
           scp /tmp/hibrido.tgz "$DEPLOY_USER@$DEPLOY_HOST:/tmp/hibrido.tgz"
-          ssh "$DEPLOY_USER@$DEPLOY_HOST" "tar -xzf /tmp/hibrido.tgz -C '$TARGET_DIR' && cd '$TARGET_DIR' && sh deploy.sh"
+          scp scripts/backup-postgres.sh "$DEPLOY_USER@$DEPLOY_HOST:/tmp/backup-postgres.sh"
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" "install -m 700 -d '$TARGET_DIR/scripts' && install -m 700 /tmp/backup-postgres.sh '$TARGET_DIR/scripts/backup-postgres.sh' && tar -xzf /tmp/hibrido.tgz -C '$TARGET_DIR' && cd '$TARGET_DIR' && sh deploy.sh"
       - name: Validar ambiente publicado
         env:
           SMOKE_BASE_URL: ${{ vars.SMOKE_BASE_URL }}

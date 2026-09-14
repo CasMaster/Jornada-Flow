@@ -62,6 +62,6 @@ Use rollback somente em ambiente descartável ou com autorização e plano de da
 
 ## Backup e restauração
 
-Use `scripts/backup-postgres.sh` e as instruções em `docs/OPERACAO.md`. O destino externo definido é OneDrive, sempre por integração autenticada fora do Git. Restauração altera dados e exige autorização do Super Admin, janela de manutenção e conferência de checksum.
+Use `scripts/backup-postgres.sh` e as instruções em `docs/OPERACAO.md`. O destino externo definido é Backblaze B2, sempre por integração autenticada fora do Git. Restauração altera dados e exige autorização do Super Admin, janela de manutenção e conferência de checksum.
 
 A política definida é reter por dois anos logs de auditoria, sessões, notificações, solicitações recusadas e contas desativadas. A automação de expurgo/anonimização ainda precisa ser projetada com preservação de integridade referencial e auditoria; não exclua esses dados manualmente.

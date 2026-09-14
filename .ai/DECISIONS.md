@@ -4,7 +4,7 @@ Somente decisões comprovadas pelo código ou pela documentação existente são
 
 ## 2026-09-14 — Alerta de falha no backup
 
-Produção mantém um único backup B2 diário às 02:15 de Campinas. Quando o script retorna erro, o cron executa `hibrido:notify-backup-failure`, que envia imediatamente e-mail e notificação interna a todos os Super Admins ativos. O mecanismo não inclui conteúdo do log na mensagem e não substitui um monitor externo, pois depende da aplicação, PostgreSQL e SMTP.
+Produção mantém um único backup B2 diário às 02:15 de Campinas. Quando o script retorna erro, o cron executa `hibrido:notify-backup-failure`, que envia imediatamente e-mail e notificação interna aos Super Admins ativos, excluindo contas técnicas declaradas no agendamento. A falha de um destinatário não bloqueia os demais. O mecanismo não inclui conteúdo do log na mensagem e não substitui um monitor externo, pois depende da aplicação, PostgreSQL e SMTP.
 
 ## 2026-09-14 — Backblaze B2 como cópia externa de backup
 

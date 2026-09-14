@@ -264,11 +264,12 @@ Em produção, execute diariamente às `05:15 UTC`, equivalente a `02:15` em
 `/opt/backups/hibrido-home-office/backup.log`. Mantenha somente este agendamento:
 
 ```cron
-15 5 * * * BACKUP_REMOTE=b2-mixhome:mixhome-backups/producao /opt/hibrido-home-office-prod/scripts/backup-postgres.sh >> /opt/backups/hibrido-home-office/backup.log 2>&1 || { status=$?; podman exec hibrido-home-office-prod php artisan hibrido:notify-backup-failure --exit-code="$status" >> /opt/backups/hibrido-home-office/backup.log 2>&1; }
+15 5 * * * BACKUP_REMOTE=b2-mixhome:mixhome-backups/producao /opt/hibrido-home-office-prod/scripts/backup-postgres.sh >> /opt/backups/hibrido-home-office/backup.log 2>&1 || { status=$?; podman exec hibrido-home-office-prod php artisan hibrido:notify-backup-failure --exit-code="$status" --exclude-email=gestor@mixfiscal.com.br >> /opt/backups/hibrido-home-office/backup.log 2>&1; }
 ```
 
 Em caso de falha, o comando envia imediatamente e-mail e notificação interna a
-todos os Super Admins ativos. O alerta depende do PostgreSQL, da aplicação e do
+todos os Super Admins ativos, exceto contas técnicas explicitamente excluídas. Uma
+falha de destinatário não impede a tentativa de entrega aos demais. O alerta depende do PostgreSQL, da aplicação e do
 SMTP; monitore também o arquivo de log por um mecanismo externo quando disponível.
 
 Use uma Application Key restrita ao bucket, nunca a chave principal da conta. Não

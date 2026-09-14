@@ -12,7 +12,7 @@ Em 2026-09-14, o destino externo foi alterado para Backblaze B2. O remoto `b2-mi
 
 O primeiro teste de restauração a partir do B2 foi aprovado em um PostgreSQL 16 descartável: checksum válido, oito migrations e 18 usuários recuperados. O container e os arquivos temporários foram removidos ao final, sem alteração do banco de produção.
 
-Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e notificação interna diretamente aos Super Admins ativos. Produção deve manter um único cron às 05:15 UTC; o alerta depende da aplicação, PostgreSQL e SMTP.
+Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e notificação interna diretamente aos Super Admins ativos. A conta placeholder `gestor@mixfiscal.com.br` é excluída no cron, e falhas individuais não bloqueiam outros destinatários. Produção deve manter um único cron às 05:15 UTC; o alerta depende da aplicação, PostgreSQL e SMTP.
 
 ## Alterações atuais
 

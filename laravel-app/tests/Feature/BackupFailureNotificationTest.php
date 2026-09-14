@@ -20,8 +20,12 @@ class BackupFailureNotificationTest extends TestCase
         $administrator = User::factory()->create(['role' => 'super_admin', 'active' => true]);
         $inactiveAdministrator = User::factory()->create(['role' => 'super_admin', 'active' => false]);
         $manager = User::factory()->create(['role' => 'manager', 'active' => true]);
+        $placeholder = User::factory()->create(['role' => 'super_admin', 'active' => true, 'email' => 'gestor@mixfiscal.com.br']);
 
-        $this->artisan('hibrido:notify-backup-failure', ['--exit-code' => 23])
+        $this->artisan('hibrido:notify-backup-failure', [
+            '--exit-code' => 23,
+            '--exclude-email' => ['gestor@mixfiscal.com.br'],
+        ])
             ->expectsOutput('Alerta enviado para 1 Super Admin(s).')
             ->assertSuccessful();
 
@@ -33,6 +37,7 @@ class BackupFailureNotificationTest extends TestCase
         );
         Notification::assertNotSentTo($inactiveAdministrator, BackupFailed::class);
         Notification::assertNotSentTo($manager, BackupFailed::class);
+        Notification::assertNotSentTo($placeholder, BackupFailed::class);
     }
 
     public function test_it_fails_safely_when_mail_notifications_are_disabled(): void

@@ -15,6 +15,18 @@ BACKUP_TEMP="$BACKUP_FILE.tmp"
 mkdir -p "$BACKUP_DIR"
 umask 077
 trap 'rm -f "$BACKUP_TEMP"' EXIT HUP INT TERM
+
+podman-compose up -d postgres
+attempt=0
+until podman-compose exec -T postgres sh -c 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"' >/dev/null 2>&1; do
+    attempt=$((attempt + 1))
+    if [ "$attempt" -ge 12 ]; then
+        echo "PostgreSQL não ficou pronto para o backup pré-deploy." >&2
+        exit 1
+    fi
+    sleep 5
+done
+
 podman-compose exec -T postgres sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > "$BACKUP_TEMP"
 mv "$BACKUP_TEMP" "$BACKUP_FILE"
 sha256sum "$BACKUP_FILE" > "$BACKUP_FILE.sha256"

@@ -174,6 +174,8 @@ class VacationFlowTest extends TestCase
             ->assertOk()
             ->assertSee('será usado automaticamente')
             ->assertSee('name="vacation_entitlement_id" value="'.$entitlement->id.'"', false)
+            ->assertSee('data-available-from="'.$entitlement->acquisition_ends_on->copy()->addDay()->format('Y-m-d').'"', false)
+            ->assertSee('data-expires-on="'.$entitlement->expires_on->format('Y-m-d').'"', false)
             ->assertDontSee('Início aquisitivo');
     }
 

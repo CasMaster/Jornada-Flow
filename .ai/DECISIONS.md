@@ -4,7 +4,7 @@ Somente decisões comprovadas pelo código ou pela documentação existente são
 
 ## 2026-09-15 — Saldo administrativo de férias por período aquisitivo
 
-O MixHome conta dias corridos de forma inclusiva e controla concessão, ajuste, reserva e consumo por período aquisitivo. Solicitações pendentes reservam saldo; aprovadas consomem; recusadas e canceladas liberam os dias. O Super Admin cadastra e ajusta saldos mediante justificativa auditada. O controle apoia o planejamento, mas não substitui o sistema oficial de RH/folha nem automatiza regras legais de fracionamento, abono ou redução por faltas.
+O MixHome conta dias corridos de forma inclusiva e controla concessão, ajuste, reserva e consumo por período aquisitivo. A data de contratação gera automaticamente ciclos anuais completos, com 30 dias e prazo de utilização de um ano após o término. A sincronização ocorre ao salvar o usuário e diariamente. Solicitações pendentes reservam saldo; aprovadas consomem; recusadas e canceladas liberam os dias. O Super Admin ajusta exceções mediante justificativa auditada. O controle apoia o planejamento, mas não substitui o sistema oficial de RH/folha nem automatiza regras legais de fracionamento, abono ou redução por faltas.
 
 ## 2026-09-14 — Alerta de falha no backup
 

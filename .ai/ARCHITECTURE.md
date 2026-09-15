@@ -50,12 +50,12 @@ O `compose.yaml` define quatro serviços: `postgres`, `hibrido_laravel`, `queue_
 
 ### Férias
 
-1. Super Admin cadastra a concessão por período aquisitivo conforme informação oficial do RH.
+1. Super Admin informa a data de contratação; o serviço gera os períodos anuais completos ao salvar e pela sincronização diária.
 2. Colaborador escolhe um saldo e solicita um intervalo futuro imutável, contado em dias corridos inclusivos.
 3. O serviço rejeita sobreposição, conflito com home office e insuficiência de saldo; pendências reservam dias.
 4. Gestor autorizado aprova ou recusa; aprovação consome e recusa libera o saldo.
 5. Férias aprovadas aparecem na visão da equipe e bloqueiam home office no intervalo.
-6. Super Admin ajusta saldo, corrige ou cancela mediante justificativa, preservando auditoria.
+6. Super Admin ajusta exceções de saldo, corrige ou cancela mediante justificativa, preservando auditoria.
 
 ### Usuários e permissões
 

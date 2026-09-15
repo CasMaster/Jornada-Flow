@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Services\VacationEntitlementService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,7 @@ use Illuminate\View\View;
 
 class UserDirectoryController extends Controller
 {
-    public function __construct(private AuditService $audit) {}
+    public function __construct(private AuditService $audit, private VacationEntitlementService $vacationEntitlements) {}
 
     public function index(Request $request): View
     {
@@ -56,6 +57,7 @@ class UserDirectoryController extends Controller
                 'email' => $data['email'],
                 'role' => $data['role'],
                 'team' => $data['team'] ?? '',
+                'hired_on' => $data['hired_on'] ?? null,
                 'active' => true,
                 'password' => $generatedPassword ? Str::password(32) : $data['password'],
             ]);
@@ -63,7 +65,8 @@ class UserDirectoryController extends Controller
 
             return $user;
         });
-        $this->audit->record('user.created', $user, [], $user->only(['name', 'email', 'role', 'team', 'active']));
+        $this->audit->record('user.created', $user, [], $user->only(['name', 'email', 'role', 'team', 'hired_on', 'active']));
+        $this->vacationEntitlements->sync($user, $request->user());
 
         if (! $generatedPassword) {
             return redirect()->route('admin.users.index')->with('success', 'Usuário criado com senha provisória.');
@@ -75,13 +78,18 @@ class UserDirectoryController extends Controller
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
         $data = $request->validated();
-        $old = $user->only(['name', 'email', 'role', 'team', 'active']);
+        $newHiredOn = $data['hired_on'] ?? null;
+        if ($user->hired_on && $newHiredOn !== $user->hired_on->toDateString() && $user->vacationEntitlements()->exists()) {
+            return back()->withErrors(['hired_on' => 'A data de contratação não pode ser alterada depois da geração dos períodos. Ajuste os saldos na área de férias.'])->withInput();
+        }
+        $old = $user->only(['name', 'email', 'role', 'team', 'hired_on', 'active']);
         DB::transaction(function () use ($user, $data): void {
             $user->fill([
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'role' => $data['role'],
                 'team' => $data['team'] ?? '',
+                'hired_on' => $data['hired_on'] ?? null,
             ]);
             if (! empty($data['password'])) {
                 $user->password = $data['password'];
@@ -89,7 +97,8 @@ class UserDirectoryController extends Controller
             $user->save();
             $this->syncManagedTeams($user, $data);
         });
-        $this->audit->record('user.updated', $user, $old, $user->only(['name', 'email', 'role', 'team', 'active']));
+        $this->audit->record('user.updated', $user, $old, $user->only(['name', 'email', 'role', 'team', 'hired_on', 'active']));
+        $this->vacationEntitlements->sync($user, $request->user());
 
         return back()->with('success', 'Usuário atualizado.');
     }

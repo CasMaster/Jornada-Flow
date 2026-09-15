@@ -11,7 +11,7 @@ O serviço web acessa o host interno `postgres:5432`. O compose publica PostgreS
 
 ## Estrutura geral
 
-- `users`: identidade, hash de senha, perfil, equipe própria e estado ativo.
+- `users`: identidade, hash de senha, perfil, equipe própria, data de contratação e estado ativo.
 - `teams`: catálogo de equipes e estado ativo.
 - `manager_team`: relação muitos-para-muitos entre gestores e equipes.
 - `work_requests`: solicitante, data, status, revisor e data da análise.

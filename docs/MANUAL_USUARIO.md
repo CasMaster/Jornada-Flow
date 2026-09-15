@@ -217,8 +217,10 @@ Gestores acessam **Gestão → Férias**, visualizam somente suas equipes, consu
 próximos períodos aprovados e aprovam ou recusam pedidos. A exportação CSV respeita
 os filtros. Férias aprovadas impedem novos pedidos de home office nas mesmas datas.
 
-O Super Admin cadastra cada concessão com período aquisitivo, prazo de utilização e
-dias concedidos. Ajustes positivos ou negativos, correções e cancelamentos exigem
+O Super Admin informa a **data de contratação** no cadastro do usuário. O MixHome
+gera automaticamente cada período anual completo, com 30 dias e prazo de uso de um
+ano após seu término. Uma sincronização diária cria o novo saldo quando outro ciclo
+for concluído. Ajustes positivos ou negativos, correções e cancelamentos exigem
 justificativa e ficam na auditoria. Solicitações antigas sem vínculo devem ser associadas
 a um período antes da aprovação. Este saldo é administrativo e deve ser conferido com
 o sistema oficial do RH.

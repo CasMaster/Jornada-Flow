@@ -3,6 +3,7 @@
 use App\Models\User;
 use App\Models\WorkRequest;
 use App\Notifications\PendingRequestsDigest;
+use App\Services\VacationEntitlementService;
 use App\Support\ReportingCycle;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -34,6 +35,13 @@ Artisan::command('hibrido:notify-pending', function () {
 
 Schedule::command('hibrido:notify-pending')->dailyAt('08:00')->withoutOverlapping();
 Schedule::command('hibrido:sync-holidays')->monthlyOn(1, '03:00')->withoutOverlapping()->onOneServer();
+
+Artisan::command('hibrido:sync-vacation-entitlements', function (VacationEntitlementService $service) {
+    $created = $service->syncAll();
+    $this->info("{$created} período(s) aquisitivo(s) gerado(s).");
+})->purpose('Gera saldos de férias a partir das datas de contratação');
+
+Schedule::command('hibrido:sync-vacation-entitlements')->dailyAt('01:30')->withoutOverlapping()->onOneServer();
 
 Artisan::command('hibrido:apply-retention {--execute : Confirma a aplicação das alterações}', function () {
     $cutoff = now()->subYears(2);

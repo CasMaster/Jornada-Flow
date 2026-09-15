@@ -7,7 +7,7 @@
   <nav class="manager-sections"><a href="{{ route('manager.dashboard') }}">Home office</a><a class="active" href="{{ route('manager.vacations.index') }}">Férias</a></nav>
   @if(auth()->user()->role==='super_admin')
   <article class="card vacation-entitlement-admin">
-    <div class="report-head"><div><p class="eyebrow">SALDOS DE FÉRIAS</p><h2>Períodos aquisitivos</h2></div><p>Cadastre a concessão oficial informada pelo RH. Todo ajuste exige justificativa e fica auditado.</p></div>
+    <div class="report-head"><div><p class="eyebrow">SALDOS DE FÉRIAS</p><h2>Períodos aquisitivos</h2></div><p>A data de contratação cadastrada em Usuários gera os períodos automaticamente. Use o formulário abaixo apenas para exceções informadas pelo RH.</p></div>
     <form method="post" action="{{ route('admin.vacation-entitlements.store') }}" class="entitlement-form">@csrf
       <label>Colaborador<select name="user_id" required><option value="">Selecionar</option>@foreach($employees as $employee)<option value="{{ $employee->id }}">{{ $employee->name }} — {{ $employee->email }}</option>@endforeach</select></label>
       <label>Início aquisitivo<input type="date" name="acquisition_starts_on" required></label><label>Fim aquisitivo<input type="date" name="acquisition_ends_on" required></label><label>Prazo para uso<input type="date" name="expires_on"></label><label>Dias concedidos<input type="number" name="granted_days" min="0" max="90" value="30" required></label><label>Ajuste<input type="number" name="adjustment_days" min="-90" max="90" value="0"></label><label class="entitlement-note">Justificativa<textarea name="notes" maxlength="1000" required></textarea></label><button class="primary">Cadastrar saldo</button>

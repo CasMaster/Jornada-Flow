@@ -25,6 +25,7 @@ class StoreUserRequest extends FormRequest
             'email' => ['required', 'email', 'max:190', Rule::unique('users')],
             'role' => ['required', Rule::in(['employee', 'manager', 'super_admin'])],
             'team' => ['nullable', 'string', Rule::exists('teams', 'name')],
+            'hired_on' => ['nullable', 'date', 'before_or_equal:today'],
             'manager_teams' => ['array'],
             'manager_teams.*' => ['integer', Rule::exists('teams', 'id')],
             'password' => [Rule::requiredIf(! config('auth.password_recovery_enabled')), 'nullable', 'confirmed', Password::min(8)],

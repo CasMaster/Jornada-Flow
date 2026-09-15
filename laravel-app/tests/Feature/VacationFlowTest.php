@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\VacationEntitlement;
 use App\Models\VacationRequest;
 use App\Models\WorkRequest;
+use App\Services\VacationEntitlementService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -145,6 +146,23 @@ class VacationFlowTest extends TestCase
         $entitlement = VacationEntitlement::firstOrFail();
         $this->assertSame(28, $entitlement->availableDays());
         $this->assertDatabaseHas('audit_logs', ['event' => 'vacation_entitlement.created']);
+    }
+
+    public function test_hiring_date_generates_completed_acquisition_periods_idempotently(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $employee = User::factory()->create(['role' => 'employee', 'hired_on' => today()->subYears(2)]);
+        $service = app(VacationEntitlementService::class);
+
+        $this->assertSame(2, $service->sync($employee, $admin));
+        $this->assertSame(0, $service->sync($employee, $admin));
+        $this->assertSame(2, $employee->vacationEntitlements()->count());
+        $this->assertDatabaseHas('vacation_entitlements', [
+            'user_id' => $employee->id,
+            'granted_days' => 30,
+            'adjustment_days' => 0,
+        ]);
+        $this->assertSame(2, AuditLog::where('event', 'vacation_entitlement.generated')->count());
     }
 
     private function entitlement(User $user, int $days): VacationEntitlement

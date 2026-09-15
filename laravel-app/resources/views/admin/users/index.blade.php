@@ -22,6 +22,7 @@
             <label>E-mail corporativo<input name="email" type="email" value="{{ old('email') }}" required></label>
             <label>Perfil<select name="role"><option value="employee">Colaborador</option><option value="manager">Gestor</option><option value="super_admin">Super Admin</option></select></label>
             <label>Equipe própria<select name="team"><option value="">Sem equipe</option>@foreach($teams->where('active',true) as $team)<option @selected(old('team')===$team->name)>{{ $team->name }}</option>@endforeach</select></label>
+            <label>Data de contratação<input name="hired_on" type="date" max="{{ today()->format('Y-m-d') }}" value="{{ old('hired_on') }}"><small>Gera automaticamente os períodos aquisitivos completos.</small></label>
             <label>Equipes administradas<select name="manager_teams[]" multiple class="click-multi" data-placeholder="Selecione para gestores">@foreach($teams->where('active',true) as $team)<option value="{{ $team->id }}">{{ $team->name }}</option>@endforeach</select></label>
             <label>Senha provisória (opcional)<input name="password" type="password" minlength="8" autocomplete="new-password"></label>
             <label>Confirmar senha provisória<input name="password_confirmation" type="password" minlength="8" autocomplete="new-password"></label>
@@ -45,13 +46,14 @@
         @forelse($users as $user)<tr>
             <td><b>{{ $user->name }}</b><small>{{ $user->email }}</small></td>
             <td>{{ ['employee'=>'Colaborador','manager'=>'Gestor','super_admin'=>'Super Admin'][$user->role] }}</td>
-            <td>{{ $user->team?:'Sem equipe' }}@if($user->isManager())<small>Administra: {{ $user->role==='super_admin'?'Todas':($user->managedTeams->pluck('name')->join(', ')?:'nenhuma') }}</small>@endif</td>
+            <td>{{ $user->team?:'Sem equipe' }}<small>Contratação: {{ $user->hired_on?->format('d/m/Y') ?? 'não informada' }}</small>@if($user->isManager())<small>Administra: {{ $user->role==='super_admin'?'Todas':($user->managedTeams->pluck('name')->join(', ')?:'nenhuma') }}</small>@endif</td>
             <td><span class="directory-status {{ $user->active?'is-active':'is-inactive' }}">{{ $user->active?'Ativo':'Inativo' }}</span></td>
             <td><details class="user-menu"><summary>Gerenciar</summary><div class="user-actions-panel">
                 <form method="post" action="{{ route('admin.users.update',$user) }}" class="edit-user-form">@csrf @method('PUT')
                     <input name="name" value="{{ $user->name }}" required><input name="email" type="email" value="{{ $user->email }}" required>
                     <select name="role">@foreach(['employee'=>'Colaborador','manager'=>'Gestor','super_admin'=>'Super Admin'] as $role=>$label)<option value="{{ $role }}" @selected($user->role===$role)>{{ $label }}</option>@endforeach</select>
                     <select name="team"><option value="">Sem equipe própria</option>@foreach($teams as $team)<option @selected($user->team===$team->name)>{{ $team->name }}</option>@endforeach</select>
+                    <label>Contratação<input name="hired_on" type="date" max="{{ today()->format('Y-m-d') }}" value="{{ $user->hired_on?->format('Y-m-d') }}"></label>
                     <select name="manager_teams[]" multiple class="click-multi" data-placeholder="Equipes administradas">@foreach($teams as $team)<option value="{{ $team->id }}" @selected($user->managedTeams->contains($team))>{{ $team->name }}</option>@endforeach</select>
                     <input name="password" type="password" placeholder="Nova senha (opcional)"><input name="password_confirmation" type="password" placeholder="Confirmar nova senha">
                     <button class="primary">Salvar alterações</button>

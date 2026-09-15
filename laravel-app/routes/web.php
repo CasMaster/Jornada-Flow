@@ -9,6 +9,7 @@ use App\Http\Controllers\ManagerVacationController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\UserDirectoryController;
 use App\Http\Controllers\VacationController;
+use App\Http\Controllers\VacationEntitlementController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix(config('app.route_prefix'))->group(function () {
@@ -63,6 +64,8 @@ Route::prefix(config('app.route_prefix'))->group(function () {
         Route::put('/usuarios/{user}', [UserDirectoryController::class, 'update'])->name('admin.users.update');
         Route::patch('/usuarios/{user}/status', [UserDirectoryController::class, 'toggle'])->name('admin.users.toggle');
         Route::post('/usuarios/{user}/acesso', [UserDirectoryController::class, 'passwordLink'])->middleware('throttle:6,1')->name('admin.users.password-link');
+        Route::post('/ferias/saldos', [VacationEntitlementController::class, 'store'])->name('admin.vacation-entitlements.store');
+        Route::put('/ferias/saldos/{entitlement}', [VacationEntitlementController::class, 'update'])->name('admin.vacation-entitlements.update');
         Route::put('/ferias/{vacation}', [ManagerVacationController::class, 'correct'])->name('admin.vacations.correct');
         Route::post('/ferias/{vacation}/cancelar', [ManagerVacationController::class, 'cancel'])->name('admin.vacations.cancel');
     });

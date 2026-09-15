@@ -16,7 +16,7 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Alterações atuais
 
-- Módulo de planejamento de férias com solicitação por intervalo, análise por equipe, agenda aprovada, bloqueio cruzado com home office, correção/cancelamento auditado e CSV.
+- Módulo de férias com contagem inclusiva de dias corridos, saldo por período aquisitivo, reserva/consumo, fracionamento, análise por equipe, bloqueio cruzado com home office, correção/cancelamento auditado e CSV.
 - Delegação temporária entre gestores, administrada exclusivamente pelo Super Admin, com autorização aplicada na Policy.
 - Justificativa opcional individual ou em lote, visível no histórico do colaborador e registrada na auditoria.
 - Ordenação, 25/50/100 registros por página e preferência não pessoal de filtros salva no navegador.
@@ -28,7 +28,7 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Validação
 
-- Módulo de férias: 5 testes funcionais; suíte completa com 48 testes e 297 assertions aprovada em SQLite.
+- Módulo de férias com saldo: 7 testes funcionais; suíte completa com 50 testes e 306 assertions aprovada em SQLite.
 - Templates Blade, sete rotas do módulo, Laravel Pint e build local da imagem aprovados.
 - Laravel Pint: aprovado.
 - PHPUnit/SQLite: 35 testes, 233 assertions, todos aprovados.

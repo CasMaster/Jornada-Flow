@@ -207,13 +207,18 @@ O menu **Operação**, exclusivo do Super Admin, apresenta fila, falhas de proce
 
 ## 14. Planejamento de férias
 
-Abra **Minhas férias**, informe início e término e envie o período. O sistema mostra
-os dias corridos no histórico e impede sobreposição com outra solicitação de férias
-ou com home office já registrado. Depois do envio, o colaborador apenas acompanha.
+Abra **Minhas férias**, selecione o período aquisitivo, informe início e término e
+envie. A contagem inclui os dois extremos, fins de semana e feriados. O painel mostra
+dias concedidos, reservados, utilizados e disponíveis. Uma solicitação pendente reserva
+saldo; recusa ou cancelamento devolve os dias. É possível fracionar o saldo em várias
+solicitações, desde que haja disponibilidade e não exista sobreposição ou home office.
 
 Gestores acessam **Gestão → Férias**, visualizam somente suas equipes, consultam os
 próximos períodos aprovados e aprovam ou recusam pedidos. A exportação CSV respeita
 os filtros. Férias aprovadas impedem novos pedidos de home office nas mesmas datas.
 
-O Super Admin pode corrigir datas ou cancelar um registro mediante justificativa
-obrigatória. O registro permanece no histórico e todas as ações ficam na auditoria.
+O Super Admin cadastra cada concessão com período aquisitivo, prazo de utilização e
+dias concedidos. Ajustes positivos ou negativos, correções e cancelamentos exigem
+justificativa e ficam na auditoria. Solicitações antigas sem vínculo devem ser associadas
+a um período antes da aprovação. Este saldo é administrativo e deve ser conferido com
+o sistema oficial do RH.

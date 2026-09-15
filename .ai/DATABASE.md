@@ -16,6 +16,7 @@ O serviço web acessa o host interno `postgres:5432`. O compose publica PostgreS
 - `manager_team`: relação muitos-para-muitos entre gestores e equipes.
 - `work_requests`: solicitante, data, status, revisor e data da análise.
 - `vacation_requests`: solicitante, intervalo, status, análise, correção e cancelamento preservado.
+- `vacation_entitlements`: concessão e ajuste de dias por colaborador e período aquisitivo; consumo e reserva são derivados das solicitações vinculadas.
 - `holidays`: datas corporativas e indicador de bloqueio.
 - `audit_logs`: ator, evento, alvo, valores anterior/novo e metadados da requisição.
 - `notifications`: notificações persistidas.

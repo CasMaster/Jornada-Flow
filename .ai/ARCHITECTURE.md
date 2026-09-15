@@ -50,11 +50,12 @@ O `compose.yaml` define quatro serviços: `postgres`, `hibrido_laravel`, `queue_
 
 ### Férias
 
-1. Colaborador solicita um intervalo futuro imutável.
-2. O serviço rejeita sobreposição com férias ativas ou home office registrado.
-3. Gestor autorizado aprova ou recusa; períodos aprovados aparecem na visão da equipe.
-4. Férias aprovadas bloqueiam novos registros de home office no intervalo.
-5. Super Admin corrige ou cancela com justificativa, preservando auditoria.
+1. Super Admin cadastra a concessão por período aquisitivo conforme informação oficial do RH.
+2. Colaborador escolhe um saldo e solicita um intervalo futuro imutável, contado em dias corridos inclusivos.
+3. O serviço rejeita sobreposição, conflito com home office e insuficiência de saldo; pendências reservam dias.
+4. Gestor autorizado aprova ou recusa; aprovação consome e recusa libera o saldo.
+5. Férias aprovadas aparecem na visão da equipe e bloqueiam home office no intervalo.
+6. Super Admin ajusta saldo, corrige ou cancela mediante justificativa, preservando auditoria.
 
 ### Usuários e permissões
 

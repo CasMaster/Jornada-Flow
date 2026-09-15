@@ -65,6 +65,11 @@ class User extends Authenticatable
         return $this->hasMany(VacationRequest::class);
     }
 
+    public function vacationEntitlements(): HasMany
+    {
+        return $this->hasMany(VacationEntitlement::class);
+    }
+
     public function receivedDelegations(): HasMany
     {
         return $this->hasMany(ManagerDelegation::class, 'delegate_id');

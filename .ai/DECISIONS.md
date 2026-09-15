@@ -2,9 +2,9 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
-## 2026-09-14 — Planejamento de férias sem cálculo trabalhista
+## 2026-09-15 — Saldo administrativo de férias por período aquisitivo
 
-O MixHome administra somente solicitação, análise e agenda de períodos de férias; não calcula saldo, período aquisitivo, abono ou regras legais. Solicitações são intervalos imutáveis para o colaborador, conflitos bloqueiam home office, e somente o Super Admin corrige ou cancela com justificativa e auditoria.
+O MixHome conta dias corridos de forma inclusiva e controla concessão, ajuste, reserva e consumo por período aquisitivo. Solicitações pendentes reservam saldo; aprovadas consomem; recusadas e canceladas liberam os dias. O Super Admin cadastra e ajusta saldos mediante justificativa auditada. O controle apoia o planejamento, mas não substitui o sistema oficial de RH/folha nem automatiza regras legais de fracionamento, abono ou redução por faltas.
 
 ## 2026-09-14 — Alerta de falha no backup
 

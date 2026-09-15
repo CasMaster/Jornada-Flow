@@ -50,7 +50,8 @@ O ciclo começa no dia 20 e termina no dia 19 do mês seguinte. O filtro do gest
 - `teams`: equipes e disponibilidade para novos cadastros;
 - `manager_team`: vínculo de gestores a múltiplas equipes;
 - `work_requests`: data, estado, solicitante e análise;
-- `vacation_requests`: intervalo, estado, análise, correção e cancelamento de férias;
+- `vacation_entitlements`: concessões e ajustes auditáveis por período aquisitivo;
+- `vacation_requests`: intervalo, período aquisitivo, estado, análise, correção e cancelamento de férias;
 - `password_reset_tokens`: tokens de uso único e expiração de 60 minutos;
 - `sessions`, `cache` e tabelas de filas: infraestrutura do Laravel.
 
@@ -66,7 +67,7 @@ O ciclo começa no dia 20 e termina no dia 19 do mês seguinte. O filtro do gest
 
 ## Serviços de domínio e processamento assíncrono
 
-`WorkRequestService` concentra criação, bloqueios do calendário e análise; `VacationRequestService` mantém conflitos, decisões, correções e cancelamentos das férias; `AuditService` registra rastreabilidade. As Policies limitam cada gestor às equipes permitidas. Controllers coordenam HTTP e não devem duplicar essas regras.
+`WorkRequestService` concentra criação, bloqueios do calendário e análise; `VacationRequestService` mantém conflitos, reserva/consumo de saldo, decisões, correções e cancelamentos das férias; `AuditService` registra rastreabilidade. As Policies limitam cada gestor às equipes permitidas. Controllers coordenam HTTP e não devem duplicar essas regras.
 
 O fluxo é: colaborador envia datas → serviço valida calendário e imutabilidade → solicitação e auditoria são gravadas → gestor analisa individualmente ou em lote → nova auditoria é gravada → notificação é enfileirada → worker persiste a notificação e envia e-mail.
 

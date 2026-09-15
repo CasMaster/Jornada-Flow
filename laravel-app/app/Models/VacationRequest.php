@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class VacationRequest extends Model
 {
-    protected $fillable = ['user_id', 'starts_on', 'ends_on', 'status', 'reviewed_by', 'reviewed_at', 'review_note', 'corrected_by', 'corrected_at', 'cancelled_by', 'cancelled_at', 'cancel_note'];
+    protected $fillable = ['user_id', 'vacation_entitlement_id', 'starts_on', 'ends_on', 'status', 'reviewed_by', 'reviewed_at', 'review_note', 'corrected_by', 'corrected_at', 'cancelled_by', 'cancelled_at', 'cancel_note'];
 
     protected $casts = ['starts_on' => 'date', 'ends_on' => 'date', 'reviewed_at' => 'datetime', 'corrected_at' => 'datetime', 'cancelled_at' => 'datetime'];
 
@@ -19,6 +19,16 @@ class VacationRequest extends Model
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    public function entitlement(): BelongsTo
+    {
+        return $this->belongsTo(VacationEntitlement::class, 'vacation_entitlement_id');
+    }
+
+    public function days(): int
+    {
+        return $this->starts_on->diffInDays($this->ends_on) + 1;
     }
 
     public function corrector(): BelongsTo

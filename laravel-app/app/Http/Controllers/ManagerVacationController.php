@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Team;
 use App\Models\User;
+use App\Models\VacationEntitlement;
 use App\Models\VacationRequest;
 use App\Services\VacationRequestService;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,7 +31,7 @@ class ManagerVacationController extends Controller
     {
         $teams = $this->allowedTeams($request->user());
 
-        return VacationRequest::with(['user', 'reviewer'])->whereHas('user', fn (Builder $q) => $q->whereIn('team', $teams))
+        return VacationRequest::with(['user.vacationEntitlements.requests', 'reviewer', 'entitlement.requests'])->whereHas('user', fn (Builder $q) => $q->whereIn('team', $teams))
             ->when($request->filled('status'), fn (Builder $q) => $q->where('status', $request->string('status')))
             ->when($request->filled('team'), fn (Builder $q) => $q->whereHas('user', fn (Builder $u) => $u->where('team', $request->string('team'))))
             ->when($request->filled('q'), function (Builder $q) use ($request) {
@@ -43,7 +44,13 @@ class ManagerVacationController extends Controller
     {
         $query = $this->query($request);
 
-        return view('vacations.manage', ['vacations' => (clone $query)->orderBy('starts_on')->paginate(25)->withQueryString(), 'approved' => (clone $query)->where('status', 'approved')->whereDate('ends_on', '>=', today())->orderBy('starts_on')->limit(20)->get(), 'teams' => $this->allowedTeams($request->user())]);
+        return view('vacations.manage', [
+            'vacations' => (clone $query)->orderBy('starts_on')->paginate(25)->withQueryString(),
+            'approved' => (clone $query)->where('status', 'approved')->whereDate('ends_on', '>=', today())->orderBy('starts_on')->limit(20)->get(),
+            'teams' => $this->allowedTeams($request->user()),
+            'employees' => $request->user()->role === 'super_admin' ? User::where('active', true)->orderBy('name')->get(['id', 'name', 'email']) : collect(),
+            'entitlements' => $request->user()->role === 'super_admin' ? VacationEntitlement::with(['user', 'requests'])->latest('acquisition_ends_on')->limit(100)->get() : collect(),
+        ]);
     }
 
     public function review(Request $request, VacationRequest $vacation): RedirectResponse
@@ -57,8 +64,8 @@ class ManagerVacationController extends Controller
 
     public function correct(Request $request, VacationRequest $vacation): RedirectResponse
     {
-        $data = $request->validate(['starts_on' => ['required', 'date'], 'ends_on' => ['required', 'date', 'after_or_equal:starts_on'], 'note' => ['required', 'string', 'max:1000']]);
-        $this->vacations->correct($request->user(), $vacation, $data['starts_on'], $data['ends_on'], $data['note']);
+        $data = $request->validate(['vacation_entitlement_id' => ['required', 'exists:vacation_entitlements,id'], 'starts_on' => ['required', 'date'], 'ends_on' => ['required', 'date', 'after_or_equal:starts_on'], 'note' => ['required', 'string', 'max:1000']]);
+        $this->vacations->correct($request->user(), $vacation, VacationEntitlement::findOrFail($data['vacation_entitlement_id']), $data['starts_on'], $data['ends_on'], $data['note']);
 
         return back()->with('success', 'Período de férias corrigido.');
     }
@@ -78,9 +85,9 @@ class ManagerVacationController extends Controller
         return response()->streamDownload(function () use ($records) {
             $out = fopen('php://output', 'w');
             fwrite($out, "\xEF\xBB\xBF");
-            fputcsv($out, ['Colaborador', 'E-mail', 'Equipe', 'Início', 'Fim', 'Dias corridos', 'Status', 'Analisado por'], ';');
+            fputcsv($out, ['Colaborador', 'E-mail', 'Equipe', 'Período aquisitivo', 'Início', 'Fim', 'Dias corridos', 'Status', 'Analisado por'], ';');
             foreach ($records as $item) {
-                fputcsv($out, [$item->user->name, $item->user->email, $item->user->team, $item->starts_on->format('d/m/Y'), $item->ends_on->format('d/m/Y'), VacationRequestService::days($item->starts_on, $item->ends_on), ['pending' => 'Pendente', 'approved' => 'Aprovada', 'rejected' => 'Recusada', 'cancelled' => 'Cancelada'][$item->status], $item->reviewer?->name ?? ''], ';');
+                fputcsv($out, [$item->user->name, $item->user->email, $item->user->team, $item->entitlement ? $item->entitlement->acquisition_starts_on->format('d/m/Y').' a '.$item->entitlement->acquisition_ends_on->format('d/m/Y') : 'Legado', $item->starts_on->format('d/m/Y'), $item->ends_on->format('d/m/Y'), $item->days(), ['pending' => 'Pendente', 'approved' => 'Aprovada', 'rejected' => 'Recusada', 'cancelled' => 'Cancelada'][$item->status], $item->reviewer?->name ?? ''], ';');
             } fclose($out);
         }, 'ferias-mixhome-'.today()->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }

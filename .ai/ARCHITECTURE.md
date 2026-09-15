@@ -20,6 +20,7 @@ O `compose.yaml` define quatro serviços: `postgres`, `hibrido_laravel`, `queue_
 - `app/Http/Middleware/EnsureRole.php`: restrição por perfil.
 - `app/Models`: modelos Eloquent de usuários, equipes, solicitações, feriados e auditoria.
 - `app/Services`: regras de solicitações e gravação de auditoria.
+- `app/Services/VacationRequestService.php`: conflitos e ciclo de vida das solicitações de férias.
 - `app/Policies/WorkRequestPolicy.php`: escopo de análise por equipe.
 - `app/Support/ReportingCycle.php`: limites e opções do ciclo 20–19.
 - `app/Notifications`: mudança de status, resumo de pendências e falha operacional de backup.
@@ -46,6 +47,14 @@ O `compose.yaml` define quatro serviços: `postgres`, `hibrido_laravel`, `queue_
 3. `WorkRequestService` atualiza status, revisor e horário e registra auditoria.
 4. Uma notificação é enviada ao usuário; em produção a fila usa banco.
 5. A análise em lote limita 100 itens e verifica autorização antes das alterações.
+
+### Férias
+
+1. Colaborador solicita um intervalo futuro imutável.
+2. O serviço rejeita sobreposição com férias ativas ou home office registrado.
+3. Gestor autorizado aprova ou recusa; períodos aprovados aparecem na visão da equipe.
+4. Férias aprovadas bloqueiam novos registros de home office no intervalo.
+5. Super Admin corrige ou cancela com justificativa, preservando auditoria.
 
 ### Usuários e permissões
 

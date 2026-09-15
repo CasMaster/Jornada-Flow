@@ -16,6 +16,7 @@
 
         <nav class="manager-sections">
             <a href="#registros">Solicitações</a>
+            <a href="{{ route('manager.vacations.index') }}">Férias</a>
             @if(auth()->user()->role==='super_admin')
                 <a href="#equipes">Equipes</a>
                 <a href="{{ route('admin.users.index') }}">Diretório de usuários</a>

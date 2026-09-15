@@ -204,3 +204,16 @@ O painel do gestor destaca as pendências mais antigas e resume a distribuição
 ## 13. Saúde operacional
 
 O menu **Operação**, exclusivo do Super Admin, apresenta fila, falhas de processamento, pendências antigas, disponibilidade e tamanho do banco. Esses indicadores complementam o monitoramento externo e não substituem os alertas do servidor.
+
+## 14. Planejamento de férias
+
+Abra **Minhas férias**, informe início e término e envie o período. O sistema mostra
+os dias corridos no histórico e impede sobreposição com outra solicitação de férias
+ou com home office já registrado. Depois do envio, o colaborador apenas acompanha.
+
+Gestores acessam **Gestão → Férias**, visualizam somente suas equipes, consultam os
+próximos períodos aprovados e aprovam ou recusam pedidos. A exportação CSV respeita
+os filtros. Férias aprovadas impedem novos pedidos de home office nas mesmas datas.
+
+O Super Admin pode corrigir datas ou cancelar um registro mediante justificativa
+obrigatória. O registro permanece no histórico e todas as ações ficam na auditoria.

@@ -21,13 +21,16 @@ class VacationRequestService
         return DB::transaction(function () use ($user, $startsOn, $endsOn) {
             $vacation = $user->vacationRequests()->create(['starts_on' => $startsOn, 'ends_on' => $endsOn, 'status' => 'pending']);
             $this->audit->record('vacation_request.created', $vacation, [], $vacation->only(['starts_on', 'ends_on', 'status']));
+
             return $vacation;
         });
     }
 
     public function review(User $manager, VacationRequest $vacation, string $decision, ?string $note): void
     {
-        if ($vacation->status !== 'pending') throw ValidationException::withMessages(['decision' => 'Esta solicitação já foi analisada.']);
+        if ($vacation->status !== 'pending') {
+            throw ValidationException::withMessages(['decision' => 'Esta solicitação já foi analisada.']);
+        }
         if ($decision === 'approved') {
             $this->ensureAvailable($vacation->user, $vacation->starts_on->toDateString(), $vacation->ends_on->toDateString(), $vacation);
         }
@@ -39,7 +42,9 @@ class VacationRequestService
 
     public function correct(User $admin, VacationRequest $vacation, string $startsOn, string $endsOn, string $note): void
     {
-        if ($vacation->status === 'cancelled') throw ValidationException::withMessages(['note' => 'Uma solicitação cancelada não pode ser corrigida.']);
+        if ($vacation->status === 'cancelled') {
+            throw ValidationException::withMessages(['note' => 'Uma solicitação cancelada não pode ser corrigida.']);
+        }
         $this->ensureAvailable($vacation->user, $startsOn, $endsOn, $vacation);
         $old = $vacation->only(['starts_on', 'ends_on', 'corrected_by', 'corrected_at', 'review_note']);
         $vacation->update(['starts_on' => $startsOn, 'ends_on' => $endsOn, 'corrected_by' => $admin->id, 'corrected_at' => now(), 'review_note' => trim($note)]);
@@ -48,7 +53,9 @@ class VacationRequestService
 
     public function cancel(User $admin, VacationRequest $vacation, string $note): void
     {
-        if ($vacation->status === 'cancelled') throw ValidationException::withMessages(['cancel_note' => 'Esta solicitação já está cancelada.']);
+        if ($vacation->status === 'cancelled') {
+            throw ValidationException::withMessages(['cancel_note' => 'Esta solicitação já está cancelada.']);
+        }
         $old = $vacation->only(['status', 'cancelled_by', 'cancelled_at', 'cancel_note']);
         $vacation->update(['status' => 'cancelled', 'cancelled_by' => $admin->id, 'cancelled_at' => now(), 'cancel_note' => trim($note)]);
         $this->audit->record('vacation_request.cancelled', $vacation, $old, $vacation->only(['status', 'cancelled_by', 'cancelled_at', 'cancel_note']));
@@ -60,11 +67,15 @@ class VacationRequestService
         $vacationConflict = $user->vacationRequests()->whereNotIn('status', ['rejected', 'cancelled'])
             ->when($ignore, fn ($query) => $query->whereKeyNot($ignore->id))
             ->whereDate('starts_on', '<=', $endsOn)->whereDate('ends_on', '>=', $startsOn)->exists();
-        if ($vacationConflict) throw ValidationException::withMessages(['starts_on' => 'O período conflita com outra solicitação de férias.']);
+        if ($vacationConflict) {
+            throw ValidationException::withMessages(['starts_on' => 'O período conflita com outra solicitação de férias.']);
+        }
 
         $workConflict = WorkRequest::where('user_id', $user->id)->whereNotIn('status', ['rejected'])
             ->whereBetween('work_date', [$startsOn, $endsOn])->exists();
-        if ($workConflict) throw ValidationException::withMessages(['starts_on' => 'O período conflita com dias de home office registrados.']);
+        if ($workConflict) {
+            throw ValidationException::withMessages(['starts_on' => 'O período conflita com dias de home office registrados.']);
+        }
     }
 
     public static function days(mixed $startsOn, mixed $endsOn): int

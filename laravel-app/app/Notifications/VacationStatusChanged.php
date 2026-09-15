@@ -12,7 +12,10 @@ class VacationStatusChanged extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public VacationRequest $vacation) { $this->afterCommit(); }
+    public function __construct(public VacationRequest $vacation)
+    {
+        $this->afterCommit();
+    }
 
     public function via(object $notifiable): array
     {
@@ -27,6 +30,7 @@ class VacationStatusChanged extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $label = ['approved' => 'aprovada', 'rejected' => 'recusada', 'cancelled' => 'cancelada'][$this->vacation->status] ?? 'atualizada';
+
         return (new MailMessage)->subject('Atualização da solicitação de férias')->greeting('Olá, '.$notifiable->name.'.')->line('Sua solicitação de '.$this->vacation->starts_on->format('d/m/Y').' a '.$this->vacation->ends_on->format('d/m/Y').' foi '.$label.'.')->action('Consultar férias', route('vacations.index'));
     }
 }

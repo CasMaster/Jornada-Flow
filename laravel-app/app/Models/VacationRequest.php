@@ -11,11 +11,23 @@ class VacationRequest extends Model
 
     protected $casts = ['starts_on' => 'date', 'ends_on' => 'date', 'reviewed_at' => 'datetime', 'corrected_at' => 'datetime', 'cancelled_at' => 'datetime'];
 
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
-    public function reviewer(): BelongsTo { return $this->belongsTo(User::class, 'reviewed_by'); }
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
+    }
 
-    public function corrector(): BelongsTo { return $this->belongsTo(User::class, 'corrected_by'); }
+    public function corrector(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'corrected_by');
+    }
 
-    public function canceller(): BelongsTo { return $this->belongsTo(User::class, 'cancelled_by'); }
+    public function canceller(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by');
+    }
 }

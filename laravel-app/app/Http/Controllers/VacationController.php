@@ -20,6 +20,7 @@ class VacationController extends Controller
     {
         $data = $request->validate(['starts_on' => ['required', 'date', 'after_or_equal:today'], 'ends_on' => ['required', 'date', 'after_or_equal:starts_on']]);
         $vacation = $this->vacations->create($request->user(), $data['starts_on'], $data['ends_on']);
+
         return back()->with('success', VacationRequestService::days($data['starts_on'], $data['ends_on']).' dia(s) de férias enviados para aprovação.');
     }
 }

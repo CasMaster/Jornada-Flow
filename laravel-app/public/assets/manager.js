@@ -142,10 +142,11 @@ const positionRequestMenu = (details) => {
   const summary = details.querySelector('summary');
   if (!panel || !summary || !details.open) return;
   const rect = summary.getBoundingClientRect();
-  const panelWidth = Math.min(220, window.innerWidth - 24);
+  const panelWidth = Math.min(panel.offsetWidth || 220, window.innerWidth - 24);
   const right = Math.max(12, window.innerWidth - rect.right);
   let top = rect.bottom + 7;
-  if (top + 96 > window.innerHeight - 12) top = Math.max(12, rect.top - 96);
+  const panelHeight = Math.min(panel.scrollHeight || 96, window.innerHeight - 24);
+  if (top + panelHeight > window.innerHeight - 12) top = Math.max(12, rect.top - panelHeight - 7);
   panel.style.setProperty('--request-menu-top', `${top}px`);
   panel.style.setProperty('--request-menu-right', `${Math.min(right, window.innerWidth - panelWidth - 12)}px`);
 };
@@ -162,6 +163,11 @@ window.addEventListener('resize', () => {
   document.querySelectorAll('details.user-menu[open]').forEach(positionUserMenu);
   document.querySelectorAll('details.request-menu[open]').forEach(positionRequestMenu);
 });
+
+window.addEventListener('scroll', () => {
+  document.querySelectorAll('details.user-menu[open]').forEach(positionUserMenu);
+  document.querySelectorAll('details.request-menu[open]').forEach(positionRequestMenu);
+}, { passive: true });
 
 const selectAll = document.querySelector('[data-select-all]');
 const batchCheckboxes = [...document.querySelectorAll('.batch-checkbox')];

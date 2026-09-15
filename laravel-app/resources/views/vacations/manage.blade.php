@@ -25,3 +25,4 @@
   </tbody></table></div>{{ $vacations->links() }}</article>
 </section></main>
 @endsection
+@push('scripts')<script src="{{ asset('assets/manager.js') }}?v={{ filemtime(public_path('assets/manager.js')) }}" defer></script>@endpush

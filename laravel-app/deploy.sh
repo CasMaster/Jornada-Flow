@@ -67,4 +67,6 @@ until podman exec "$APP_CONTAINER" php /var/www/html/docker-healthcheck.php >/de
     sleep 5
 done
 
+podman exec "$APP_CONTAINER" php artisan hibrido:sync-vacation-entitlements
+
 echo "Deploy validado. Backup prévio: $BACKUP_FILE"

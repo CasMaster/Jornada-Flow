@@ -177,6 +177,25 @@ class VacationFlowTest extends TestCase
             ->assertDontSee('Início aquisitivo');
     }
 
+    public function test_employee_sees_current_accrual_period_before_first_balance_is_released(): void
+    {
+        $this->travelTo('2026-09-15');
+        $employee = User::factory()->create([
+            'role' => 'employee',
+            'hired_on' => '2025-11-11',
+        ]);
+
+        $this->actingAs($employee)->get(route('vacations.index'))
+            ->assertOk()
+            ->assertSee('Em formação')
+            ->assertSee('11/11/2025')
+            ->assertSee('10/11/2026')
+            ->assertSee('Disponível a partir de 11/11/2026')
+            ->assertDontSee('Confirme sua data de admissão');
+
+        $this->travelBack();
+    }
+
     private function entitlement(User $user, int $days): VacationEntitlement
     {
         return VacationEntitlement::create([

@@ -65,4 +65,28 @@ class VacationEntitlementService
 
         return $created;
     }
+
+    /**
+     * @return array{starts_on: CarbonImmutable, ends_on: CarbonImmutable, available_on: CarbonImmutable}|null
+     */
+    public function currentAccrualPeriod(User $user): ?array
+    {
+        if (! $user->hired_on) {
+            return null;
+        }
+
+        $startsOn = CarbonImmutable::parse($user->hired_on);
+
+        while ($startsOn->addYearNoOverflow()->lte(today())) {
+            $startsOn = $startsOn->addYearNoOverflow();
+        }
+
+        $endsOn = $startsOn->addYearNoOverflow()->subDay();
+
+        return [
+            'starts_on' => $startsOn,
+            'ends_on' => $endsOn,
+            'available_on' => $endsOn->addDay(),
+        ];
+    }
 }

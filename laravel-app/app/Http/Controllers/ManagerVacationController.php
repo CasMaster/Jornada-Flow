@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\VacationEntitlement;
 use App\Models\VacationRequest;
 use App\Services\VacationRequestService;
+use App\Services\VacationEntitlementService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ManagerVacationController extends Controller
 {
-    public function __construct(private VacationRequestService $vacations) {}
+    public function __construct(
+        private VacationRequestService $vacations,
+        private VacationEntitlementService $vacationEntitlements,
+    ) {}
 
     private function allowedTeams(User $user): array
     {
@@ -43,13 +47,20 @@ class ManagerVacationController extends Controller
     public function index(Request $request): View
     {
         $query = $this->query($request);
+        $employees = $request->user()->role === 'super_admin'
+            ? User::where('active', true)->orderBy('name')->get(['id', 'name', 'email', 'hired_on'])
+            : collect();
 
         return view('vacations.manage', [
             'vacations' => (clone $query)->orderBy('starts_on')->paginate(25)->withQueryString(),
             'approved' => (clone $query)->where('status', 'approved')->whereDate('ends_on', '>=', today())->orderBy('starts_on')->limit(20)->get(),
             'teams' => $this->allowedTeams($request->user()),
-            'employees' => $request->user()->role === 'super_admin' ? User::where('active', true)->orderBy('name')->get(['id', 'name', 'email']) : collect(),
+            'employees' => $employees,
             'entitlements' => $request->user()->role === 'super_admin' ? VacationEntitlement::with(['user', 'requests'])->latest('acquisition_ends_on')->limit(100)->get() : collect(),
+            'accrualPeriods' => $employees->filter(fn (User $user) => $user->hired_on)->map(fn (User $user) => [
+                'user' => $user,
+                'period' => $this->vacationEntitlements->currentAccrualPeriod($user),
+            ]),
         ]);
     }
 

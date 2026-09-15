@@ -12,8 +12,18 @@
         <div><span>{{ $entitlement->approvedDays() }} utilizados</span><span>{{ $entitlement->reservedDays() }} reservados</span><span>{{ $entitlement->totalDays() }} concedidos</span></div>
       </article>
     @empty
+      @unless($accrualPeriod)
       <article class="card vacation-balance-card is-empty"><strong>Sem saldo disponível</strong><p>Confirme sua data de admissão com o responsável pelo cadastro de usuários.</p></article>
+      @endunless
     @endforelse
+    @if($accrualPeriod)
+      <article class="card vacation-balance-card is-accruing">
+        <span>PRÓXIMO SALDO</span>
+        <strong>Em formação</strong>
+        <p>Período trabalhado de {{ $accrualPeriod['starts_on']->format('d/m/Y') }} a {{ $accrualPeriod['ends_on']->format('d/m/Y') }}.</p>
+        <div><span>30 dias previstos</span><span>Disponível a partir de {{ $accrualPeriod['available_on']->format('d/m/Y') }}</span></div>
+      </article>
+    @endif
   </div>
   <div class="vacation-layout">
     <article class="card vacation-form-card"><div class="title"><span>01</span><h2>Nova solicitação</h2></div><form method="post" action="{{ route('vacations.store') }}" class="vacation-form">@csrf

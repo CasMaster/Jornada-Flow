@@ -60,7 +60,7 @@ Consulte os eventos com `podman logs hibrido-home-office-prod` e os processos wo
 
 ## Deploy seguro e rollback
 
-`deploy.sh` cria um dump PostgreSQL com checksum e permissão restrita na pasta `backups/` do próprio ambiente (ou em `BACKUP_DIR`, quando definido) antes de reconstruir os serviços. Essa pasta é excluída da imagem. Depois da recriação, executa repetidamente o healthcheck da imagem. Se a aplicação não ficar saudável, volta a apontar os serviços para a imagem anterior e encerra com erro. O smoke HTTPS externo ainda é obrigatório depois desse processo.
+`deploy.sh` cria um dump PostgreSQL com checksum e permissão restrita na pasta `backups/` do próprio ambiente (ou em `BACKUP_DIR`, quando definido) antes de reconstruir os serviços. Essa pasta é excluída da imagem. Depois da recriação, executa repetidamente o healthcheck da imagem e sincroniza os saldos de férias das pessoas com data de admissão, incluindo cadastros anteriores à implantação dessa funcionalidade. Se a aplicação não ficar saudável, volta a apontar os serviços para a imagem anterior e encerra com erro. O smoke HTTPS externo ainda é obrigatório depois desse processo.
 
 O retorno da imagem não desfaz migrations. Toda migration de produção deve ser progressiva e compatível com a versão anterior; se uma mudança de schema impedir o retorno, interrompa a operação e use o backup pré-deploy somente mediante autorização explícita do Super Admin.
 

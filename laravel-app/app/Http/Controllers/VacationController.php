@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\VacationEntitlement;
+use App\Services\VacationEntitlementService;
 use App\Services\VacationRequestService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -10,7 +11,10 @@ use Illuminate\View\View;
 
 class VacationController extends Controller
 {
-    public function __construct(private VacationRequestService $vacations) {}
+    public function __construct(
+        private VacationRequestService $vacations,
+        private VacationEntitlementService $vacationEntitlements,
+    ) {}
 
     public function index(Request $request): View
     {
@@ -20,6 +24,7 @@ class VacationController extends Controller
             'vacations' => $request->user()->vacationRequests()->with(['reviewer', 'entitlement'])->latest('starts_on')->paginate(15),
             'entitlements' => $entitlements,
             'usableEntitlements' => $entitlements->filter(fn (VacationEntitlement $entitlement) => $entitlement->isUsable() && $entitlement->availableDays() > 0)->values(),
+            'accrualPeriod' => $this->vacationEntitlements->currentAccrualPeriod($request->user()),
         ]);
     }
 

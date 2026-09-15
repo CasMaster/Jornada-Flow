@@ -48,6 +48,11 @@ class VacationEntitlement extends Model
         return $this->totalDays() - $this->approvedDays($ignoreRequestId) - $this->reservedDays($ignoreRequestId);
     }
 
+    public function isUsable(): bool
+    {
+        return $this->acquisition_ends_on->lt(today()) && (! $this->expires_on || $this->expires_on->gte(today()));
+    }
+
     private function requestDays(array $statuses, ?int $ignoreRequestId): int
     {
         if ($this->relationLoaded('requests')) {

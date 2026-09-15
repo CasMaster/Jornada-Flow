@@ -28,7 +28,7 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Validação
 
-- Módulo de férias com saldo: 8 testes funcionais; suíte completa com 51 testes e 311 assertions aprovada em SQLite.
+- Módulo de férias com saldo: interface simplificada e 9 testes funcionais; suíte completa com 52 testes e 315 assertions aprovada em SQLite.
 - Templates Blade, sete rotas do módulo, Laravel Pint e build local da imagem aprovados.
 - Laravel Pint: aprovado.
 - PHPUnit/SQLite: 35 testes, 233 assertions, todos aprovados.

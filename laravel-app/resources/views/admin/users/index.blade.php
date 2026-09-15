@@ -22,7 +22,7 @@
             <label>E-mail corporativo<input name="email" type="email" value="{{ old('email') }}" required></label>
             <label>Perfil<select name="role"><option value="employee">Colaborador</option><option value="manager">Gestor</option><option value="super_admin">Super Admin</option></select></label>
             <label>Equipe própria<select name="team"><option value="">Sem equipe</option>@foreach($teams->where('active',true) as $team)<option @selected(old('team')===$team->name)>{{ $team->name }}</option>@endforeach</select></label>
-            <label>Data de contratação<input name="hired_on" type="date" max="{{ today()->format('Y-m-d') }}" value="{{ old('hired_on') }}"><small>Gera automaticamente os períodos aquisitivos completos.</small></label>
+            <label>Data de admissão<input name="hired_on" type="date" max="{{ today()->format('Y-m-d') }}" value="{{ old('hired_on') }}"><small>É só informar esta data; o saldo de férias será calculado automaticamente.</small></label>
             <label>Equipes administradas<select name="manager_teams[]" multiple class="click-multi" data-placeholder="Selecione para gestores">@foreach($teams->where('active',true) as $team)<option value="{{ $team->id }}">{{ $team->name }}</option>@endforeach</select></label>
             <label>Senha provisória (opcional)<input name="password" type="password" minlength="8" autocomplete="new-password"></label>
             <label>Confirmar senha provisória<input name="password_confirmation" type="password" minlength="8" autocomplete="new-password"></label>

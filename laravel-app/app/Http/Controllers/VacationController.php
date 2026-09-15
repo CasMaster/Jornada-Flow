@@ -14,9 +14,12 @@ class VacationController extends Controller
 
     public function index(Request $request): View
     {
+        $entitlements = $request->user()->vacationEntitlements()->with('requests')->orderByDesc('acquisition_ends_on')->get();
+
         return view('vacations.index', [
             'vacations' => $request->user()->vacationRequests()->with(['reviewer', 'entitlement'])->latest('starts_on')->paginate(15),
-            'entitlements' => $request->user()->vacationEntitlements()->with('requests')->orderByDesc('acquisition_ends_on')->get(),
+            'entitlements' => $entitlements,
+            'usableEntitlements' => $entitlements->filter(fn (VacationEntitlement $entitlement) => $entitlement->isUsable() && $entitlement->availableDays() > 0)->values(),
         ]);
     }
 

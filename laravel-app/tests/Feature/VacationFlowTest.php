@@ -165,6 +165,18 @@ class VacationFlowTest extends TestCase
         $this->assertSame(2, AuditLog::where('event', 'vacation_entitlement.generated')->count());
     }
 
+    public function test_employee_with_one_balance_does_not_need_to_choose_acquisition_period(): void
+    {
+        $employee = User::factory()->create(['role' => 'employee']);
+        $entitlement = $this->entitlement($employee, 30);
+
+        $this->actingAs($employee)->get(route('vacations.index'))
+            ->assertOk()
+            ->assertSee('será usado automaticamente')
+            ->assertSee('name="vacation_entitlement_id" value="'.$entitlement->id.'"', false)
+            ->assertDontSee('Início aquisitivo');
+    }
+
     private function entitlement(User $user, int $days): VacationEntitlement
     {
         return VacationEntitlement::create([

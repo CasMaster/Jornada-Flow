@@ -2,6 +2,10 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-09-15 — Planejamento antecipado de férias
+
+O período anual em formação é criado a partir da data de admissão e pode receber uma solicitação antecipada, desde que o primeiro dia das férias seja posterior ao encerramento aquisitivo e o último respeite o prazo de utilização. O formulário limita essas datas e a mesma regra permanece validada no servidor. O saldo em formação é identificado como previsão até completar os 12 meses.
+
 ## 2026-09-15 — Saldo administrativo de férias por período aquisitivo
 
 O MixHome conta dias corridos de forma inclusiva e controla concessão, ajuste, reserva e consumo por período aquisitivo. A data de contratação gera automaticamente ciclos anuais completos, com 30 dias e prazo de utilização de um ano após o término. A sincronização ocorre ao salvar o usuário e diariamente. Solicitações pendentes reservam saldo; aprovadas consomem; recusadas e canceladas liberam os dias. O Super Admin ajusta exceções mediante justificativa auditada. O controle apoia o planejamento, mas não substitui o sistema oficial de RH/folha nem automatiza regras legais de fracionamento, abono ou redução por faltas.

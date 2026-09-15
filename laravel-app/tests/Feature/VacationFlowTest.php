@@ -148,21 +148,21 @@ class VacationFlowTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['event' => 'vacation_entitlement.created']);
     }
 
-    public function test_hiring_date_generates_completed_acquisition_periods_idempotently(): void
+    public function test_hiring_date_generates_completed_and_current_acquisition_periods_idempotently(): void
     {
         $admin = User::factory()->create(['role' => 'super_admin']);
         $employee = User::factory()->create(['role' => 'employee', 'hired_on' => today()->subYears(2)]);
         $service = app(VacationEntitlementService::class);
 
-        $this->assertSame(2, $service->sync($employee, $admin));
+        $this->assertSame(3, $service->sync($employee, $admin));
         $this->assertSame(0, $service->sync($employee, $admin));
-        $this->assertSame(2, $employee->vacationEntitlements()->count());
+        $this->assertSame(3, $employee->vacationEntitlements()->count());
         $this->assertDatabaseHas('vacation_entitlements', [
             'user_id' => $employee->id,
             'granted_days' => 30,
             'adjustment_days' => 0,
         ]);
-        $this->assertSame(2, AuditLog::where('event', 'vacation_entitlement.generated')->count());
+        $this->assertSame(3, AuditLog::where('event', 'vacation_entitlement.generated')->count());
     }
 
     public function test_employee_with_one_balance_does_not_need_to_choose_acquisition_period(): void
@@ -194,6 +194,36 @@ class VacationFlowTest extends TestCase
             ->assertSee('10/11/2026')
             ->assertSee('Disponível a partir de 11/11/2026')
             ->assertDontSee('Confirme sua data de admissão');
+
+        $this->travelBack();
+    }
+
+    public function test_employee_can_plan_vacation_for_after_current_period_release(): void
+    {
+        $this->travelTo('2026-09-15');
+        $employee = User::factory()->create([
+            'role' => 'employee',
+            'hired_on' => '2025-11-11',
+        ]);
+        app(VacationEntitlementService::class)->sync($employee);
+        $entitlement = $employee->vacationEntitlements()->firstOrFail();
+
+        $this->actingAs($employee)->get(route('vacations.index'))
+            ->assertOk()
+            ->assertSee('data-available-from="2026-11-11"', false)
+            ->assertDontSee('id="vacation-starts-on" type="date" name="starts_on" data-today="2026-09-15" min="2026-09-15" value="" required disabled', false);
+
+        $this->actingAs($employee)->post(route('vacations.store'), [
+            'vacation_entitlement_id' => $entitlement->id,
+            'starts_on' => '2026-11-11',
+            'ends_on' => '2026-11-15',
+        ])->assertSessionHasNoErrors();
+
+        $this->actingAs($employee)->post(route('vacations.store'), [
+            'vacation_entitlement_id' => $entitlement->id,
+            'starts_on' => '2026-11-10',
+            'ends_on' => '2026-11-10',
+        ])->assertSessionHasErrors('starts_on');
 
         $this->travelBack();
     }

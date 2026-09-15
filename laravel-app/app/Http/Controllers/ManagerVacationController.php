@@ -6,7 +6,6 @@ use App\Models\Team;
 use App\Models\User;
 use App\Models\VacationEntitlement;
 use App\Models\VacationRequest;
-use App\Services\VacationEntitlementService;
 use App\Services\VacationRequestService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -16,10 +15,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ManagerVacationController extends Controller
 {
-    public function __construct(
-        private VacationRequestService $vacations,
-        private VacationEntitlementService $vacationEntitlements,
-    ) {}
+    public function __construct(private VacationRequestService $vacations) {}
 
     private function allowedTeams(User $user): array
     {
@@ -57,10 +53,6 @@ class ManagerVacationController extends Controller
             'teams' => $this->allowedTeams($request->user()),
             'employees' => $employees,
             'entitlements' => $request->user()->role === 'super_admin' ? VacationEntitlement::with(['user', 'requests'])->latest('acquisition_ends_on')->limit(100)->get() : collect(),
-            'accrualPeriods' => $employees->filter(fn (User $user) => $user->hired_on)->map(fn (User $user) => [
-                'user' => $user,
-                'period' => $this->vacationEntitlements->currentAccrualPeriod($user),
-            ]),
         ]);
     }
 

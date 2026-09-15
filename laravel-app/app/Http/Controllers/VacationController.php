@@ -24,6 +24,7 @@ class VacationController extends Controller
             'vacations' => $request->user()->vacationRequests()->with(['reviewer', 'entitlement'])->latest('starts_on')->paginate(15),
             'entitlements' => $entitlements,
             'usableEntitlements' => $entitlements->filter(fn (VacationEntitlement $entitlement) => $entitlement->isUsable() && $entitlement->availableDays() > 0)->values(),
+            'requestableEntitlements' => $entitlements->filter(fn (VacationEntitlement $entitlement) => $entitlement->isRequestable() && $entitlement->availableDays() > 0)->values(),
             'accrualPeriod' => $this->vacationEntitlements->currentAccrualPeriod($request->user()),
         ]);
     }

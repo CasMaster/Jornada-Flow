@@ -25,9 +25,6 @@ class VacationEntitlementService
                 $startsOn = $hiredOn->addYearsNoOverflow($year);
                 $nextStartsOn = $hiredOn->addYearsNoOverflow($year + 1);
                 $endsOn = $nextStartsOn->subDay();
-                if ($endsOn->gte(today())) {
-                    break;
-                }
 
                 $entitlement = VacationEntitlement::where('user_id', $user->id)
                     ->whereDate('acquisition_starts_on', $startsOn)
@@ -49,6 +46,10 @@ class VacationEntitlementService
                     $this->audit->record('vacation_entitlement.generated', $entitlement, [], $entitlement->only([
                         'user_id', 'acquisition_starts_on', 'acquisition_ends_on', 'expires_on', 'granted_days',
                     ]));
+                }
+
+                if ($endsOn->gte(today())) {
+                    break;
                 }
             }
 

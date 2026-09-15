@@ -16,7 +16,7 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Alterações atuais
 
-- O painel de férias mostra o período anual ainda em formação e sua data prevista de liberação, sem conceder saldo antes de completar os 12 meses.
+- O painel mostra o período anual em formação e permite planejar férias antecipadamente, mas restringe o início à data de liberação e o fim ao prazo de utilização; o servidor reforça os mesmos limites.
 - O deploy sincroniza de forma idempotente os saldos de férias após o healthcheck, cobrindo datas de admissão cadastradas antes da implantação do cálculo automático.
 - Módulo de férias com geração automática dos períodos pela data de contratação, contagem inclusiva, saldo, reserva/consumo, fracionamento, análise por equipe, bloqueio cruzado com home office, correção/cancelamento auditado e CSV.
 - Delegação temporária entre gestores, administrada exclusivamente pelo Super Admin, com autorização aplicada na Policy.

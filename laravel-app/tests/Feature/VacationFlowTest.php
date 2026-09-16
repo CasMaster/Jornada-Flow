@@ -116,6 +116,9 @@ class VacationFlowTest extends TestCase
             'ends_on' => $start->copy()->addDays(5)->toDateString(),
         ])->assertSessionHasNoErrors();
         $this->assertSame(4, $entitlement->availableDays());
+        $this->actingAs($employee)->get(route('vacations.index'))
+            ->assertSee('4 dias restantes')
+            ->assertSee('6 dias já estão reservados em solicitação pendente.');
 
         $this->actingAs($employee)->post(route('vacations.store'), [
             'vacation_entitlement_id' => $entitlement->id,
@@ -172,7 +175,8 @@ class VacationFlowTest extends TestCase
 
         $this->actingAs($employee)->get(route('vacations.index'))
             ->assertOk()
-            ->assertSee('será usado automaticamente')
+            ->assertSee('dias restantes')
+            ->assertSee('Este saldo será usado automaticamente.')
             ->assertSee('name="vacation_entitlement_id" value="'.$entitlement->id.'"', false)
             ->assertSee('data-available-from="'.$entitlement->acquisition_ends_on->copy()->addDay()->format('Y-m-d').'"', false)
             ->assertSee('data-expires-on="'.$entitlement->expires_on->format('Y-m-d').'"', false)

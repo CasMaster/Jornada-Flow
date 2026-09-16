@@ -235,6 +235,35 @@ class VacationFlowTest extends TestCase
         $this->travelBack();
     }
 
+    public function test_super_admin_sees_available_accruing_and_expired_periods_correctly(): void
+    {
+        $this->travelTo('2026-09-16');
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $employee = User::factory()->create();
+        foreach ([
+            ['2026-03-14', '2027-03-13', '2028-03-13'],
+            ['2025-03-14', '2026-03-13', '2027-03-13'],
+            ['2024-03-14', '2025-03-13', '2026-03-13'],
+        ] as [$startsOn, $endsOn, $expiresOn]) {
+            VacationEntitlement::create([
+                'user_id' => $employee->id,
+                'acquisition_starts_on' => $startsOn,
+                'acquisition_ends_on' => $endsOn,
+                'expires_on' => $expiresOn,
+                'granted_days' => 30,
+                'notes' => 'Teste de classificação',
+            ]);
+        }
+
+        $this->actingAs($admin)->get(route('manager.vacations.index'))
+            ->assertOk()
+            ->assertSee('Em formação · libera 14/03/2027')
+            ->assertSee('30 disponíveis')
+            ->assertSee('Vencido em 13/03/2026');
+
+        $this->travelBack();
+    }
+
     private function entitlement(User $user, int $days): VacationEntitlement
     {
         return VacationEntitlement::create([

@@ -53,6 +53,16 @@ class VacationEntitlement extends Model
         return $this->acquisition_ends_on->lt(today()) && (! $this->expires_on || $this->expires_on->gte(today()));
     }
 
+    public function isAccruing(): bool
+    {
+        return $this->acquisition_ends_on->gte(today());
+    }
+
+    public function isExpired(): bool
+    {
+        return ! $this->isAccruing() && $this->expires_on?->lt(today());
+    }
+
     public function isRequestable(): bool
     {
         return ! $this->expires_on || $this->expires_on->gte(today());

@@ -2,6 +2,10 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-09-16 — Gestão dividida por responsabilidade
+
+O painel gerencial de solicitações deixa de concentrar cadastros administrativos. Solicitações, férias, equipes, usuários, auditoria e operação passam a ter navegação comum e telas dedicadas. A tela de Equipes reúne cadastro de equipes, calendário corporativo e delegações temporárias; permanece exclusiva do Super Admin. A separação reduz carga e complexidade visual sem duplicar regras de domínio ou permissões.
+
 ## 2026-09-15 — Planejamento antecipado de férias
 
 O período anual em formação é criado a partir da data de admissão e pode receber uma solicitação antecipada, desde que o primeiro dia das férias seja posterior ao encerramento aquisitivo e o último respeite o prazo de utilização. O formulário limita essas datas e a mesma regra permanece validada no servidor. O saldo em formação é identificado como previsão até completar os 12 meses.

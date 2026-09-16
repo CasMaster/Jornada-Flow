@@ -160,6 +160,25 @@ class HibridoFlowTest extends TestCase
         $this->actingAs($manager)->get('/admin/operacao')->assertForbidden();
     }
 
+    public function test_management_areas_are_split_into_dedicated_screens(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $manager = User::factory()->create(['role' => 'manager']);
+
+        $this->actingAs($admin)->get(route('manager.dashboard'))
+            ->assertOk()
+            ->assertSee('Localizar solicitações')
+            ->assertDontSee('Delegação de gestores');
+
+        $this->actingAs($admin)->get(route('admin.teams.index'))
+            ->assertOk()
+            ->assertSee('Equipes e')
+            ->assertSee('Feriados e bloqueios')
+            ->assertSee('Delegação de gestores');
+
+        $this->actingAs($manager)->get(route('admin.teams.index'))->assertForbidden();
+    }
+
     public function test_retention_is_dry_run_and_requires_feature_flag(): void
     {
         AuditLog::create(['event' => 'old.event', 'created_at' => now()->subYears(3), 'updated_at' => now()->subYears(3)]);

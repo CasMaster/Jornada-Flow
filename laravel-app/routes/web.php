@@ -51,6 +51,7 @@ Route::prefix(config('app.route_prefix'))->group(function () {
         Route::get('/ferias/exportar', [ManagerVacationController::class, 'export'])->name('manager.vacations.export');
     });
     Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->group(function () {
+        Route::get('/equipes', [AdminController::class, 'teams'])->name('admin.teams.index');
         Route::post('/equipes', [AdminController::class, 'team'])->name('admin.teams.store');
         Route::patch('/equipes/{team}', [AdminController::class, 'toggleTeam'])->name('admin.teams.toggle');
         Route::post('/calendario', [AdminController::class, 'holiday'])->name('admin.holidays.store');

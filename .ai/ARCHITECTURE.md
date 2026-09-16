@@ -26,6 +26,7 @@ O `compose.yaml` define quatro serviços: `postgres`, `hibrido_laravel`, `queue_
 - `app/Notifications`: mudança de status, resumo de pendências e falha operacional de backup.
 - `app/Console/Commands`: criação de Super Admin e importação legada.
 - `resources/views`: páginas Blade server-rendered.
+- `resources/views/manager/_navigation.blade.php`: navegação compartilhada entre as áreas de gestão; solicitações, férias, equipes, usuários, auditoria e operação são telas distintas.
 - `public/assets`: identidade visual e interações sem pipeline de build frontend.
 - `database/migrations`: schema incremental.
 - `tests/Feature`: cobertura dos fluxos principais.

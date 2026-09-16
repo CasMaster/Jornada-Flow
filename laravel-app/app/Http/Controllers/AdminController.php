@@ -18,6 +18,19 @@ class AdminController extends Controller
 {
     public function __construct(private AuditService $audit) {}
 
+    public function teams(): View
+    {
+        $holidays = Holiday::orderBy('date')->whereDate('date', '>=', today()->startOfYear())->get();
+
+        return view('admin.teams', [
+            'allTeams' => Team::orderBy('name')->get(),
+            'holidays' => $holidays,
+            'holidayLastSync' => $holidays->whereNotNull('last_synced_at')->max('last_synced_at'),
+            'managers' => User::where('active', true)->whereIn('role', ['manager', 'super_admin'])->orderBy('name')->get(),
+            'delegations' => ManagerDelegation::with(['manager', 'delegate'])->whereDate('ends_on', '>=', today())->orderBy('starts_on')->get(),
+        ]);
+    }
+
     public function team(Request $request): RedirectResponse
     {
         $data = $request->validate(['name' => ['required', 'string', 'max:100', 'unique:teams']]);

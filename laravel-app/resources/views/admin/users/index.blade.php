@@ -8,6 +8,7 @@
         <div><p class="eyebrow">ADMINISTRAÇÃO</p><h1>Diretório de <em>usuários.</em></h1><p>Contas, equipes e permissões em uma área dedicada e paginada.</p></div>
         <a class="clear-filter" href="{{ route('manager.dashboard') }}">← Voltar para gestão</a>
     </div>
+    @include('manager._navigation')
 
     <div class="stats stats-three directory-stats">
         <div><span>TOTAL</span><strong>{{ $totalUsers }}</strong></div>

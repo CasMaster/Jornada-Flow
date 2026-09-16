@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Holiday;
-use App\Models\ManagerDelegation;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\WorkRequest;
@@ -87,8 +85,6 @@ class ManagerController extends Controller
         $sorts = ['date_asc' => ['work_date', 'asc'], 'date_desc' => ['work_date', 'desc'], 'created_desc' => ['created_at', 'desc'], 'status' => ['status', 'asc']];
         [$sortColumn, $sortDirection] = $sorts[$request->string('sort')->toString()] ?? $sorts['date_asc'];
         $perPage = in_array($request->integer('per_page'), [25, 50, 100], true) ? $request->integer('per_page') : 25;
-        $isAdmin = $request->user()->role === 'super_admin';
-        $holidays = $isAdmin ? Holiday::whereBetween('date', [$start, $end])->orderBy('date')->get() : collect();
 
         return view('manager.dashboard', [
             'records' => $base->orderBy($sortColumn, $sortDirection)->paginate($perPage)->withQueryString(),
@@ -97,10 +93,6 @@ class ManagerController extends Controller
             'teams' => Team::whereIn('name', $allowed)->orderBy('name')->get(),
             'employees' => User::where('active', true)->where('team', '<>', '')->whereIn('team', $employeeTeams)->orderBy('name')->get(),
             'cycles' => ReportingCycle::options(), 'start' => $start, 'end' => $end,
-            'allTeams' => $isAdmin ? Team::orderBy('name')->get() : collect(), 'holidays' => $holidays,
-            'holidayLastSync' => $holidays->whereNotNull('last_synced_at')->max('last_synced_at'),
-            'managers' => $isAdmin ? User::where('active', true)->whereIn('role', ['manager', 'super_admin'])->orderBy('name')->get() : collect(),
-            'delegations' => $isAdmin ? ManagerDelegation::with(['manager', 'delegate'])->whereDate('ends_on', '>=', today())->orderBy('starts_on')->get() : collect(),
         ]);
     }
 

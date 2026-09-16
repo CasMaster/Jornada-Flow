@@ -88,7 +88,7 @@ class HolidaySyncTest extends TestCase
             ->assertSee('feriados_api');
 
         $admin = User::factory()->create(['role' => 'super_admin']);
-        $this->actingAs($admin)->get('/gestor')
+        $this->actingAs($admin)->get(route('admin.teams.index'))
             ->assertOk()
             ->assertSee('holiday-date-tile', false)
             ->assertSee('holiday-scope-estadual', false)

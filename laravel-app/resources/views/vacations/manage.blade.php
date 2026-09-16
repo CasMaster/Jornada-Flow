@@ -4,7 +4,7 @@
 @section('content')
 <main><section class="workspace manager-workspace vacation-workspace">
   <div class="manager-head"><div><p class="eyebrow">PAINEL DO GESTOR</p><h1>Planejamento de <em>férias.</em></h1><p>Analise solicitações e acompanhe a disponibilidade das equipes.</p></div><a class="primary button-link" href="{{ route('manager.vacations.export',request()->query()) }}">Exportar CSV ↓</a></div>
-  <nav class="manager-sections"><a href="{{ route('manager.dashboard') }}">Home office</a><a class="active" href="{{ route('manager.vacations.index') }}">Férias</a></nav>
+  <nav class="manager-sections" aria-label="Áreas de gestão"><a href="{{ route('manager.dashboard') }}">Home office</a><a class="active" aria-current="page" href="{{ route('manager.vacations.index') }}">Férias</a></nav>
   @if(auth()->user()->role==='super_admin')
   <article class="card vacation-entitlement-admin">
     <div class="balance-simple-head"><div><p class="eyebrow">SALDOS DE FÉRIAS</p><h2>Controle automático</h2><p>Você só precisa manter a data de admissão correta. O MixHome calcula o saldo.</p></div><a class="primary button-link" href="{{ route('admin.users.index') }}">Informar admissões →</a></div>

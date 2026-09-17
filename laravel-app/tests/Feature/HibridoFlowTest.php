@@ -8,6 +8,7 @@ use App\Models\ManagerDelegation;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\WorkRequest;
+use App\Notifications\PendingRequestsDigest;
 use App\Notifications\WorkRequestStatusChanged;
 use Carbon\Carbon;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -19,6 +20,24 @@ use Tests\TestCase;
 class HibridoFlowTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_pending_digest_ignores_technical_placeholder_account(): void
+    {
+        $this->travelTo('2026-09-17 08:00:00');
+        Notification::fake();
+        $team = Team::create(['name' => 'Equipe Digest', 'active' => true]);
+        $manager = User::factory()->create(['role' => 'manager', 'active' => true]);
+        $manager->managedTeams()->attach($team);
+        $placeholder = User::factory()->create(['role' => 'super_admin', 'active' => true, 'email' => 'gestor@mixfiscal.com.br']);
+        $employee = User::factory()->create(['team' => $team->name]);
+        WorkRequest::create(['user_id' => $employee->id, 'work_date' => '2026-09-18', 'status' => 'pending']);
+
+        $this->artisan('hibrido:notify-pending')->assertSuccessful();
+
+        Notification::assertSentTo($manager, PendingRequestsDigest::class);
+        Notification::assertNotSentTo($placeholder, PendingRequestsDigest::class);
+        $this->travelBack();
+    }
 
     public function test_login_exposes_employee_and_manager_areas(): void
     {

@@ -37,6 +37,7 @@ MAIL_USERNAME=USUARIO_SMTP
 MAIL_PASSWORD=SENHA_SMTP
 MAIL_FROM_ADDRESS=hibrido@DOMINIO
 MAIL_FROM_NAME="MixHome | Mix Fiscal"
+AUTOMATED_NOTIFICATION_EXCLUDED_EMAILS=gestor@mixfiscal.com.br
 ```
 
 O `.env` deve ter permissão `600` e nunca pode entrar no Git.

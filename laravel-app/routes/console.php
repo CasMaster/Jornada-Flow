@@ -23,13 +23,16 @@ Artisan::command('hibrido:notify-pending', function () {
 
         return;
     }
-    User::whereIn('role', ['manager', 'super_admin'])->where('active', true)->each(function (User $manager) use ($start, $end) {
-        $teams = $manager->role === 'super_admin' ? null : $manager->managedTeams()->pluck('name');
-        $count = WorkRequest::where('status', 'pending')->whereBetween('work_date', [$start, $end])->when($teams, fn ($q) => $q->whereHas('user', fn ($u) => $u->whereIn('team', $teams)))->count();
-        if ($count) {
-            $manager->notify(new PendingRequestsDigest($count));
-        }
-    });
+    User::whereIn('role', ['manager', 'super_admin'])
+        ->where('active', true)
+        ->whereNotIn('email', config('app.automated_notification_excluded_emails', []))
+        ->each(function (User $manager) use ($start, $end) {
+            $teams = $manager->role === 'super_admin' ? null : $manager->managedTeams()->pluck('name');
+            $count = WorkRequest::where('status', 'pending')->whereBetween('work_date', [$start, $end])->when($teams, fn ($q) => $q->whereHas('user', fn ($u) => $u->whereIn('team', $teams)))->count();
+            if ($count) {
+                $manager->notify(new PendingRequestsDigest($count));
+            }
+        });
     $this->info('Avisos enfileirados.');
 })->purpose('Notifica gestores sobre pendências próximas ao fechamento');
 

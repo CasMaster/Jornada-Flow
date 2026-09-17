@@ -72,6 +72,7 @@ return [
     'slow_query_ms' => (int) env('SLOW_QUERY_MS', 250),
     'data_retention_enabled' => (bool) env('DATA_RETENTION_ENABLED', false),
     'mail_notifications_enabled' => (bool) env('MAIL_NOTIFICATIONS_ENABLED', false),
+    'automated_notification_excluded_emails' => array_values(array_filter(array_map('trim', explode(',', (string) env('AUTOMATED_NOTIFICATION_EXCLUDED_EMAILS', 'gestor@mixfiscal.com.br'))))),
 
     /*
     |--------------------------------------------------------------------------

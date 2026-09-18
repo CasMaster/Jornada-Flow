@@ -4,7 +4,7 @@
 
 Abra o endereço fornecido pela empresa. A tela inicial possui duas opções:
 
-- **Sou colaborador**: cadastro inicial, solicitações pessoais e histórico;
+- **Sou colaborador**: primeiro acesso, solicitações pessoais, férias e histórico;
 - **Sou gestor**: análise das equipes, filtros e exportação.
 
 Contas de gestor e Super Admin também podem entrar pela opção **Sou colaborador** ou alternar de painel depois do login.
@@ -15,14 +15,14 @@ Use o botão de tema no cabeçalho. A preferência fica salva no navegador utili
 
 ## 2. Primeiro acesso do colaborador
 
-1. Selecione **Sou colaborador**.
-2. Abra **Primeiro acesso**.
-3. Informe nome completo e e-mail corporativo.
-4. Escolha a equipe correta.
-5. Crie e confirme uma senha com pelo menos oito caracteres.
-6. Clique em **Criar conta e continuar**.
+1. Solicite ao Super Admin a criação da sua conta, equipe e perfil.
+2. Na tela **Sou colaborador**, abra **Primeiro acesso**.
+3. Informe o e-mail corporativo previamente cadastrado.
+4. Abra o link individual recebido por e-mail.
+5. Defina e confirme sua senha.
+6. Retorne ao login e entre em **Já tenho cadastro**.
 
-Se o e-mail já estiver cadastrado, use **Já tenho cadastro**. Se a equipe não aparecer, solicite ao Super Admin que a ative ou cadastre.
+O link é válido por 60 minutos e pode ser usado uma única vez. Por segurança, o sistema não informa se um e-mail desconhecido está cadastrado. Se a mensagem não chegar, confirme o endereço e o status da conta com o Super Admin.
 
 ## 3. Registrar home office
 
@@ -88,14 +88,14 @@ A recusa arquiva a solicitação; ela não apaga a data. A decisão pode ser atu
 2. Clique em **Aplicar**.
 3. Clique em **Exportar dados**.
 
-A planilha considera os filtros atuais e marca somente solicitações aprovadas. Os colaboradores aparecem nas linhas e as datas nas colunas.
+A planilha considera os filtros atuais e marca somente solicitações aprovadas. Os colaboradores aparecem nas linhas e as datas nas colunas. Campos textuais são gravados de forma segura para não serem interpretados como fórmulas.
 
 ## 6. Administração do Super Admin
 
 ### Equipes
 
 - Cadastre uma equipe informando seu nome.
-- Desative equipes que não devem aceitar novos cadastros.
+- Desative equipes que não devem permanecer disponíveis para novos vínculos.
 - Reative quando necessário.
 
 Desativar uma equipe não apaga usuários nem solicitações existentes.

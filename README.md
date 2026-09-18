@@ -2,7 +2,7 @@
 
 Sistema da Mix Fiscal para solicitação, aprovação, acompanhamento e exportação de dias de home office.
 
-Inclui ciclos 20–19, múltiplas equipes, gestores que também atuam como colaboradores, aprovação individual ou em lote, calendário corporativo, notificações assíncronas, auditoria e monitoramento de prontidão.
+Inclui ciclos 20–19, múltiplas equipes, gestores que também atuam como colaboradores, aprovação individual ou em lote, férias, calendário corporativo, notificações assíncronas, auditoria, recuperação de senha e monitoramento de prontidão.
 
 ## Estado atual
 
@@ -19,16 +19,17 @@ A antiga implementação PHP/SQLite foi retirada da árvore ativa após a migra�
 ## Funcionalidades
 
 - Login unificado para colaboradores, gestores e Super Admin;
-- primeiro cadastro de colaboradores com equipes predefinidas;
+- primeiro acesso controlado por conta criada pelo Super Admin e link enviado ao e-mail corporativo;
 - gestores vinculados a múltiplas equipes;
 - gestores também podem usar o sistema como colaboradores;
 - solicitações imutáveis com estados pendente, aprovada e recusada;
 - recusas arquivadas, sem exclusão do histórico;
 - ciclo padrão de apuração do dia 20 ao dia 19;
 - filtros por ciclo, equipe, status e múltiplos colaboradores;
-- exportação Excel em formato matricial;
+- exportações Excel e CSV com neutralização de fórmulas em campos textuais;
 - gerenciamento de equipes, usuários, perfis e acessos;
-- PostgreSQL sem porta pública e backups com `pg_dump`.
+- planejamento de férias por período aquisitivo, saldo e aprovação;
+- PostgreSQL restrito ao loopback e backups externos no Backblaze B2.
 
 ## Estrutura
 
@@ -102,6 +103,7 @@ php artisan test
 
 - Nunca versione `.env`, dumps, arquivos SQLite ou credenciais.
 - Não publique a porta 5432 do PostgreSQL.
-- Use HTTPS assim que houver domínio.
-- Guarde dumps em local privado e teste periodicamente a restauração.
+- Mantenha HTTPS, cookies seguros e SMTP configurados nos ambientes publicados.
+- Mantenha os dumps no bucket privado do Backblaze B2 e teste trimestralmente a restauração.
+- Novas contas devem ser criadas pelo Super Admin; o cadastro público permanece desabilitado.
 - Desative imediatamente contas de pessoas que perderem o acesso autorizado.

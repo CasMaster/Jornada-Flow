@@ -24,13 +24,14 @@ O MixHome é um sistema interno da Mix Fiscal para controlar dias de home office
 
 ## Funcionalidades atuais
 
-- Login unificado e primeiro cadastro de colaborador.
+- Login unificado e primeiro acesso por conta previamente criada pelo Super Admin.
 - Perfis `employee`, `manager` e `super_admin`.
 - Painel pessoal, histórico e notificações.
 - Painel gerencial com filtros, paginação, análise individual/em lote e métricas.
 - Exportação XLSX matricial.
 - Diretório paginado de usuários e vínculos gestor–equipe.
-- Recuperação de senha condicionada à configuração de SMTP/HTTPS.
+- Recuperação de senha habilitada por SMTP/HTTPS, usada também no primeiro acesso.
+- Limitação de tentativas de login por e-mail e IP e exportações protegidas contra fórmulas.
 - Auditoria administrativa, calendário corporativo, filas e lembretes agendados.
 - Delegação temporária entre gestores, justificativas de análise e preferências locais de filtros.
 - Telemetria de requisições/consultas lentas e monitoramento externo agendado.

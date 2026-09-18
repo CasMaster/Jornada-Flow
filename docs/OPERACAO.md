@@ -15,8 +15,8 @@ O proxy reverso publica a produção na raiz do endereço e mantém a homologaç
 APP_ENV=production
 APP_DEBUG=false
 APP_KEY=base64:CHAVE_PRIVADA
-APP_URL=http://IP_OU_DOMINIO
-ASSET_URL=http://IP_OU_DOMINIO
+APP_URL=https://mixhome.app.br
+ASSET_URL=https://mixhome.app.br
 APP_TIMEZONE=America/Sao_Paulo
 APP_PORT=8082
 APP_BIND_IP=127.0.0.1
@@ -29,7 +29,7 @@ DB_PORT=5432
 DB_DATABASE=hibrido
 DB_USERNAME=hibrido
 DB_PASSWORD=SENHA_PRIVADA
-PASSWORD_RECOVERY_ENABLED=false
+PASSWORD_RECOVERY_ENABLED=true
 MAIL_MAILER=smtp
 MAIL_HOST=SERVIDOR_SMTP
 MAIL_PORT=587
@@ -48,10 +48,11 @@ ambiente. Não use `0.0.0.0` em `APP_BIND_IP` em produção.
 
 ## Recuperação de senha e SMTP
 
-Mantenha `PASSWORD_RECOVERY_ENABLED=false` em homologação e produção.
-SMTP e recuperação de senha estão deliberadamente adiados: HTTPS, conta de
-smoke test ou secrets cadastrados não autorizam habilitá-los. O provisionamento
-abaixo não envia e-mail, convite ou token de recuperação e não altera configuração.
+SMTP e recuperação de senha estão habilitados e validados em homologação e produção. Mantenha `PASSWORD_RECOVERY_ENABLED=true`, `APP_URL` público em HTTPS e as variáveis `MAIL_*` corretas nos três processos da aplicação.
+
+O cadastro público não existe. O Super Admin cria a conta no diretório e, quando não define uma senha provisória, o sistema envia um link individual de definição de senha. O token expira em 60 minutos, é de uso único e a redefinição encerra as sessões anteriores. Após alterar SMTP ou recuperação, recrie web, worker e scheduler e valide o fluxo completo em homologação antes de promover para produção.
+
+O login aceita no máximo cinco tentativas por minuto para a mesma combinação de e-mail normalizado e IP. Investigue respostas HTTP 429 recorrentes antes de alterar esse limite.
 
 ## Desempenho e monitoramento
 
@@ -371,10 +372,6 @@ O `compose.yaml` mantém quatro processos: PostgreSQL, aplicação web, worker d
 
 Use `GET /health/ready` para confirmar aplicação e PostgreSQL e consultar jobs pendentes ou com falha. O script `scripts/monitor-production.sh` pode ser chamado a cada cinco minutos. Configure alertas para indisponibilidade, reinícios, `failed_jobs`, disco acima de 80% e ausência de backup nas últimas 26 horas.
 
-O script `scripts/backup-postgres.sh` cria dump em formato custom, SHA-256 e retenção configurável. Exemplo de cron diário:
+O script `scripts/backup-postgres.sh` cria dump em formato custom, SHA-256 e retenção configurável. O agendamento oficial é o descrito na seção **Cópia externa no Backblaze B2**, às 05:15 UTC, com um único cron e alerta de falha. Não crie um segundo agendamento local.
 
-```cron
-15 2 * * * BACKUP_DIR=/opt/backups/hibrido-home-office RETENTION_DAYS=30 /opt/hibrido-home-office/scripts/backup-postgres.sh >> /var/log/hibrido-backup.log 2>&1
-```
-
-Mantenha uma cópia fora do servidor e teste mensalmente `pg_restore` em um banco descartável. O deploy manual do GitHub exige `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER` e `TARGET_DIR`, sempre promovendo homologação antes de produção.
+Mantenha a cópia externa no bucket privado e repita trimestralmente o teste de `pg_restore` em banco descartável. O deploy manual do GitHub exige `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER` e `TARGET_DIR`, sempre promovendo homologação antes de produção.

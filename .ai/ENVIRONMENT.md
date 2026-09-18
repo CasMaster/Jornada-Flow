@@ -8,6 +8,8 @@
 - Extensões PHP usadas pela imagem: GD, mbstring, PDO PostgreSQL, PDO SQLite e ZIP.
 - Caddy no host de produção/homologação, fora deste repositório.
 - SMTP e recuperação de senha estão habilitados; credenciais permanecem exclusivamente nos ambientes protegidos.
+- O cadastro público está desabilitado; o primeiro acesso depende de conta criada pelo Super Admin.
+- O login aplica limite de cinco tentativas por minuto por e-mail normalizado e IP.
 
 Não há pipeline Node/Vite ativo para os assets do produto.
 

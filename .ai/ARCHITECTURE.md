@@ -72,7 +72,11 @@ O `compose.yaml` define quatro serviços: `postgres`, `hibrido_laravel`, `queue_
 
 ### Recuperação de senha
 
-As rotas existem, mas `PASSWORD_RECOVERY_ENABLED` controla a disponibilidade. Tokens usam a tabela Laravel `password_reset_tokens`; e-mail depende das configurações `MAIL_*`.
+`PASSWORD_RECOVERY_ENABLED` controla a disponibilidade. Tokens usam `password_reset_tokens`, expiram em 60 minutos e o e-mail depende de `MAIL_*`. O cadastro público foi removido: o Super Admin cria a conta, e o primeiro acesso usa o mesmo fluxo de definição de senha. O login possui limitação por e-mail normalizado e IP.
+
+### Exportações seguras
+
+CSV detalhado e CSV de férias passam campos textuais por `SpreadsheetSafeText`; prefixos interpretáveis por planilhas são neutralizados. A exportação XLSX grava nomes com `DataType::TYPE_STRING` para impedir inferência de fórmula.
 
 ## Interfaces
 

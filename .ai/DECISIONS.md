@@ -2,6 +2,10 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-09-18 — Primeiro acesso controlado e exportações seguras
+
+O cadastro público foi removido. Novas contas são criadas pelo Super Admin e o primeiro acesso usa o fluxo de recuperação de senha já validado por SMTP. O login limita tentativas pela combinação de e-mail normalizado e IP. Exportações CSV neutralizam prefixos interpretáveis por planilhas e o XLSX grava nomes como texto explícito.
+
 ## 2026-09-16 — Gestão dividida por responsabilidade
 
 O painel gerencial de solicitações deixa de concentrar cadastros administrativos. Solicitações, férias, equipes, usuários, auditoria e operação passam a ter navegação comum e telas dedicadas. A tela de Equipes reúne cadastro de equipes, calendário corporativo e delegações temporárias; permanece exclusiva do Super Admin. A separação reduz carga e complexidade visual sem duplicar regras de domínio ou permissões.

@@ -25,8 +25,7 @@ Route::prefix(config('app.route_prefix'))->group(function () {
     });
     Route::middleware('guest')->group(function () {
         Route::get('/login', [AuthController::class, 'show'])->name('login');
-        Route::post('/login', [AuthController::class, 'login']);
-        Route::post('/cadastro', [AuthController::class, 'register'])->name('register');
+        Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
     });
     Route::middleware('guest')->group(function () {
         Route::get('/esqueci-a-senha', [PasswordController::class, 'request'])->name('password.request');

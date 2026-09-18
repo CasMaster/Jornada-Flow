@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\VacationEntitlement;
 use App\Models\VacationRequest;
 use App\Services\VacationRequestService;
+use App\Support\SpreadsheetSafeText;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -90,7 +91,7 @@ class ManagerVacationController extends Controller
             fwrite($out, "\xEF\xBB\xBF");
             fputcsv($out, ['Colaborador', 'E-mail', 'Equipe', 'Período aquisitivo', 'Início', 'Fim', 'Dias corridos', 'Status', 'Analisado por'], ';');
             foreach ($records as $item) {
-                fputcsv($out, [$item->user->name, $item->user->email, $item->user->team, $item->entitlement ? $item->entitlement->acquisition_starts_on->format('d/m/Y').' a '.$item->entitlement->acquisition_ends_on->format('d/m/Y') : 'Legado', $item->starts_on->format('d/m/Y'), $item->ends_on->format('d/m/Y'), $item->days(), ['pending' => 'Pendente', 'approved' => 'Aprovada', 'rejected' => 'Recusada', 'cancelled' => 'Cancelada'][$item->status], $item->reviewer?->name ?? ''], ';');
+                fputcsv($out, SpreadsheetSafeText::row([$item->user->name, $item->user->email, $item->user->team, $item->entitlement ? $item->entitlement->acquisition_starts_on->format('d/m/Y').' a '.$item->entitlement->acquisition_ends_on->format('d/m/Y') : 'Legado', $item->starts_on->format('d/m/Y'), $item->ends_on->format('d/m/Y'), $item->days(), ['pending' => 'Pendente', 'approved' => 'Aprovada', 'rejected' => 'Recusada', 'cancelled' => 'Cancelada'][$item->status], $item->reviewer?->name ?? '']), ';');
             } fclose($out);
         }, 'ferias-mixhome-'.today()->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }

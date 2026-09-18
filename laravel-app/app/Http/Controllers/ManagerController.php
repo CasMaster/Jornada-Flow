@@ -7,12 +7,14 @@ use App\Models\User;
 use App\Models\WorkRequest;
 use App\Services\WorkRequestService;
 use App\Support\ReportingCycle;
+use App\Support\SpreadsheetSafeText;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -129,7 +131,7 @@ class ManagerController extends Controller
                 fwrite($output, "\xEF\xBB\xBF");
                 fputcsv($output, ['Colaborador', 'E-mail', 'Equipe', 'Data', 'Status', 'Analisado por', 'Analisado em'], ';');
                 foreach ($exportRecords as $record) {
-                    fputcsv($output, [$record->user->name, $record->user->email, $record->user->team, $record->work_date->format('d/m/Y'), ['pending' => 'Pendente', 'approved' => 'Aprovada', 'rejected' => 'Recusada'][$record->status], $record->reviewer?->name ?? '', $record->reviewed_at?->timezone(config('app.timezone'))->format('d/m/Y H:i') ?? ''], ';');
+                    fputcsv($output, SpreadsheetSafeText::row([$record->user->name, $record->user->email, $record->user->team, $record->work_date->format('d/m/Y'), ['pending' => 'Pendente', 'approved' => 'Aprovada', 'rejected' => 'Recusada'][$record->status], $record->reviewer?->name ?? '', $record->reviewed_at?->timezone(config('app.timezone'))->format('d/m/Y H:i') ?? '']), ';');
                 }
                 fclose($output);
             }, 'mixhome-'.$start->format('Y-m-d').'-a-'.$end->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
@@ -167,7 +169,7 @@ class ManagerController extends Controller
             }
             foreach ($people as $i => $person) {
                 $row = $i + 4;
-                $sheet->setCellValue('A'.$row, $person->name);
+                $sheet->setCellValueExplicit('A'.$row, $person->name, DataType::TYPE_STRING);
                 foreach ($dates as $d => $date) {
                     if ($status = $map[strtolower($person->email)][$date->format('Y-m-d')] ?? null) {
                         $column = Coordinate::stringFromColumnIndex($d + 2);

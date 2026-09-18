@@ -67,10 +67,12 @@ class HibridoFlowTest extends TestCase
         $this->get('/')->assertRedirect('/gestor');
     }
 
-    public function test_employee_can_register_and_submit_immutable_request(): void
+    public function test_public_registration_is_disabled_and_precreated_employee_can_submit_immutable_request(): void
     {
         Team::create(['name' => 'Fiscal', 'active' => true]);
-        $this->post('/cadastro', ['name' => 'Ana', 'email' => 'ana@example.com', 'team' => 'Fiscal', 'password' => 'password1', 'password_confirmation' => 'password1'])->assertRedirect('/painel');
+        $this->post('/cadastro', ['name' => 'Ana', 'email' => 'ana@example.com', 'team' => 'Fiscal', 'password' => 'password1', 'password_confirmation' => 'password1'])->assertNotFound();
+        $employee = User::factory()->create(['name' => '=HYPERLINK("https://example.invalid")', 'role' => 'employee', 'team' => 'Fiscal']);
+        $this->actingAs($employee);
         $this->post('/solicitacoes', ['dates' => ['2026-08-05']])->assertSessionHasNoErrors();
         $this->assertDatabaseHas('work_requests', ['work_date' => '2026-08-05 00:00:00', 'status' => 'pending']);
         $this->get('/painel')->assertOk()->assertSee('Selecione os dias')->assertSee('Dias já registrados')->assertSee('05/08/2026');
@@ -157,6 +159,30 @@ class HibridoFlowTest extends TestCase
 
         $response->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8');
         $this->assertStringContainsString('Pessoa CSV', $response->streamedContent());
+    }
+
+    public function test_login_is_rate_limited_by_email_and_ip(): void
+    {
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $this->post('/login', ['email' => 'alvo@mixfiscal.com.br', 'password' => 'incorreta', 'profile' => 'manager']);
+        }
+
+        $this->post('/login', ['email' => 'alvo@mixfiscal.com.br', 'password' => 'incorreta', 'profile' => 'manager'])
+            ->assertTooManyRequests();
+    }
+
+    public function test_csv_export_neutralizes_spreadsheet_formulas(): void
+    {
+        $team = Team::create(['name' => 'Fiscal']);
+        $manager = User::factory()->create(['role' => 'manager']);
+        $manager->managedTeams()->attach($team);
+        $employee = User::factory()->create(['name' => '=HYPERLINK("https://example.invalid")', 'role' => 'employee', 'team' => 'Fiscal']);
+        WorkRequest::create(['user_id' => $employee->id, 'work_date' => '2026-07-21', 'status' => 'pending']);
+
+        $csv = $this->actingAs($manager)->get('/gestor/exportar?cycle=2026-07-20&format=csv&export_status=all')->streamedContent();
+
+        $this->assertStringContainsString("'=HYPERLINK", $csv);
+        $this->assertStringNotContainsString(';=HYPERLINK', $csv);
     }
 
     public function test_employee_calendar_exposes_request_status_accessibly(): void

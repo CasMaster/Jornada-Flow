@@ -4,7 +4,8 @@
 
 - Repetir trimestralmente o teste de restauração do backup B2 em banco descartável, mediante autorização do Super Admin.
 - Validar em homologação a rotina conservadora de retenção e somente então autorizar `DATA_RETENTION_ENABLED=true` em produção.
-- Configurar proteção de ambiente no GitHub/servidor para que somente o Super Admin autorize produção, schema e restauração.
+- Configurar proteção de ambiente no GitHub/servidor para que somente o Super Admin autorize produção, schema e restauração. `CasMaster` é a conta indicada, mas o GitHub recusou `required_reviewers` (HTTP 422) no plano atual do repositório privado; avaliar plano compatível ou gate externo no servidor.
+- Validar a primeira execução manual do monitor diário externo do backup em `.github/workflows/backup-monitor.yml`; ele depende dos secrets de produção e de acesso SSH ao servidor.
 
 ## Corrigido
 
@@ -29,5 +30,4 @@
 
 ## A confirmar
 
-- Se será adotado um monitor externo como redundância para o alerta de backup, que hoje depende da aplicação, banco e SMTP.
 - Se a retenção de dois anos termina em exclusão ou anonimização para cada categoria de dado.

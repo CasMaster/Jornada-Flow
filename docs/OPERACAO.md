@@ -372,6 +372,6 @@ O `compose.yaml` mantém quatro processos: PostgreSQL, aplicação web, worker d
 
 Use `GET /health/ready` para confirmar aplicação e PostgreSQL e consultar jobs pendentes ou com falha. O script `scripts/monitor-production.sh` pode ser chamado a cada cinco minutos. Configure alertas para indisponibilidade, reinícios, `failed_jobs`, disco acima de 80% e ausência de backup nas últimas 26 horas.
 
-O script `scripts/backup-postgres.sh` cria dump em formato custom, SHA-256 e retenção configurável. O agendamento oficial é o descrito na seção **Cópia externa no Backblaze B2**, às 05:15 UTC, com um único cron e alerta de falha. Não crie um segundo agendamento local.
+O script `scripts/backup-postgres.sh` cria dump em formato custom, SHA-256 e retenção configurável. O agendamento oficial é o descrito na seção **Cópia externa no Backblaze B2**, às 05:15 UTC, com um único cron e alerta de falha. Não crie um segundo agendamento local. O workflow `Backup externo` consulta diariamente às 08:00 UTC o B2 por SSH e falha se não houver dump recente acompanhado de arquivo de checksum. Ele é independente da aplicação, banco e SMTP, mas depende do GitHub Actions, SSH, servidor e B2; a notificação de falha deve estar habilitada no GitHub.
 
 Mantenha a cópia externa no bucket privado e repita trimestralmente o teste de `pg_restore` em banco descartável. O deploy manual do GitHub exige `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER` e `TARGET_DIR`, sempre promovendo homologação antes de produção.

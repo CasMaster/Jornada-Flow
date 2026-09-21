@@ -1,0 +1,33 @@
+name: Backup externo
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+jobs:
+  verify:
+    environment: producao
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar cópia recente no Backblaze B2
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+          listing="$(ssh "$DEPLOY_USER@$DEPLOY_HOST" 'rclone lsjson b2-mixhome:mixhome-backups/producao --files-only')"
+          cutoff="$(date -u -d '26 hours ago' +%s)"
+          jq -e --argjson cutoff "$cutoff" '
+            . as $files
+            | any($files[];
+                . as $dump
+                | (.Name | test("^hibrido-[0-9]{8}-[0-9]{6}\\.dump$"))
+                  and ((.ModTime | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601) >= $cutoff)
+                  and any($files[]; .Name == ($dump.Name + ".sha256"))
+              )
+          ' <<< "$listing" >/dev/null
+          echo 'Backup externo recente e checksum encontrados.'

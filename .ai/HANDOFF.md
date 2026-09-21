@@ -10,7 +10,7 @@ Produção recebeu em 2026-09-18 o commit `065f225` pelo deploy `35366275409`; p
 
 Em 2026-09-21, a revisão operacional confirmou que o ambiente GitHub `producao` ainda não possui regras de proteção. O Super Admin identificou sua conta como `CasMaster`, mas a API do GitHub recusou `required_reviewers` com HTTP 422 porque o plano não oferece essa regra para o repositório privado. O ambiente vazio criado durante a tentativa foi removido; o deploy não recebeu um gate ilusório. A simulação de retenção com dados reais de homologação ainda não foi executada. Um monitor diário independente do aplicativo para verificar a presença de dump e checksum recentes no B2 foi adicionado em `.github/workflows/backup-monitor.yml`; a primeira execução manual `35629353820` passou. Uma automação trimestral na tarefa Codex foi criada para lembrar a conferência da restauração e solicitar autorização do Super Admin; ela não executa restauração automaticamente.
 
-Ainda em 2026-09-21, foi confirmado acesso SSH por um IP já presente em `known_hosts`. A chave pessoal `admin` também era usada pelo secret de deploy do GitHub, conforme fingerprints nos logs; ela não foi alterada. Um par novo e exclusivo para a automação foi criado fora do repositório. Os scripts `mixhome-ci-gate` e `mixhome-approve` foram instalados como root no servidor, e a entrada da chave nova em `authorized_keys` tem comando forçado. Os workflows foram publicados no commit `a5ab9b4` e `DEPLOY_SSH_KEY` foi substituído em homologação e produção. O monitor `35632343103` passou usando o fingerprint da nova chave; execução arbitrária foi negada e a chave pessoal continuou funcionando. Ainda falta acompanhar o primeiro deploy controlado em homologação. A chave pessoal esteve no GitHub e eventuais cópias históricas não são revogadas pela troca do secret.
+Ainda em 2026-09-21, foi confirmado acesso SSH por um IP já presente em `known_hosts`. A chave pessoal `admin` também era usada pelo secret de deploy do GitHub, conforme fingerprints nos logs; ela não foi alterada. Um par novo e exclusivo para a automação foi criado fora do repositório. Os scripts `mixhome-ci-gate` e `mixhome-approve` foram instalados como root no servidor, e a entrada da chave nova em `authorized_keys` tem comando forçado. Os workflows foram publicados no commit `a5ab9b4` e `DEPLOY_SSH_KEY` foi substituído em homologação e produção. O monitor `35632343103` passou usando o fingerprint da nova chave; execução arbitrária foi negada e a chave pessoal continuou funcionando. O primeiro deploy controlado em homologação (`35634509195`) recebeu aprovação manual e passou pelo healthcheck e smoke autenticado; produção não foi recriada e seu healthcheck retornou 200. A chave pessoal esteve no GitHub e eventuais cópias históricas não são revogadas pela troca do secret.
 
 Em 2026-09-14, o destino externo foi alterado para Backblaze B2. O remoto `b2-mixhome` está configurado exclusivamente no servidor, o bucket privado `mixhome-backups` recebeu o primeiro dump com checksum válido e a execução diária foi agendada para 05:15 UTC (02:15 em Campinas).
 
@@ -50,6 +50,7 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 - CI `33905163885`: aprovado, incluindo PostgreSQL 16 e build.
 - Homologação `33905331399`: deploy, backup, healthcheck e smoke aprovados.
 - Homologação `35347548481`: correções de segurança, healthcheck e smoke autenticado aprovados.
+- Homologação `35634509195`: primeiro deploy pelo gate, aprovação manual do digest, backup prévio, healthcheck e smoke autenticado aprovados.
 - Produção `33905491385`: deploy, backup, healthcheck e smoke aprovados.
 - Cinco medições externas de produção retornaram HTTP 200 entre 63 ms e 223 ms; `Server-Timing` observado em 9,48 ms.
 - Contas sintéticas e secrets separados provisionados nos dois ambientes; smokes autenticados `33907539221` (homologação) e `33907612711` (produção) aprovados.
@@ -57,7 +58,7 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Próximo passo
 
-Acompanhar o primeiro deploy controlado em homologação antes de usar o novo fluxo em produção. A simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
+O fluxo de deploy controlado foi validado em homologação. Antes de promover mudanças futuras para produção, obter autorização explícita do Super Admin e conferir o digest do pacote; a simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
 
 ## Limites
 

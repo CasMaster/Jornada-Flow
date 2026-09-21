@@ -311,7 +311,7 @@ A cópia externa definida para este projeto é o Backblaze B2. A ferramenta de s
 
 Somente o Super Admin pode autorizar deploy em produção, migrations de schema e restauração de dados. Configure proteção equivalente nos ambientes do GitHub e nos acessos ao servidor.
 
-### Controle de deploy no servidor (ativação pendente)
+### Controle de deploy no servidor
 
 Como o plano atual do GitHub não oferece revisores obrigatórios para este
 repositório privado, a publicação usa uma chave SSH **exclusiva da automação**.
@@ -326,8 +326,8 @@ Instale `scripts/mixhome-ci-gate.sh` e `scripts/mixhome-approve.sh` como
 `root:root`, modo `755`, em `/usr/local/sbin/mixhome-ci-gate` e
 `/usr/local/sbin/mixhome-approve`. O diretório
 `/var/lib/mixhome-ci/approved` deve ser `root:root`, modo `700`.
-Somente então substitua o secret `DEPLOY_SSH_KEY` dos **dois** ambientes pelo
-arquivo privado da chave exclusiva da automação. Nunca versione essa chave.
+O secret `DEPLOY_SSH_KEY` dos **dois** ambientes usa o arquivo privado da chave
+exclusiva da automação desde 2026-09-21. Nunca versione essa chave.
 
 O comando forçado aceita apenas `backup-status`, `deploy-homologacao` e
 `deploy-producao`. O workflow envia o pacote pelo canal SSH; o servidor imprime
@@ -347,8 +347,14 @@ Essa separação não altera a chave pessoal, mas ela já esteve em um secret do
 GitHub: substituí-la no secret impede uso futuro pela automação, **não** revoga
 eventuais cópias históricas. A garantia de exclusividade total depende de uma
 rotação posterior da chave pessoal e da revisão de outras chaves administrativas.
-Não trate a instalação dos scripts, isoladamente, como ativação da proteção;
-valide o secret novo e as execuções de monitor/deploy antes de declarar concluído.
+O gate protege a chave da automação e o workflow oficial; pessoas com shell e
+`sudo` no servidor ainda podem executar migrations, restaurações ou deploys
+diretamente. Revise esses acessos separadamente e mantenha a exigência de
+autorização operacional do Super Admin.
+Após qualquer rotação futura, confirme o fingerprint usado pelo GitHub nos logs
+SSH do servidor, o monitor B2 e a rejeição de um comando fora da lista. A nova
+chave e o monitor foram validados em 2026-09-21; o primeiro deploy controlado
+em homologação ainda deve ser acompanhado pelo Super Admin.
 
 Logs de auditoria, sessões, notificações, solicitações recusadas e contas desativadas têm retenção definida de dois anos. Até existir rotina segura de expurgo/anonimização, não faça exclusões manuais dessas categorias.
 

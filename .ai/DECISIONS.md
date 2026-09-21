@@ -2,6 +2,10 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-09-21 — Aprovação de deploy no servidor
+
+O plano GitHub do repositório privado não permite revisores obrigatórios de ambiente. O workflow usa agora uma chave SSH exclusiva, com comando forçado no `authorized_keys`. Um script root-owned aceita apenas consulta do backup e upload de pacote para homologação/produção; para publicar, calcula o SHA-256 e aguarda aprovação individual, de uso único e curta duração, feita em sessão SSH administrativa separada. A chave pessoal do administrador não foi alterada. A segregação foi validada no monitor B2 e na rejeição de comandos arbitrários; o primeiro deploy com aprovação ainda precisa ser acompanhado em homologação. Como a chave pessoal antiga esteve em um secret do GitHub, a substituição do secret não elimina o risco de eventuais cópias históricas.
+
 ## 2026-09-18 — Primeiro acesso controlado e exportações seguras
 
 O cadastro público foi removido. Novas contas são criadas pelo Super Admin e o primeiro acesso usa o fluxo de recuperação de senha já validado por SMTP. O login limita tentativas pela combinação de e-mail normalizado e IP. Exportações CSV neutralizam prefixos interpretáveis por planilhas e o XLSX grava nomes como texto explícito.

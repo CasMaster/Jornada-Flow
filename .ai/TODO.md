@@ -5,7 +5,6 @@
 - Repetir trimestralmente o teste de restauração do backup B2 em banco descartável, mediante autorização do Super Admin.
 - Validar em homologação a rotina conservadora de retenção e somente então autorizar `DATA_RETENTION_ENABLED=true` em produção.
 - Configurar proteção de ambiente no GitHub/servidor para que somente o Super Admin autorize produção, schema e restauração. `CasMaster` é a conta indicada, mas o GitHub recusou `required_reviewers` (HTTP 422) no plano atual do repositório privado; avaliar plano compatível ou gate externo no servidor.
-- Validar a primeira execução manual do monitor diário externo do backup em `.github/workflows/backup-monitor.yml`; ele depende dos secrets de produção e de acesso SSH ao servidor.
 
 ## Corrigido
 
@@ -18,6 +17,7 @@
 - CI valida a suíte em PostgreSQL 16, além do SQLite rápido.
 - Deploy cria backup prévio, verifica saúde e preserva referência para retorno à imagem anterior.
 - Monitoramento externo de produção roda a cada 15 minutos e mede tempo de resposta.
+- Monitor diário externo do backup em `.github/workflows/backup-monitor.yml` publicado e validado manualmente; depende de GitHub Actions, SSH, servidor e B2.
 - Solicitações aceitam justificativa, gestores podem delegar equipes temporariamente e filtros suportam ordenação, tamanho de página e preferência local.
 - O calendário distingue solicitações por estado; painel gerencial ganhou prioridades, visão executiva, CSV e área operacional.
 - Retenção de dois anos possui simulação, trava explícita e agendamento; backup suporta destinos externos via `rclone`.

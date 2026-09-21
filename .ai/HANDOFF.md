@@ -8,7 +8,7 @@ Manter o MixHome seguro e operacional, promovendo para produção somente mudan�
 
 Produção recebeu em 2026-09-18 o commit `065f225` pelo deploy `35366275409`; publicação e smoke autenticado passaram. As correções de segurança do commit `03fd193` estão incluídas: cadastro público removido, login limitado por e-mail/IP e proteção de CSV/XLSX contra fórmulas. O smoke de produção de 2026-09-21 (`35591770253`) também passou. Recuperação de senha por SMTP está habilitada e é o fluxo oficial de primeiro acesso após o Super Admin criar a conta.
 
-Em 2026-09-21, a revisão operacional confirmou que o ambiente GitHub `producao` ainda não possui regras de proteção. O Super Admin identificou sua conta como `CasMaster`, mas a API do GitHub recusou `required_reviewers` com HTTP 422 porque o plano não oferece essa regra para o repositório privado. O ambiente vazio criado durante a tentativa foi removido; o deploy não recebeu um gate ilusório. A conexão SSH local não foi estabelecida por ausência de chave de host previamente confiável; portanto a simulação de retenção com dados reais de homologação não foi executada. Um monitor diário independente do aplicativo para verificar a presença de dump e checksum recentes no B2 foi adicionado em `.github/workflows/backup-monitor.yml`; validar sua primeira execução manual. Uma automação trimestral na tarefa Codex foi criada para lembrar a conferência da restauração e solicitar autorização do Super Admin; ela não executa restauração automaticamente.
+Em 2026-09-21, a revisão operacional confirmou que o ambiente GitHub `producao` ainda não possui regras de proteção. O Super Admin identificou sua conta como `CasMaster`, mas a API do GitHub recusou `required_reviewers` com HTTP 422 porque o plano não oferece essa regra para o repositório privado. O ambiente vazio criado durante a tentativa foi removido; o deploy não recebeu um gate ilusório. A conexão SSH local não foi estabelecida por ausência de chave de host previamente confiável; portanto a simulação de retenção com dados reais de homologação não foi executada. Um monitor diário independente do aplicativo para verificar a presença de dump e checksum recentes no B2 foi adicionado em `.github/workflows/backup-monitor.yml`; a primeira execução manual `35629353820` passou. Uma automação trimestral na tarefa Codex foi criada para lembrar a conferência da restauração e solicitar autorização do Super Admin; ela não executa restauração automaticamente.
 
 Em 2026-09-14, o destino externo foi alterado para Backblaze B2. O remoto `b2-mixhome` está configurado exclusivamente no servidor, o bucket privado `mixhome-backups` recebeu o primeiro dump com checksum válido e a execução diária foi agendada para 05:15 UTC (02:15 em Campinas).
 
@@ -43,6 +43,8 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 - Build da imagem de produção: aprovado.
 - Sintaxe JavaScript e scripts shell: aprovada.
 - `git diff --check`: aprovado.
+- Monitor externo B2 `35629353820`: execução manual aprovada, dump recente e checksum localizados.
+- CI `35629335190`: suíte SQLite/PostgreSQL e build aprovados após publicação do monitor.
 - CI `33905163885`: aprovado, incluindo PostgreSQL 16 e build.
 - Homologação `33905331399`: deploy, backup, healthcheck e smoke aprovados.
 - Homologação `35347548481`: correções de segurança, healthcheck e smoke autenticado aprovados.
@@ -53,7 +55,7 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Próximo passo
 
-Validar a primeira execução manual do workflow de monitor de backup, escolher mecanismo de aprovação de produção compatível com repositório privado (plano GitHub que ofereça revisores ou gate externo no servidor), executar a simulação de retenção em homologação quando houver acesso seguro e manter retenção desabilitada até conferência pelo Super Admin. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
+Escolher mecanismo de aprovação de produção compatível com repositório privado (plano GitHub que ofereça revisores ou gate externo no servidor), executar a simulação de retenção em homologação quando houver acesso seguro e manter retenção desabilitada até conferência pelo Super Admin. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
 
 ## Limites
 

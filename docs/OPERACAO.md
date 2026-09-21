@@ -311,6 +311,45 @@ A cópia externa definida para este projeto é o Backblaze B2. A ferramenta de s
 
 Somente o Super Admin pode autorizar deploy em produção, migrations de schema e restauração de dados. Configure proteção equivalente nos ambientes do GitHub e nos acessos ao servidor.
 
+### Controle de deploy no servidor (ativação pendente)
+
+Como o plano atual do GitHub não oferece revisores obrigatórios para este
+repositório privado, a publicação usa uma chave SSH **exclusiva da automação**.
+Sua entrada em `authorized_keys` deve conter somente a chave pública nova, com
+este comando forçado (a chave pessoal do administrador fica em outra entrada):
+
+```text
+restrict,command="sudo -n --preserve-env=SSH_ORIGINAL_COMMAND /usr/local/sbin/mixhome-ci-gate" ssh-ed25519 CHAVE_PUBLICA_DA_AUTOMACAO
+```
+
+Instale `scripts/mixhome-ci-gate.sh` e `scripts/mixhome-approve.sh` como
+`root:root`, modo `755`, em `/usr/local/sbin/mixhome-ci-gate` e
+`/usr/local/sbin/mixhome-approve`. O diretório
+`/var/lib/mixhome-ci/approved` deve ser `root:root`, modo `700`.
+Somente então substitua o secret `DEPLOY_SSH_KEY` dos **dois** ambientes pelo
+arquivo privado da chave exclusiva da automação. Nunca versione essa chave.
+
+O comando forçado aceita apenas `backup-status`, `deploy-homologacao` e
+`deploy-producao`. O workflow envia o pacote pelo canal SSH; o servidor imprime
+o SHA-256 e aguarda por até 15 minutos. Depois de conferir o ambiente, commit e
+digest nos logs, o Super Admin aprova em uma sessão SSH pessoal:
+
+```bash
+sudo /usr/local/sbin/mixhome-approve producao SHA256_EXIBIDO_NO_JOB
+```
+
+Para homologação, troque `producao` por `homologacao`. A aprovação vale para um
+único pacote, expira após 15 minutos e é consumida antes da extração/deploy.
+Sem aprovação, o pacote não é publicado. O monitor de backup usa somente
+`backup-status`, sem permissão para executar shell arbitrário.
+
+Essa separação não altera a chave pessoal, mas ela já esteve em um secret do
+GitHub: substituí-la no secret impede uso futuro pela automação, **não** revoga
+eventuais cópias históricas. A garantia de exclusividade total depende de uma
+rotação posterior da chave pessoal e da revisão de outras chaves administrativas.
+Não trate a instalação dos scripts, isoladamente, como ativação da proteção;
+valide o secret novo e as execuções de monitor/deploy antes de declarar concluído.
+
 Logs de auditoria, sessões, notificações, solicitações recusadas e contas desativadas têm retenção definida de dois anos. Até existir rotina segura de expurgo/anonimização, não faça exclusões manuais dessas categorias.
 
 ### Retenção de dois anos

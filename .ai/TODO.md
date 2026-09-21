@@ -5,6 +5,7 @@
 - Repetir trimestralmente o teste de restauração do backup B2 em banco descartável, mediante autorização do Super Admin.
 - Validar em homologação a rotina conservadora de retenção e somente então autorizar `DATA_RETENTION_ENABLED=true` em produção.
 - Configurar proteção de ambiente no GitHub/servidor para que somente o Super Admin autorize produção, schema e restauração. `CasMaster` é a conta indicada, mas o GitHub recusou `required_reviewers` (HTTP 422) no plano atual do repositório privado; avaliar plano compatível ou gate externo no servidor.
+- Ativar o gate SSH já instalado no servidor: publicar workflows que usem `backup-status`/`deploy-*`, substituir `DEPLOY_SSH_KEY` em homologação e produção pela chave exclusiva restrita e validar ambos os fluxos. A chave pessoal permanece intacta, mas deve ser avaliada uma rotação posterior porque já esteve no GitHub.
 
 ## Corrigido
 

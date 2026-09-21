@@ -19,7 +19,7 @@ jobs:
           printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
-          listing="$(ssh "$DEPLOY_USER@$DEPLOY_HOST" 'rclone lsjson b2-mixhome:mixhome-backups/producao --files-only')"
+          listing="$(ssh "$DEPLOY_USER@$DEPLOY_HOST" 'backup-status')"
           cutoff="$(date -u -d '26 hours ago' +%s)"
           jq -e --argjson cutoff "$cutoff" '
             . as $files

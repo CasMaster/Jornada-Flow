@@ -6,5 +6,6 @@
         <a class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}" @if(request()->routeIs('admin.users.*')) aria-current="page" @endif href="{{ route('admin.users.index') }}">Usuários</a>
         <a class="{{ request()->routeIs('admin.audits') ? 'active' : '' }}" @if(request()->routeIs('admin.audits')) aria-current="page" @endif href="{{ route('admin.audits') }}">Auditoria</a>
         <a class="{{ request()->routeIs('admin.operations') ? 'active' : '' }}" @if(request()->routeIs('admin.operations')) aria-current="page" @endif href="{{ route('admin.operations') }}">Operação</a>
+        <a class="{{ request()->routeIs('admin.deploy.*') ? 'active' : '' }}" @if(request()->routeIs('admin.deploy.*')) aria-current="page" @endif href="{{ route('admin.deploy.index') }}">Deploy</a>
     @endif
 </nav>

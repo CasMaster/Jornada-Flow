@@ -63,7 +63,7 @@ class DeployApprovalTest extends TestCase
         $admin = User::factory()->create(['role' => 'super_admin', 'active' => true, 'password' => Hash::make('secret-password')]);
         file_put_contents($this->pendingDir.'/homologacao-'.$digest, (string) (time() + 900));
 
-        $this->actingAs($admin)->get(route('admin.deploy.index'))->assertOk()->assertSee($digest);
+        $this->actingAs($admin)->get(route('admin.deploy.index'))->assertOk()->assertSee($digest)->assertSee('aria-current="page"', false)->assertSee('>Deploy</a>', false);
         $this->post(route('admin.deploy.approve', $digest), ['password' => 'wrong'])->assertSessionHasErrors('password');
         $this->assertFileDoesNotExist($this->approvedDir.'/homologacao-'.$digest);
         $this->post(route('admin.deploy.approve', str_repeat('c', 64)), ['password' => 'secret-password'])->assertStatus(409);

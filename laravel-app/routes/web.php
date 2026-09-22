@@ -2,12 +2,12 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DeployApprovalController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\ManagerVacationController;
 use App\Http\Controllers\PasswordController;
-use App\Http\Controllers\DeployApprovalController;
 use App\Http\Controllers\UserDirectoryController;
 use App\Http\Controllers\VacationController;
 use App\Http\Controllers\VacationEntitlementController;

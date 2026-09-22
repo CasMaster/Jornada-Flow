@@ -1,0 +1,6 @@
+.deploy-approval-item{border:1px solid var(--line);border-radius:10px;padding:18px;margin:16px 0;background:var(--surface)}
+.deploy-approval-item code{display:inline-block;max-width:100%;overflow-wrap:anywhere;user-select:all;font-size:.85rem}
+.deploy-approval-item form{display:flex;flex-wrap:wrap;align-items:end;gap:12px;margin-top:16px}
+.deploy-approval-item label{display:block;width:100%;font-weight:700}
+.deploy-approval-item input{min-width:220px;min-height:42px;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--text)}
+@media(max-width:640px){.deploy-approval-item form>*{width:100%}}

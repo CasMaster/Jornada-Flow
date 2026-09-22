@@ -2,6 +2,10 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-09-22 — Aprovação web vinculada ao pacote
+
+O MixHome oferece ao Super Admin ativo uma página de aprovação de deploy com confirmação de senha, CSRF e limite de tentativas. O host continua responsável pelo bloqueio: o gate publica apenas após consumir uma autorização de uso único, assinada por HMAC com chave separada por ambiente, vinculada ao SHA-256 do pacote pendente e com validade máxima de cinco minutos. Os diretórios de pendências e aprovações são montados somente no serviço web, com permissões distintas; worker e scheduler não recebem a chave. A aprovação SSH permanece como contingência. A funcionalidade só deve ser ativada após instalação dos scripts e segredos no servidor e validação em homologação.
+
 ## 2026-09-21 — Aprovação de deploy no servidor
 
 O plano GitHub do repositório privado não permite revisores obrigatórios de ambiente. O workflow usa agora uma chave SSH exclusiva, com comando forçado no `authorized_keys`. Um script root-owned aceita apenas consulta do backup e upload de pacote para homologação/produção; para publicar, calcula o SHA-256 e aguarda aprovação individual, de uso único e curta duração, feita em sessão SSH administrativa separada. A chave pessoal do administrador não foi alterada. A segregação foi validada no monitor B2, na rejeição de comandos arbitrários e no primeiro deploy com aprovação em homologação (`35634509195`). Como a chave pessoal antiga esteve em um secret do GitHub, a substituição do secret não elimina o risco de eventuais cópias históricas.

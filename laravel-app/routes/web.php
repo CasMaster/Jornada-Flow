@@ -7,6 +7,7 @@ use App\Http\Controllers\HealthController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\ManagerVacationController;
 use App\Http\Controllers\PasswordController;
+use App\Http\Controllers\DeployApprovalController;
 use App\Http\Controllers\UserDirectoryController;
 use App\Http\Controllers\VacationController;
 use App\Http\Controllers\VacationEntitlementController;
@@ -59,6 +60,8 @@ Route::prefix(config('app.route_prefix'))->group(function () {
         Route::delete('/delegacoes/{delegation}', [AdminController::class, 'deleteDelegation'])->name('admin.delegations.destroy');
         Route::get('/auditoria', [AdminController::class, 'audits'])->name('admin.audits');
         Route::get('/operacao', [AdminController::class, 'operations'])->name('admin.operations');
+        Route::get('/operacao/deploy', [DeployApprovalController::class, 'index'])->name('admin.deploy.index');
+        Route::post('/operacao/deploy/{digest}/aprovar', [DeployApprovalController::class, 'approve'])->middleware('throttle:3,1')->name('admin.deploy.approve');
         Route::get('/usuarios', [UserDirectoryController::class, 'index'])->name('admin.users.index');
         Route::post('/usuarios', [UserDirectoryController::class, 'store'])->name('admin.users.store');
         Route::put('/usuarios/{user}', [UserDirectoryController::class, 'update'])->name('admin.users.update');

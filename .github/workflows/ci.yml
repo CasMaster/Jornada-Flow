@@ -20,6 +20,8 @@ jobs:
       - run: php artisan key:generate
       - run: vendor/bin/pint --test
       - run: php artisan test
+      - run: sh -n ../scripts/mixhome-ci-gate.sh ../scripts/mixhome-approve.sh
+      - run: python3 -B -m unittest discover ../scripts/tests -p test_web_approval.py
       - run: docker build -t hibrido-home-office:${{ github.sha }} .
   postgres:
     runs-on: ubuntu-latest

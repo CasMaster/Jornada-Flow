@@ -343,6 +343,46 @@ Para homologação, troque `producao` por `homologacao`. A aprovação vale para
 Sem aprovação, o pacote não é publicado. O monitor de backup usa somente
 `backup-status`, sem permissão para executar shell arbitrário.
 
+#### Aprovação web (ativação opcional)
+
+A área **Gestão → Operação → Aprovação de deploy** permite que um Super Admin
+ativo aprove o pacote pendente sem abrir SSH a cada publicação. O formulário exige
+novamente a senha, tem proteção CSRF e limite de tentativas. O servidor continua
+sendo a autoridade: confere o SHA-256 do pacote, a assinatura HMAC por ambiente,
+o prazo de até cinco minutos e consome a autorização uma única vez. A aprovação
+SSH existente permanece como contingência. Não habilite a interface antes de
+instalar e testar a verificação no servidor.
+
+Na preparação de **cada** ambiente, crie os diretórios
+`/var/lib/mixhome-ci/pending` (root, modo 755) e
+`/var/lib/mixhome-ci/web-approved/homologacao` e
+`/var/lib/mixhome-ci/web-approved/producao` (cada um com UID/GID do Apache no
+container, modo 700; o diretório pai permanece restrito ao root).
+Instale `scripts/mixhome-verify-web-approval.py` como root, modo 755, em
+`/usr/local/sbin/mixhome-verify-web-approval`, e atualize
+`/usr/local/sbin/mixhome-ci-gate` a partir do script versionado. O host precisa
+ter Python 3. Guarde uma chave aleatória **diferente por ambiente**, com no mínimo
+32 caracteres, em `/etc/mixhome-ci/homologacao.approval-key` e
+`/etc/mixhome-ci/producao.approval-key` (root, modo 600). Não registre as chaves
+em logs, no GitHub ou neste documento.
+
+No `.env` privado de cada ambiente, configure `DEPLOY_APPROVAL_ENV` com
+`homologacao` ou `producao`, `DEPLOY_APPROVAL_KEY` com a respectiva chave e
+`DEPLOY_PENDING_HOST_DIR=/var/lib/mixhome-ci/pending` e
+`DEPLOY_APPROVED_HOST_DIR=/var/lib/mixhome-ci/web-approved/<ambiente>` (substitua
+`<ambiente>` pelo nome correspondente). O Compose monta o
+diretório de pendências como somente leitura e o de autorizações como escrita
+somente no serviço web; worker e scheduler não recebem esses mounts ou a chave.
+Confira UID/GID efetivos no Podman antes de ajustar a propriedade do diretório.
+O arquivo `.env` precisa permanecer com permissão restrita.
+
+Ative primeiro em homologação, execute um deploy controlado e confira: usuário
+sem perfil Super Admin recebe 403; senha incorreta, digest ausente/expirado e
+assinatura inválida não publicam; aprovação correta publica apenas o pacote
+exibido e os healthcheck/smoke passam. Só depois, mediante autorização do Super
+Admin, repita em produção. A primeira publicação que instala a interface ainda
+usa a aprovação SSH anterior; publicações seguintes podem usar a interface.
+
 Essa separação não altera a chave pessoal, mas ela já esteve em um secret do
 GitHub: substituí-la no secret impede uso futuro pela automação, **não** revoga
 eventuais cópias históricas. A garantia de exclusividade total depende de uma

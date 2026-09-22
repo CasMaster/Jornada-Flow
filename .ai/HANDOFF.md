@@ -2,9 +2,11 @@
 
 ## Objetivo atual
 
-Manter o MixHome seguro e operacional, promovendo para produção somente mudanças já validadas em homologação.
+Preparar a aprovação web de deploy sem remover o bloqueio no servidor, validando primeiro em homologação e mantendo a publicação em produção sob autorização explícita do Super Admin.
 
 ## Estado atual
+
+Em 2026-09-22, a implementação local da aprovação web foi preparada, mas ainda não foi enviada ao GitHub nem instalada no servidor. O Super Admin vê os pacotes pendentes do próprio ambiente, confirma a senha e gera autorização curta vinculada ao digest. O gate do host verifica assinatura e prazo antes de publicar; a aprovação SSH continua disponível. Os testes Laravel locais passaram (70 testes, 383 assertions), assim como o teste do verificador Python, a sintaxe shell, o Compose e o build local da imagem. A ativação exige preparar diretórios, chave por ambiente e atualizar os scripts root-owned conforme `docs/OPERACAO.md`, começando por homologação.
 
 Produção recebeu em 2026-09-18 o commit `065f225` pelo deploy `35366275409`; publicação e smoke autenticado passaram. As correções de segurança do commit `03fd193` estão incluídas: cadastro público removido, login limitado por e-mail/IP e proteção de CSV/XLSX contra fórmulas. O smoke de produção de 2026-09-21 (`35591770253`) também passou. Recuperação de senha por SMTP está habilitada e é o fluxo oficial de primeiro acesso após o Super Admin criar a conta.
 
@@ -58,7 +60,7 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Próximo passo
 
-O fluxo de deploy controlado foi validado em homologação. Antes de promover mudanças futuras para produção, obter autorização explícita do Super Admin e conferir o digest do pacote; a simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
+Revisar o código e o procedimento local da aprovação web, preparar a ativação em homologação com autorização operacional, testar o caminho completo (inclusive recusas e expiração) e somente então considerar produção. Sem autorização para envio/publicação, nada foi alterado no servidor. A simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
 
 ## Limites
 

@@ -33,6 +33,11 @@ test -s "$incoming" || { echo 'Empty package.' >&2; exit 1; }
 tar -tzf "$incoming" >/dev/null
 digest=$(sha256sum "$incoming" | cut -d ' ' -f 1)
 approval="$state/approved/$environment-$digest"
+pending="$state/pending/$environment-$digest"
+web_approval="$state/web-approved/$environment/$environment-$digest"
+printf '%s\n' "$(( $(date +%s) + 900 ))" > "$pending"
+chmod 644 "$pending"
+trap 'rm -f "$incoming" "$pending" ${consumed:+"$consumed"}' EXIT HUP INT TERM
 
 echo "Package received for $environment. SHA-256: $digest"
 echo "Waiting up to 15 minutes for server approval."
@@ -49,6 +54,17 @@ while [ "$attempt" -lt 60 ]; do
             esac
             [ "$expires" -ge "$now" ] || { echo 'Approval expired.' >&2; exit 1; }
             break
+        fi
+    fi
+    if [ -f "$web_approval" ]; then
+        consumed="$web_approval.used.$$"
+        if mv "$web_approval" "$consumed" 2>/dev/null; then
+            if web_actor=$(/usr/local/sbin/mixhome-verify-web-approval "$environment" "$digest" "$consumed"); then
+                logger -t mixhome-ci-gate "web approval for $environment package $digest by app user $web_actor"
+                break
+            fi
+            rm -f "$consumed"
+            consumed=
         fi
     fi
     attempt=$((attempt + 1))

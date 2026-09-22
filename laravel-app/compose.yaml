@@ -52,6 +52,8 @@ services:
       SLOW_REQUEST_MS: "${SLOW_REQUEST_MS:-750}"
       SLOW_QUERY_MS: "${SLOW_QUERY_MS:-250}"
       DATA_RETENTION_ENABLED: "${DATA_RETENTION_ENABLED:-false}"
+      DEPLOY_APPROVAL_ENV: "${DEPLOY_APPROVAL_ENV:-}"
+      DEPLOY_APPROVAL_KEY: "${DEPLOY_APPROVAL_KEY:-}"
       MAIL_NOTIFICATIONS_ENABLED: "${MAIL_NOTIFICATIONS_ENABLED:-false}"
       MAIL_MAILER: "${MAIL_MAILER:-log}"
       MAIL_SCHEME: "${MAIL_SCHEME:-}"
@@ -63,6 +65,8 @@ services:
       MAIL_FROM_NAME: "${MAIL_FROM_NAME:-MixHome | Mix Fiscal}"
     volumes:
       - hibrido_laravel_data:/var/www/html/legacy:ro
+      - "${DEPLOY_PENDING_HOST_DIR:-./storage/deploy-pending}:/run/mixhome-ci/pending:ro"
+      - "${DEPLOY_APPROVED_HOST_DIR:-./storage/deploy-approved}:/run/mixhome-ci/web-approved:rw"
     depends_on:
       - postgres
   queue_worker:

@@ -356,12 +356,13 @@ instalar e testar a verificação no servidor.
 Na preparação de **cada** ambiente, crie os diretórios
 `/opt/hibrido-home-office-<ambiente>/.deploy-approval/pending` (admin, modo
 755; arquivos pendentes são criados pelo gate em modo 644) e
-`/opt/hibrido-home-office-<ambiente>/.deploy-approval/approved` (UID/GID do
-Apache **mapeados pelo Podman rootless**, modo 700). O diretório pai pertence a
+`/opt/hibrido-home-office-<ambiente>/.deploy-approval/approved` (UID do
+Apache **mapeado pelo Podman rootless**, grupo do usuário `admin`, modo 770). O diretório pai pertence a
 `admin` e deve ter modo 700. Aqui `<ambiente>` é `hml` ou `prod`, conforme o
-diretório já existente no servidor. Use `podman unshare chown 33:33` no diretório de
-aprovações para aplicar o mapeamento de UID/GID do container; não faça `chown`
-direto para 33:33 no host. O gate root acessa os dois diretórios no host.
+diretório já existente no servidor. Use `podman unshare chown 33:0` no diretório de
+aprovações para aplicar o mapeamento de UID do container e preservar acesso do
+usuário `admin` ao bind mount; não faça `chown` direto para 33 no host. O gate
+root acessa os dois diretórios no host.
 Instale `scripts/mixhome-verify-web-approval.py` como root, modo 755, em
 `/usr/local/sbin/mixhome-verify-web-approval`, e atualize
 `/usr/local/sbin/mixhome-ci-gate` a partir do script versionado. O host precisa

@@ -33,8 +33,8 @@ test -s "$incoming" || { echo 'Empty package.' >&2; exit 1; }
 tar -tzf "$incoming" >/dev/null
 digest=$(sha256sum "$incoming" | cut -d ' ' -f 1)
 approval="$state/approved/$environment-$digest"
-pending="$state/pending/$environment-$digest"
-web_approval="$state/web-approved/$environment/$environment-$digest"
+pending="$target/.deploy-approval/pending/$environment-$digest"
+web_approval="$target/.deploy-approval/approved/$environment-$digest"
 printf '%s\n' "$(( $(date +%s) + 900 ))" > "$pending"
 chmod 644 "$pending"
 trap 'rm -f "$incoming" "$pending" ${consumed:+"$consumed"}' EXIT HUP INT TERM

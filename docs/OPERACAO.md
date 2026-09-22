@@ -354,10 +354,14 @@ SSH existente permanece como contingência. Não habilite a interface antes de
 instalar e testar a verificação no servidor.
 
 Na preparação de **cada** ambiente, crie os diretórios
-`/var/lib/mixhome-ci/pending` (root, modo 755) e
-`/var/lib/mixhome-ci/web-approved/homologacao` e
-`/var/lib/mixhome-ci/web-approved/producao` (cada um com UID/GID do Apache no
-container, modo 700; o diretório pai permanece restrito ao root).
+`/opt/hibrido-home-office-<ambiente>/.deploy-approval/pending` (admin, modo
+755; arquivos pendentes são criados pelo gate em modo 644) e
+`/opt/hibrido-home-office-<ambiente>/.deploy-approval/approved` (UID/GID do
+Apache **mapeados pelo Podman rootless**, modo 700). O diretório pai pertence a
+`admin` e deve ter modo 700. Aqui `<ambiente>` é `hml` ou `prod`, conforme o
+diretório já existente no servidor. Use `podman unshare chown 33:33` no diretório de
+aprovações para aplicar o mapeamento de UID/GID do container; não faça `chown`
+direto para 33:33 no host. O gate root acessa os dois diretórios no host.
 Instale `scripts/mixhome-verify-web-approval.py` como root, modo 755, em
 `/usr/local/sbin/mixhome-verify-web-approval`, e atualize
 `/usr/local/sbin/mixhome-ci-gate` a partir do script versionado. O host precisa
@@ -368,9 +372,9 @@ em logs, no GitHub ou neste documento.
 
 No `.env` privado de cada ambiente, configure `DEPLOY_APPROVAL_ENV` com
 `homologacao` ou `producao`, `DEPLOY_APPROVAL_KEY` com a respectiva chave e
-`DEPLOY_PENDING_HOST_DIR=/var/lib/mixhome-ci/pending` e
-`DEPLOY_APPROVED_HOST_DIR=/var/lib/mixhome-ci/web-approved/<ambiente>` (substitua
-`<ambiente>` pelo nome correspondente). O Compose monta o
+`DEPLOY_PENDING_HOST_DIR=/opt/hibrido-home-office-<ambiente>/.deploy-approval/pending`
+e `DEPLOY_APPROVED_HOST_DIR=/opt/hibrido-home-office-<ambiente>/.deploy-approval/approved`
+(substitua `<ambiente>` pelo nome do diretório do respectivo ambiente). O Compose monta o
 diretório de pendências como somente leitura e o de autorizações como escrita
 somente no serviço web; worker e scheduler não recebem esses mounts ou a chave.
 Confira UID/GID efetivos no Podman antes de ajustar a propriedade do diretório.

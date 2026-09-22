@@ -6,5 +6,5 @@
 @include('manager._navigation')
 <article class="card report"><div class="table-wrap"><table><thead><tr><th>DATA</th><th>RESPONSÁVEL</th><th>EVENTO</th><th>REGISTRO</th><th>IP</th></tr></thead><tbody>
 @forelse($logs as $log)<tr><td>{{ $log->created_at->timezone(config('app.timezone'))->format('d/m/Y H:i') }}</td><td>{{ $log->actor?->name ?? 'Sistema' }}</td><td><b>{{ $log->event }}</b></td><td>{{ class_basename($log->auditable_type ?? '') }} #{{ $log->auditable_id }}</td><td>{{ $log->ip_address ?: '—' }}</td></tr>@empty<tr><td colspan="5" class="empty">Nenhum evento registrado.</td></tr>@endforelse
-</tbody></table></div><div class="directory-pagination">{{ $logs->links() }}</div></article></section></main>
+</tbody></table></div>@include('components.pagination', ['paginator' => $logs])</article></section></main>
 @endsection

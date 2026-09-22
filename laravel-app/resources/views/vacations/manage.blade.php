@@ -33,7 +33,7 @@
       <form method="post" action="{{ route('admin.vacations.cancel',$vacation) }}" class="vacation-cancel-form">@csrf<label><span>Cancelar solicitação</span><input name="note" required placeholder="Informe o motivo do cancelamento"></label><button class="reject-action">Cancelar</button></form>
     </div></details>@endif
   </td></tr>@empty<tr><td colspan="6" class="empty">Nenhuma solicitação encontrada.</td></tr>@endforelse
-  </tbody></table></div>{{ $vacations->links() }}</article>
+  </tbody></table></div>@include('components.pagination', ['paginator' => $vacations])</article>
 </section></main>
 @endsection
 @push('scripts')<script src="{{ asset('assets/manager.js') }}?v={{ filemtime(public_path('assets/manager.js')) }}" defer></script>@endpush

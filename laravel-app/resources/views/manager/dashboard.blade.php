@@ -61,7 +61,7 @@
                         <td class="review-actions"><details class="request-menu"><summary>Analisar</summary><form method="post" action="{{ route('manager.review',$record) }}" class="request-menu-panel">@csrf<textarea name="review_note" maxlength="1000" rows="3" placeholder="Justificativa opcional">{{ $record->review_note }}</textarea><button class="approve-action" name="decision" value="approved">✓ Aprovar</button><button class="reject-action" name="decision" value="rejected" onclick="return confirm('Recusar e arquivar esta solicitação?')">× Recusar</button></form></details>@if($record->review_note)<small class="review-note">{{ $record->review_note }}</small>@endif</td>
                     </tr>
                 @empty<tr><td colspan="6" class="empty">Nenhuma solicitação neste ciclo.</td></tr>@endforelse</tbody>
-            </table></div><div class="directory-pagination">{{ $records->links() }}</div>
+            </table></div>@include('components.pagination', ['paginator' => $records])
         </details>
 
     </section>

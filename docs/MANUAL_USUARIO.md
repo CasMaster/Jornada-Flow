@@ -231,6 +231,6 @@ O MixHome pode ser instalado no celular ou computador sem criar uma conta adicio
 
 No Android ou em navegadores compatíveis, acesse o MixHome e use o botão **Instalar app** quando ele aparecer. Também é possível abrir o menu do navegador e escolher **Instalar aplicativo** ou **Adicionar à tela inicial**.
 
-No iPhone ou iPad, abra o MixHome no Safari, toque em **Compartilhar** e escolha **Adicionar à Tela de Início**.
+No iPhone ou iPad, o botão **Como instalar** mostra a orientação específica do iOS. Abra o MixHome no Safari, toque em **Compartilhar** e escolha **Adicionar à Tela de Início**. Se a opção estiver recolhida, role a lista ou abra **Editar Ações**.
 
 Por segurança, solicitações, dados pessoais e páginas autenticadas não ficam disponíveis sem internet. Em caso de perda da conexão, o aplicativo mostra uma tela informativa e permite tentar novamente.

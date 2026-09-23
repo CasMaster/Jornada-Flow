@@ -61,4 +61,14 @@ class PwaTest extends TestCase
             ->assertSee('data-service-worker=', false)
             ->assertSee('data-pwa-install', false);
     }
+
+    public function test_pwa_script_includes_ios_installation_guidance(): void
+    {
+        $script = file_get_contents(public_path('assets/pwa.js'));
+
+        $this->assertStringContainsString('/iphone|ipad|ipod/i', $script);
+        $this->assertStringContainsString('Como instalar', $script);
+        $this->assertStringContainsString('Adicionar à Tela de Início', $script);
+        $this->assertStringContainsString('showModal()', $script);
+    }
 }

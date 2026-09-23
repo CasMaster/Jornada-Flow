@@ -7,9 +7,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WorkRequest extends Model
 {
-    protected $fillable = ['user_id', 'work_date', 'status', 'reviewed_by', 'reviewed_at', 'review_note'];
+    protected $fillable = ['user_id', 'work_date', 'work_mode', 'status', 'reviewed_by', 'reviewed_at', 'review_note'];
 
     protected $casts = ['work_date' => 'date', 'reviewed_at' => 'datetime'];
+
+    public function isOnsite(): bool
+    {
+        return $this->work_mode === 'onsite';
+    }
 
     public function user(): BelongsTo
     {

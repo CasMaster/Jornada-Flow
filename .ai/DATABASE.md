@@ -14,7 +14,7 @@ O serviço web acessa o host interno `postgres:5432`. O compose publica PostgreS
 - `users`: identidade, hash de senha, perfil, equipe própria, data de contratação e estado ativo.
 - `teams`: catálogo de equipes e estado ativo.
 - `manager_team`: relação muitos-para-muitos entre gestores e equipes.
-- `work_requests`: solicitante, data, status, revisor e data da análise.
+- `work_requests`: solicitante, data, modalidade (`home_office` ou `onsite`), status, revisor e data da análise.
 - `vacation_requests`: solicitante, intervalo, status, análise, correção e cancelamento preservado.
 - `vacation_entitlements`: concessão e ajuste de dias por colaborador e período aquisitivo; consumo e reserva são derivados das solicitações vinculadas.
 - `holidays`: datas corporativas e indicador de bloqueio.
@@ -28,7 +28,7 @@ Restrições relevantes:
 - e-mail de usuário único;
 - nome de equipe único;
 - vínculo gestor–equipe único pela chave composta;
-- solicitação única por `(user_id, work_date)`;
+- solicitação única por `(user_id, work_date, work_mode)`; modalidades diferentes na mesma data só podem coexistir quando a anterior foi recusada;
 - data corporativa única.
 
 ## Migrations

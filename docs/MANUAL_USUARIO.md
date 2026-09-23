@@ -27,7 +27,8 @@ O link é válido por 60 minutos e pode ser usado uma única vez. Por segurança
 ## 3. Registrar home office
 
 1. Entre no painel pessoal.
-2. Navegue até o mês desejado pelas setas do calendário.
+2. Escolha **Home office** ou **Presencial** acima do calendário.
+3. Navegue até o mês desejado pelas setas do calendário.
 3. Clique em cada dia que deseja solicitar.
 4. Confira o contador de dias selecionados.
 5. Clique em **Enviar solicitação**.

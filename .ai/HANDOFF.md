@@ -2,9 +2,11 @@
 
 ## Objetivo atual
 
-Preparar a primeira entrega do MixHome como PWA instalável, preservando o Laravel atual e impedindo cache de dados autenticados.
+Adicionar solicitação de dia presencial pelo colaborador, usando a mesma aprovação gerencial do home office.
 
 ## Estado atual
+
+Em 2026-09-23, a modalidade de trabalho foi adicionada localmente a `work_requests`, preservando os registros anteriores como `home_office`. O colaborador escolhe home office ou presencial no calendário; ambos nascem pendentes, respeitam bloqueios e férias, impedem modalidades ativas conflitantes e seguem pela mesma aprovação, auditoria, notificação, filtros e exportação. A migration e a publicação ainda não foram executadas fora dos testes locais.
 
 Em 2026-09-23, a PWA foi implementada com manifesto dinâmico, escopo compatível com a raiz de produção e `/homologacao`, ícones, registro de Service Worker, comando de instalação e tela offline. O Service Worker armazena somente assets públicos e a tela offline; navegações e dados de negócio usam rede e não são persistidos. A homologação foi publicada pelo deploy `35870636198`; smoke autenticado, manifesto, escopo, ícones, Service Worker, tela offline e controle de instalação foram validados. Produção permanece sem essa entrega.
 
@@ -43,6 +45,8 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Validação
 
+- Modalidade presencial: suíte completa aprovada em 2026-09-23, com 81 testes e 431 assertions; inclui criação pendente, aprovação gerencial, conflito entre modalidades e filtro da gestão.
+- Modalidade presencial: Laravel Pint, sintaxe JavaScript, `git diff --check` e build local da imagem aprovados.
 - Laravel Pint: aprovado após as correções de segurança.
 - PHPUnit/SQLite: 67 testes, 360 assertions, todos aprovados.
 - Migration completa executada com sucesso em PostgreSQL 16 temporário.
@@ -62,7 +66,7 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Próximo passo
 
-Revisar o código e o procedimento local da aprovação web, preparar a ativação em homologação com autorização operacional, testar o caminho completo (inclusive recusas e expiração) e somente então considerar produção. Sem autorização para envio/publicação, nada foi alterado no servidor. A simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
+Publicar a modalidade presencial primeiro em homologação após autorização explícita de envio, executar a migration, validar solicitações home office e presencial pelo fluxo completo e somente então considerar produção. Sem autorização para envio/publicação nesta tarefa, nada foi alterado no servidor. A simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
 
 ## Limites
 

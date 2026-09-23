@@ -35,10 +35,10 @@ O `compose.yaml` define quatro serviços: `postgres`, `hibrido_laravel`, `queue_
 
 ### Solicitação
 
-1. Usuário autenticado seleciona datas no painel.
+1. Usuário autenticado escolhe home office ou presencial e seleciona datas no painel.
 2. `EmployeeController` valida a entrada.
-3. `WorkRequestService` verifica bloqueios, remove duplicatas e grava em transação.
-4. Uma restrição única em `(user_id, work_date)` reforça a regra no banco.
+3. `WorkRequestService` verifica bloqueios, férias e conflito entre modalidades, remove duplicatas e grava em transação.
+4. Uma restrição única em `(user_id, work_date, work_mode)` reforça a integridade no banco; a regra de domínio impede duas modalidades ativas na mesma data.
 5. `AuditService` registra a criação.
 
 ### Análise

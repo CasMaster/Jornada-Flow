@@ -15,7 +15,7 @@ class WorkRequestService
 {
     public function __construct(private AuditService $audit) {}
 
-    public function createMany(User $user, array $dates): int
+    public function createMany(User $user, array $dates, string $workMode = 'home_office'): int
     {
         $uniqueDates = array_unique($dates);
         $blocked = Holiday::where(function ($query) use ($uniqueDates) {
@@ -37,15 +37,30 @@ class WorkRequestService
                     && $vacation->ends_on->startOfDay()->gte($requestedDate);
             }));
         if ($vacationConflict) {
-            throw ValidationException::withMessages(['dates' => 'Não é possível solicitar home office durante férias aprovadas.']);
+            throw ValidationException::withMessages(['dates' => 'Não é possível registrar trabalho durante férias aprovadas.']);
+        }
+        $activeConflict = WorkRequest::where('user_id', $user->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->where('work_mode', '<>', $workMode)
+            ->where(function ($query) use ($uniqueDates) {
+                foreach ($uniqueDates as $date) {
+                    $query->orWhereDate('work_date', $date);
+                }
+            })
+            ->exists();
+        if ($activeConflict) {
+            throw ValidationException::withMessages(['dates' => 'Uma ou mais datas já possuem outro tipo de jornada registrado.']);
         }
         $added = 0;
-        DB::transaction(function () use ($user, $dates, &$added) {
+        DB::transaction(function () use ($user, $dates, $workMode, &$added) {
             foreach (array_unique($dates) as $date) {
-                $record = WorkRequest::firstOrCreate(['user_id' => $user->id, 'work_date' => $date], ['status' => 'pending']);
+                $record = WorkRequest::firstOrCreate(
+                    ['user_id' => $user->id, 'work_date' => $date, 'work_mode' => $workMode],
+                    ['status' => 'pending']
+                );
                 if ($record->wasRecentlyCreated) {
                     $added++;
-                    $this->audit->record('work_request.created', $record, [], ['work_date' => $date, 'status' => 'pending']);
+                    $this->audit->record('work_request.created', $record, [], ['work_date' => $date, 'work_mode' => $workMode, 'status' => 'pending']);
                 }
             }
         });

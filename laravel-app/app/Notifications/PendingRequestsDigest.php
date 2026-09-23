@@ -28,6 +28,6 @@ class PendingRequestsDigest extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)->subject('Solicitações de home office pendentes')->greeting('Olá, '.$notifiable->name.'.')->line("Há {$this->count} solicitação(ões) aguardando análise perto do fechamento do ciclo.")->action('Analisar agora', route('manager.dashboard', ['status' => 'pending']));
+        return (new MailMessage)->subject('Solicitações de jornada pendentes')->greeting('Olá, '.$notifiable->name.'.')->line("Há {$this->count} solicitação(ões) de home office ou presencial aguardando análise perto do fechamento do ciclo.")->action('Analisar agora', route('manager.dashboard', ['status' => 'pending']));
     }
 }

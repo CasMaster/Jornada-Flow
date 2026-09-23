@@ -6,7 +6,7 @@ O MixHome é um sistema interno da Mix Fiscal para controlar dias de home office
 
 ## Problema resolvido
 
-- Colaboradores registram datas de trabalho remoto em um painel pessoal.
+- Colaboradores solicitam datas de home office ou trabalho presencial em um painel pessoal.
 - Gestores analisam solicitações das equipes sob sua responsabilidade.
 - Super Admins mantêm usuários, equipes, calendário e auditoria.
 - A gestão consolida o período operacional em planilha Excel.
@@ -27,6 +27,7 @@ O MixHome é um sistema interno da Mix Fiscal para controlar dias de home office
 - Login unificado e primeiro acesso por conta previamente criada pelo Super Admin.
 - Perfis `employee`, `manager` e `super_admin`.
 - Painel pessoal, histórico e notificações.
+- Escolha de modalidade home office ou presencial, ambas submetidas à aprovação gerencial e impedidas durante férias aprovadas.
 - Painel gerencial com filtros, paginação, análise individual/em lote e métricas.
 - Exportação XLSX matricial.
 - Diretório paginado de usuários e vínculos gestor–equipe.

@@ -2,6 +2,10 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-09-23 — Presencial e home office compartilham a aprovação
+
+O colaborador escolhe a modalidade `home_office` ou `onsite` ao selecionar as datas. As duas modalidades nascem pendentes, são imutáveis para o colaborador, passam pela mesma autorização gerencial e geram notificação e auditoria. Solicitações ativas de modalidades diferentes não podem ocupar a mesma data; uma solicitação recusada permanece preservada e não impede uma nova solicitação da outra modalidade. Férias aprovadas e datas corporativas bloqueadas impedem ambas.
+
 ## 2026-09-23 — PWA instalável sem cache de dados autenticados
 
 O MixHome passa a oferecer manifesto, ícones, instalação e Service Worker no mesmo Laravel server-rendered. O escopo é calculado por `APP_ROUTE_PREFIX`, permitindo produção na raiz e homologação em `/homologacao`. O Service Worker armazena somente a interface pública estática e a página de indisponibilidade; navegações, respostas autenticadas, formulários e dados de negócio nunca são gravados para uso offline. A primeira entrega não inclui push nem distribuição por lojas.

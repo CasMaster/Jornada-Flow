@@ -24,13 +24,14 @@ class WorkRequestStatusChanged extends Notification implements ShouldQueue
 
     public function toArray(object $notifiable): array
     {
-        return ['work_request_id' => $this->record->id, 'date' => $this->record->work_date->format('Y-m-d'), 'status' => $this->record->status];
+        return ['work_request_id' => $this->record->id, 'date' => $this->record->work_date->format('Y-m-d'), 'work_mode' => $this->record->work_mode, 'status' => $this->record->status];
     }
 
     public function toMail(object $notifiable): MailMessage
     {
         $status = $this->record->status === 'approved' ? 'aprovada' : 'recusada';
+        $mode = $this->record->isOnsite() ? 'presencial' : 'home office';
 
-        return (new MailMessage)->subject('Atualização da solicitação de home office')->greeting('Olá, '.$notifiable->name.'.')->line('Sua solicitação de '.$this->record->work_date->format('d/m/Y').' foi '.$status.'.')->action('Ver histórico', route('employee.dashboard'));
+        return (new MailMessage)->subject('Atualização da solicitação de '.$mode)->greeting('Olá, '.$notifiable->name.'.')->line('Sua solicitação de '.$mode.' para '.$this->record->work_date->format('d/m/Y').' foi '.$status.'.')->action('Ver histórico', route('employee.dashboard'));
     }
 }

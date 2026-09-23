@@ -8,12 +8,16 @@ use App\Http\Controllers\HealthController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\ManagerVacationController;
 use App\Http\Controllers\PasswordController;
+use App\Http\Controllers\PwaController;
 use App\Http\Controllers\UserDirectoryController;
 use App\Http\Controllers\VacationController;
 use App\Http\Controllers\VacationEntitlementController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix(config('app.route_prefix'))->group(function () {
+    Route::get('/manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');
+    Route::get('/service-worker.js', [PwaController::class, 'serviceWorker'])->name('pwa.service-worker');
+    Route::get('/offline', [PwaController::class, 'offline'])->name('pwa.offline');
     Route::get('/health/ready', [HealthController::class, 'ready'])->name('health.ready');
     Route::get('/', function () {
         if (! auth()->check()) {

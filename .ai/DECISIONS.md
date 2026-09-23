@@ -2,6 +2,10 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-09-23 — PWA instalável sem cache de dados autenticados
+
+O MixHome passa a oferecer manifesto, ícones, instalação e Service Worker no mesmo Laravel server-rendered. O escopo é calculado por `APP_ROUTE_PREFIX`, permitindo produção na raiz e homologação em `/homologacao`. O Service Worker armazena somente a interface pública estática e a página de indisponibilidade; navegações, respostas autenticadas, formulários e dados de negócio nunca são gravados para uso offline. A primeira entrega não inclui push nem distribuição por lojas.
+
 ## 2026-09-22 — Aprovação web vinculada ao pacote
 
 O MixHome oferece ao Super Admin ativo uma página de aprovação de deploy com confirmação de senha, CSRF e limite de tentativas. O host continua responsável pelo bloqueio: o gate publica apenas após consumir uma autorização de uso único, assinada por HMAC com chave separada por ambiente, vinculada ao SHA-256 do pacote pendente e com validade máxima de cinco minutos. Os diretórios de pendências e aprovações são montados somente no serviço web, com permissões distintas; worker e scheduler não recebem a chave. A aprovação SSH permanece como contingência. A funcionalidade só deve ser ativada após instalação dos scripts e segredos no servidor e validação em homologação.

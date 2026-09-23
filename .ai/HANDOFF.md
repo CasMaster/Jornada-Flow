@@ -2,9 +2,11 @@
 
 ## Objetivo atual
 
-Preparar a aprovação web de deploy sem remover o bloqueio no servidor, validando primeiro em homologação e mantendo a publicação em produção sob autorização explícita do Super Admin.
+Preparar a primeira entrega do MixHome como PWA instalável, preservando o Laravel atual e impedindo cache de dados autenticados.
 
 ## Estado atual
+
+Em 2026-09-23, a PWA foi implementada localmente com manifesto dinâmico, escopo compatível com a raiz de produção e `/homologacao`, ícones, registro de Service Worker, comando de instalação e tela offline. O Service Worker armazena somente assets públicos e a tela offline; navegações e dados de negócio usam rede e não são persistidos. A alteração ainda não foi enviada nem publicada.
 
 Em 2026-09-22, a implementação local da aprovação web foi preparada, mas ainda não foi enviada ao GitHub nem instalada no servidor. O Super Admin vê os pacotes pendentes do próprio ambiente, confirma a senha e gera autorização curta vinculada ao digest. O gate do host verifica assinatura e prazo antes de publicar; a aprovação SSH continua disponível. Os testes Laravel locais passaram (70 testes, 383 assertions), assim como o teste do verificador Python, a sintaxe shell, o Compose e o build local da imagem. A ativação exige preparar diretórios, chave por ambiente e atualizar os scripts root-owned conforme `docs/OPERACAO.md`, começando por homologação.
 

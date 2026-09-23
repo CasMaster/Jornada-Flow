@@ -224,3 +224,13 @@ for concluído. Ajustes positivos ou negativos, correções e cancelamentos exig
 justificativa e ficam na auditoria. Solicitações antigas sem vínculo devem ser associadas
 a um período antes da aprovação. Este saldo é administrativo e deve ser conferido com
 o sistema oficial do RH.
+
+## 15. Instalar o MixHome como aplicativo
+
+O MixHome pode ser instalado no celular ou computador sem criar uma conta adicional. O aplicativo utiliza o mesmo endereço, login e permissões da versão web.
+
+No Android ou em navegadores compatíveis, acesse o MixHome e use o botão **Instalar app** quando ele aparecer. Também é possível abrir o menu do navegador e escolher **Instalar aplicativo** ou **Adicionar à tela inicial**.
+
+No iPhone ou iPad, abra o MixHome no Safari, toque em **Compartilhar** e escolha **Adicionar à Tela de Início**.
+
+Por segurança, solicitações, dados pessoais e páginas autenticadas não ficam disponíveis sem internet. Em caso de perda da conexão, o aplicativo mostra uma tela informativa e permite tentar novamente.

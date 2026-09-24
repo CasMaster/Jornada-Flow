@@ -26,6 +26,7 @@ function renderCalendar() {
     button.dataset.date = date;
     button.title = holiday?.name || '';
     button.disabled = Boolean(holiday?.blocked || requestStatus);
+    if (holiday?.blocked) button.classList.add('blocked-date');
     if (requestStatus) button.classList.add('registered-date', `registered-${requestStatus}`, `registered-mode-${request.workMode}`);
     if (selected.has(date)) button.classList.add('chosen');
     if (holiday) {

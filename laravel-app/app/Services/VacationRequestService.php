@@ -15,18 +15,19 @@ class VacationRequestService
 {
     public function __construct(private AuditService $audit) {}
 
-    public function create(User $user, VacationEntitlement $entitlement, string $startsOn, string $endsOn): VacationRequest
+    public function create(User $user, VacationEntitlement $entitlement, string $startsOn, string $endsOn, int $cashAllowanceDays = 0): VacationRequest
     {
         if ($entitlement->user_id !== $user->id) {
             throw ValidationException::withMessages(['vacation_entitlement_id' => 'O saldo selecionado não pertence a este colaborador.']);
         }
         $this->ensureAvailable($user, $startsOn, $endsOn);
 
-        return DB::transaction(function () use ($user, $entitlement, $startsOn, $endsOn) {
+        return DB::transaction(function () use ($user, $entitlement, $startsOn, $endsOn, $cashAllowanceDays) {
             $lockedEntitlement = VacationEntitlement::lockForUpdate()->findOrFail($entitlement->id);
-            $this->ensureBalance($lockedEntitlement, self::days($startsOn, $endsOn), null, $startsOn, $endsOn);
-            $vacation = $user->vacationRequests()->create(['vacation_entitlement_id' => $lockedEntitlement->id, 'starts_on' => $startsOn, 'ends_on' => $endsOn, 'status' => 'pending']);
-            $this->audit->record('vacation_request.created', $vacation, [], $vacation->only(['starts_on', 'ends_on', 'status']));
+            $this->ensureCashAllowance($lockedEntitlement, self::days($startsOn, $endsOn), $cashAllowanceDays);
+            $this->ensureBalance($lockedEntitlement, self::days($startsOn, $endsOn) + $cashAllowanceDays, null, $startsOn, $endsOn);
+            $vacation = $user->vacationRequests()->create(['vacation_entitlement_id' => $lockedEntitlement->id, 'starts_on' => $startsOn, 'ends_on' => $endsOn, 'cash_allowance_days' => $cashAllowanceDays, 'status' => 'pending']);
+            $this->audit->record('vacation_request.created', $vacation, [], $vacation->only(['starts_on', 'ends_on', 'cash_allowance_days', 'status']));
 
             return $vacation;
         });
@@ -45,7 +46,7 @@ class VacationRequestService
                 }
                 $lockedEntitlement = VacationEntitlement::lockForUpdate()->findOrFail($lockedVacation->vacation_entitlement_id);
                 $this->ensureAvailable($lockedVacation->user, $lockedVacation->starts_on->toDateString(), $lockedVacation->ends_on->toDateString(), $lockedVacation);
-                $this->ensureBalance($lockedEntitlement, $lockedVacation->days(), $lockedVacation->id, $lockedVacation->starts_on, $lockedVacation->ends_on);
+                $this->ensureBalance($lockedEntitlement, $lockedVacation->totalDebitedDays(), $lockedVacation->id, $lockedVacation->starts_on, $lockedVacation->ends_on);
             }
             $old = $lockedVacation->only(['status', 'reviewed_by', 'reviewed_at', 'review_note']);
             $lockedVacation->update(['status' => $decision, 'reviewed_by' => $manager->id, 'reviewed_at' => now(), 'review_note' => $note ?: null]);
@@ -65,8 +66,9 @@ class VacationRequestService
         $this->ensureAvailable($vacation->user, $startsOn, $endsOn, $vacation);
         DB::transaction(function () use ($admin, $vacation, $entitlement, $startsOn, $endsOn, $note) {
             $lockedEntitlement = VacationEntitlement::lockForUpdate()->findOrFail($entitlement->id);
-            $this->ensureBalance($lockedEntitlement, self::days($startsOn, $endsOn), $vacation->id, $startsOn, $endsOn);
-            $old = $vacation->only(['vacation_entitlement_id', 'starts_on', 'ends_on', 'corrected_by', 'corrected_at', 'review_note']);
+            $this->ensureCorrectedCashAllowance($lockedEntitlement, self::days($startsOn, $endsOn), $vacation->cash_allowance_days);
+            $this->ensureBalance($lockedEntitlement, self::days($startsOn, $endsOn) + $vacation->cash_allowance_days, $vacation->id, $startsOn, $endsOn);
+            $old = $vacation->only(['vacation_entitlement_id', 'starts_on', 'ends_on', 'cash_allowance_days', 'corrected_by', 'corrected_at', 'review_note']);
             $vacation->update(['vacation_entitlement_id' => $lockedEntitlement->id, 'starts_on' => $startsOn, 'ends_on' => $endsOn, 'corrected_by' => $admin->id, 'corrected_at' => now(), 'review_note' => trim($note)]);
             $this->audit->record('vacation_request.corrected', $vacation, $old, $vacation->only(['vacation_entitlement_id', 'starts_on', 'ends_on', 'corrected_by', 'corrected_at', 'review_note']));
         });
@@ -118,6 +120,35 @@ class VacationRequestService
         if ($requestedDays > $entitlement->availableDays($ignoreRequestId)) {
             $availableDays = $entitlement->availableDays($ignoreRequestId);
             throw ValidationException::withMessages(['ends_on' => "A solicitação excede o saldo disponível de {$availableDays} dia(s)."]);
+        }
+    }
+
+    private function ensureCashAllowance(VacationEntitlement $entitlement, int $restDays, int $cashAllowanceDays): void
+    {
+        if ($cashAllowanceDays === 0) {
+            return;
+        }
+        $maximum = intdiv($entitlement->totalDays(), 3);
+        if ($cashAllowanceDays !== $maximum || $restDays + $cashAllowanceDays !== $entitlement->totalDays()) {
+            throw ValidationException::withMessages(['cash_allowance_days' => "O abono deve corresponder a 1/3 do saldo ({$maximum} dia(s))."]);
+        }
+        if ($entitlement->approvedDays() > 0 || $entitlement->reservedDays() > 0) {
+            throw ValidationException::withMessages(['cash_allowance_days' => 'O abono deve ser solicitado antes de utilizar ou reservar este saldo.']);
+        }
+        if (today()->gt($entitlement->acquisition_ends_on->copy()->subDays(15))) {
+            throw ValidationException::withMessages(['cash_allowance_days' => 'O prazo para solicitar o abono deste período aquisitivo terminou.']);
+        }
+    }
+
+    private function ensureCorrectedCashAllowance(VacationEntitlement $entitlement, int $restDays, int $cashAllowanceDays): void
+    {
+        if ($cashAllowanceDays === 0) {
+            return;
+        }
+
+        $maximum = intdiv($entitlement->totalDays(), 3);
+        if ($cashAllowanceDays !== $maximum || $restDays + $cashAllowanceDays !== $entitlement->totalDays()) {
+            throw ValidationException::withMessages(['ends_on' => 'A correção deve preservar os dias de descanso e de abono originalmente solicitados.']);
         }
     }
 }

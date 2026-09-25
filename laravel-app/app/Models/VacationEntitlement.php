@@ -74,12 +74,12 @@ class VacationEntitlement extends Model
             return $this->requests
                 ->whereIn('status', $statuses)
                 ->when($ignoreRequestId, fn ($requests) => $requests->where('id', '!=', $ignoreRequestId))
-                ->sum(fn (VacationRequest $request) => $request->days());
+                ->sum(fn (VacationRequest $request) => $request->totalDebitedDays());
         }
 
         return $this->requests()->whereIn('status', $statuses)
             ->when($ignoreRequestId, fn ($query) => $query->whereKeyNot($ignoreRequestId))
-            ->get(['starts_on', 'ends_on'])
-            ->sum(fn (VacationRequest $request) => $request->days());
+            ->get(['starts_on', 'ends_on', 'cash_allowance_days'])
+            ->sum(fn (VacationRequest $request) => $request->totalDebitedDays());
     }
 }

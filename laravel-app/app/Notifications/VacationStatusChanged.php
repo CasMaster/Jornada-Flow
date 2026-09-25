@@ -24,7 +24,7 @@ class VacationStatusChanged extends Notification implements ShouldQueue
 
     public function toArray(object $notifiable): array
     {
-        return ['type' => 'vacation_status', 'vacation_request_id' => $this->vacation->id, 'status' => $this->vacation->status, 'starts_on' => $this->vacation->starts_on->format('Y-m-d'), 'ends_on' => $this->vacation->ends_on->format('Y-m-d')];
+        return ['type' => 'vacation_status', 'vacation_request_id' => $this->vacation->id, 'status' => $this->vacation->status, 'starts_on' => $this->vacation->starts_on->format('Y-m-d'), 'ends_on' => $this->vacation->ends_on->format('Y-m-d'), 'cash_allowance_days' => $this->vacation->cash_allowance_days];
     }
 
     public function toMail(object $notifiable): MailMessage

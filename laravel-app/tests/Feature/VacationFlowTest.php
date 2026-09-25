@@ -131,6 +131,84 @@ class VacationFlowTest extends TestCase
         $this->assertSame(10, $entitlement->availableDays());
     }
 
+    public function test_employee_can_request_twenty_days_with_ten_day_cash_allowance(): void
+    {
+        $this->travelTo('2026-09-01');
+        $employee = User::factory()->create(['role' => 'employee']);
+        $entitlement = VacationEntitlement::create([
+            'user_id' => $employee->id,
+            'acquisition_starts_on' => '2025-10-01',
+            'acquisition_ends_on' => '2026-09-30',
+            'expires_on' => '2027-09-30',
+            'granted_days' => 30,
+        ]);
+
+        $this->actingAs($employee)->post(route('vacations.store'), [
+            'vacation_entitlement_id' => $entitlement->id,
+            'starts_on' => '2026-10-01',
+            'ends_on' => '2026-10-20',
+            'cash_allowance_days' => 10,
+        ])->assertSessionHasNoErrors();
+
+        $vacation = VacationRequest::firstOrFail();
+        $this->assertSame(20, $vacation->days());
+        $this->assertSame(10, $vacation->cash_allowance_days);
+        $this->assertSame(30, $vacation->totalDebitedDays());
+        $this->assertSame(0, $entitlement->availableDays());
+        $this->travelBack();
+    }
+
+    public function test_cash_allowance_rejects_invalid_amount_and_expired_request_deadline(): void
+    {
+        $this->travelTo('2026-09-01');
+        $employee = User::factory()->create(['role' => 'employee']);
+        $entitlement = VacationEntitlement::create([
+            'user_id' => $employee->id,
+            'acquisition_starts_on' => '2025-09-01',
+            'acquisition_ends_on' => '2026-08-31',
+            'expires_on' => '2027-08-31',
+            'granted_days' => 30,
+        ]);
+
+        $payload = ['vacation_entitlement_id' => $entitlement->id, 'starts_on' => '2026-09-10', 'ends_on' => '2026-09-29'];
+        $this->actingAs($employee)->post(route('vacations.store'), [...$payload, 'cash_allowance_days' => 9])->assertSessionHasErrors('cash_allowance_days');
+        $this->actingAs($employee)->post(route('vacations.store'), [...$payload, 'cash_allowance_days' => 10])->assertSessionHasErrors('cash_allowance_days');
+        $this->assertDatabaseCount('vacation_requests', 0);
+        $this->travelBack();
+    }
+
+    public function test_correction_preserves_the_rest_period_of_a_cash_allowance_request(): void
+    {
+        $this->travelTo('2026-09-01');
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $employee = User::factory()->create(['role' => 'employee']);
+        $entitlement = VacationEntitlement::create([
+            'user_id' => $employee->id,
+            'acquisition_starts_on' => '2025-10-01',
+            'acquisition_ends_on' => '2026-09-30',
+            'expires_on' => '2027-09-30',
+            'granted_days' => 30,
+        ]);
+        $vacation = VacationRequest::create([
+            'user_id' => $employee->id,
+            'vacation_entitlement_id' => $entitlement->id,
+            'starts_on' => '2026-10-01',
+            'ends_on' => '2026-10-20',
+            'cash_allowance_days' => 10,
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($admin)->put(route('admin.vacations.correct', $vacation), [
+            'vacation_entitlement_id' => $entitlement->id,
+            'starts_on' => '2026-10-01',
+            'ends_on' => '2026-10-19',
+            'note' => 'Correção incompatível com o abono',
+        ])->assertSessionHasErrors('ends_on');
+
+        $this->assertSame('2026-10-20', $vacation->fresh()->ends_on->toDateString());
+        $this->travelBack();
+    }
+
     public function test_super_admin_registers_and_adjusts_acquisition_period(): void
     {
         $admin = User::factory()->create(['role' => 'super_admin']);

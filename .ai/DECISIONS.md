@@ -2,6 +2,10 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-09-25 — Abono pecuniário integrado ao saldo de férias
+
+O colaborador pode solicitar férias integrais, um período personalizado ou converter exatamente 1/3 do direito em abono pecuniário dentro do prazo aplicável. Dias de descanso e de abono pertencem à mesma solicitação e ambos reservam/consomem o saldo derivado do período aquisitivo. O fluxo mantém uma única aprovação gerencial, auditoria e exportação, sem contadores duplicados.
+
 ## 2026-09-23 — Presencial e home office compartilham a aprovação
 
 O colaborador escolhe a modalidade `home_office` ou `onsite` ao selecionar as datas. As duas modalidades nascem pendentes, são imutáveis para o colaborador, passam pela mesma autorização gerencial e geram notificação e auditoria. Solicitações ativas de modalidades diferentes não podem ocupar a mesma data; uma solicitação recusada permanece preservada e não impede uma nova solicitação da outra modalidade. Férias aprovadas e datas corporativas bloqueadas impedem ambas.

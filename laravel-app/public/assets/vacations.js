@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const entitlement = document.querySelector('#vacation-entitlement')
   const availability = document.querySelector('#vacation-availability')
   const calendar = document.querySelector('#vacation-calendar')
+  const cashAllowance = document.querySelector('#vacation-cash-allowance')
+  const planSummary = document.querySelector('#vacation-plan-summary')
+  const plans = [...document.querySelectorAll('input[name="vacation_plan"]')]
 
   if (!startsOn || !endsOn || !startTrigger || !endTrigger || !calendar) return
 
@@ -26,6 +29,36 @@ document.addEventListener('DOMContentLoaded', () => {
   const formatDate = (value) => value ? dateFormatter.format(fromIso(value)) : ''
   const selectedBalance = () => entitlement?.tagName === 'SELECT' ? entitlement.selectedOptions[0] : entitlement
   const inWindow = (value) => value >= minimum && (!maximum || value <= maximum)
+  const selectedPlan = () => plans.find((plan) => plan.checked)?.value || 'custom'
+  const addDays = (value, amount) => {
+    const date = fromIso(value)
+    date.setUTCDate(date.getUTCDate() + amount)
+    return toIso(date)
+  }
+
+  const updatePlan = () => {
+    const balance = selectedBalance()
+    const available = Number(balance?.dataset.availableDays || 0)
+    const total = Number(balance?.dataset.totalDays || available)
+    const allowance = Number(balance?.dataset.allowanceDays || 0)
+    const allowanceOption = plans.find((plan) => plan.value === 'allowance')
+    if (allowanceOption) allowanceOption.disabled = balance?.dataset.allowanceEligible !== '1'
+    document.querySelector('[data-plan-full]').textContent = available ? `${available} dias de descanso` : 'Período integral'
+    document.querySelector('[data-plan-allowance]').textContent = allowance ? `${total - allowance} dias + ${allowance} de abono` : 'Descanso + abono'
+    if (allowanceOption?.disabled && allowanceOption.checked) plans.find((plan) => plan.value === 'custom').checked = true
+    cashAllowance.value = selectedPlan() === 'allowance' ? allowance : 0
+    endTrigger.disabled = selectedPlan() !== 'custom' || !balance?.value
+    if (startsOn.value && selectedPlan() !== 'custom') {
+      const restDays = selectedPlan() === 'allowance' ? total - allowance : available
+      endsOn.value = addDays(startsOn.value, restDays - 1)
+      if (!inWindow(endsOn.value)) endsOn.value = ''
+    }
+    const restDays = startsOn.value && endsOn.value ? Math.round((fromIso(endsOn.value) - fromIso(startsOn.value)) / 86400000) + 1 : 0
+    planSummary.textContent = restDays
+      ? `${restDays} dias de descanso${Number(cashAllowance.value) ? ` + ${cashAllowance.value} dias de abono` : ''}. Total utilizado: ${restDays + Number(cashAllowance.value)} dias.`
+      : (allowanceOption?.disabled && balance?.value ? 'O abono não está disponível para este saldo ou o prazo legal terminou.' : '')
+    updateTriggers()
+  }
 
   const updateTriggers = () => {
     startTrigger.querySelector('span').textContent = startsOn.value ? formatDate(startsOn.value) : 'Escolher data'
@@ -87,6 +120,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selecting === 'start') {
       startsOn.value = value
       if (endsOn.value && endsOn.value < value) endsOn.value = ''
+      if (selectedPlan() !== 'custom') {
+        updatePlan()
+        closeCalendar()
+        return
+      }
       selecting = 'end'
       renderCalendar()
       return
@@ -101,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     endsOn.value = value
+    updatePlan()
     closeCalendar()
   }
 
@@ -124,6 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const enabled = Boolean(balance?.value)
     startTrigger.disabled = !enabled
     endTrigger.disabled = !enabled
+    updatePlan()
     updateTriggers()
     if (!calendar.hidden) renderCalendar()
   }
@@ -131,6 +171,11 @@ document.addEventListener('DOMContentLoaded', () => {
   startTrigger.addEventListener('click', () => openCalendar('start'))
   endTrigger.addEventListener('click', () => openCalendar('end'))
   entitlement?.addEventListener('change', applyBalanceWindow)
+  plans.forEach((plan) => plan.addEventListener('change', () => {
+    startsOn.value = ''
+    endsOn.value = ''
+    updatePlan()
+  }))
   days.addEventListener('click', (event) => {
     const button = event.target.closest('[data-date]')
     if (button && !button.disabled) chooseDate(button.dataset.date)
@@ -148,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
     endsOn.value = ''
     selecting = 'start'
     updateTriggers()
+    updatePlan()
     renderCalendar()
   })
   calendar.querySelector('[data-calendar-close]').addEventListener('click', closeCalendar)

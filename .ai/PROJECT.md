@@ -29,6 +29,7 @@ O MixHome é um sistema interno da Mix Fiscal para controlar dias de home office
 - Painel pessoal, histórico e notificações.
 - Escolha de modalidade home office ou presencial, ambas submetidas à aprovação gerencial e impedidas durante férias aprovadas.
 - Painel gerencial com filtros, paginação, análise individual/em lote e métricas.
+- Indicador gerencial mensal de modalidade, com dias aprovados de home office e presencial agrupados alfabeticamente por colaborador.
 - Exportação XLSX matricial.
 - Diretório paginado de usuários e vínculos gestor–equipe.
 - Recuperação de senha habilitada por SMTP/HTTPS, usada também no primeiro acesso.

@@ -10,6 +10,7 @@ use App\Support\ReportingCycle;
 use App\Support\SpreadsheetSafeText;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -86,6 +87,9 @@ class ManagerController extends Controller
         $statusSummary = (clone $base)->select('status')->selectRaw('COUNT(*) total')->groupBy('status')->pluck('total', 'status');
         $teamSummary = (clone $base)->join('users', 'users.id', '=', 'work_requests.user_id')->select('users.team')->selectRaw('COUNT(*) total')->selectRaw("SUM(CASE WHEN work_requests.status='pending' THEN 1 ELSE 0 END) pending")->groupBy('users.team')->orderByDesc('total')->limit(8)->get();
         $employeeTeams = ($request->has('teams') || $request->filled('team')) ? $selectedTeams : $allowed;
+        $oldestWorkModeDate = WorkRequest::whereHas('user', fn (Builder $query) => $query->whereIn('team', $allowed))->min('work_date');
+        $firstWorkModeYear = $oldestWorkModeDate ? (int) substr((string) $oldestWorkModeDate, 0, 4) : now()->year;
+        $workModeYears = range(max(now()->year, $firstWorkModeYear), $firstWorkModeYear);
 
         $sorts = ['date_asc' => ['work_date', 'asc'], 'date_desc' => ['work_date', 'desc'], 'created_desc' => ['created_at', 'desc'], 'status' => ['status', 'asc']];
         [$sortColumn, $sortDirection] = $sorts[$request->string('sort')->toString()] ?? $sorts['date_asc'];
@@ -98,7 +102,38 @@ class ManagerController extends Controller
             'teams' => Team::whereIn('name', $allowed)->orderBy('name')->get(),
             'employees' => User::where('active', true)->where('team', '<>', '')->whereIn('team', $employeeTeams)->orderBy('name')->get(),
             'cycles' => ReportingCycle::options(), 'start' => $start, 'end' => $end,
+            'workModeYears' => $workModeYears,
         ]);
+    }
+
+    public function workModeDistribution(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'month' => ['required', 'integer', 'between:1,12'],
+            'year' => ['required', 'integer', 'between:2000,2100'],
+        ]);
+        $start = now()->setDate($data['year'], $data['month'], 1)->startOfDay();
+        $end = $start->copy()->endOfMonth();
+        $allowedTeams = $this->allowedTeams($request->user());
+
+        $items = WorkRequest::query()
+            ->join('users', 'users.id', '=', 'work_requests.user_id')
+            ->where('work_requests.status', 'approved')
+            ->whereBetween('work_requests.work_date', [$start->toDateString(), $end->toDateString()])
+            ->whereIn('users.team', $allowedTeams)
+            ->select('users.id', 'users.name')
+            ->selectRaw("SUM(CASE WHEN work_requests.work_mode = 'home_office' THEN 1 ELSE 0 END) AS home_office")
+            ->selectRaw("SUM(CASE WHEN work_requests.work_mode = 'onsite' THEN 1 ELSE 0 END) AS onsite")
+            ->groupBy('users.id', 'users.name')
+            ->orderBy('users.name')
+            ->get()
+            ->map(fn ($item) => [
+                'collaborator' => $item->name,
+                'home_office' => (int) $item->home_office,
+                'onsite' => (int) $item->onsite,
+            ]);
+
+        return response()->json(['data' => $items]);
     }
 
     public function review(Request $request, WorkRequest $workRequest): RedirectResponse

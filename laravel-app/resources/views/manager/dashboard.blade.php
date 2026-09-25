@@ -45,6 +45,21 @@
 
         <section class="manager-insights" aria-label="Resumo gerencial"><article class="card priority-card"><div class="report-head"><div><p class="eyebrow">PRIORIDADE</p><h2>Pendências mais antigas</h2></div><a href="{{ route('manager.dashboard',[...request()->query(),'status'=>'pending']) }}">Ver todas</a></div><div class="priority-list">@forelse($priorityRequests as $record)<div><span><b>{{ $record->user->name }}</b><small>{{ $record->user->team }} · {{ $record->work_date->format('d/m/Y') }}</small></span><strong>{{ $record->created_at->diffForHumans() }}</strong></div>@empty<p class="empty compact-empty">Nenhuma pendência no filtro atual.</p>@endforelse</div></article><article class="card executive-card"><div class="report-head"><div><p class="eyebrow">VISÃO EXECUTIVA</p><h2>Distribuição do ciclo</h2></div></div>@php($summaryTotal=max(1,(int)$statusSummary->sum()))<div class="status-bars">@foreach(['pending'=>'Pendentes','approved'=>'Aprovadas','rejected'=>'Recusadas'] as $status=>$label)@php($amount=(int)($statusSummary[$status]??0))<div><span><b>{{ $label }}</b><small>{{ $amount }}</small></span><i><em class="bar-{{ $status }}" style="width:{{ round($amount/$summaryTotal*100) }}%"></em></i></div>@endforeach</div><div class="team-ranking">@foreach($teamSummary as $team)<span><b>{{ $team->team ?: 'Sem equipe' }}</b><small>{{ $team->total }} registros · {{ $team->pending }} pendentes</small></span>@endforeach</div></article></section>
 
+        <article class="card work-mode-card" data-work-mode-chart data-endpoint="{{ route('manager.work-mode-distribution') }}">
+            <header class="work-mode-head">
+                <div><p class="eyebrow">INDICADOR GERENCIAL</p><h2>Modalidade de Trabalho</h2><p>Distribuição de dias por modalidade de trabalho</p></div>
+                <form class="work-mode-filters" data-work-mode-filters>
+                    <label>Mês<select name="month">@foreach(range(1,12) as $month)<option value="{{ $month }}" @selected($month===now()->month)>{{ \Carbon\Carbon::create(null,$month,1)->locale('pt_BR')->translatedFormat('F') }}</option>@endforeach</select></label>
+                    <label>Ano<select name="year">@foreach($workModeYears as $year)<option value="{{ $year }}" @selected($year===now()->year)>{{ $year }}</option>@endforeach</select></label>
+                </form>
+            </header>
+            <div class="work-mode-legend" aria-label="Legenda"><span><i class="home-office"></i>Home Office</span><span><i class="onsite"></i>Presencial</span></div>
+            <div class="work-mode-status" data-work-mode-status role="status" aria-live="polite">Carregando dados...</div>
+            <div class="work-mode-chart-scroll" data-work-mode-scroll hidden>
+                <div class="work-mode-chart" data-work-mode-bars role="img" aria-label="Gráfico de barras agrupadas da distribuição de dias por modalidade"></div>
+            </div>
+        </article>
+
         <details class="card report requests-accordion" @if(request()->hasAny(['cycle','team','teams','status','work_mode','employees'])) open @endif>
             <summary class="requests-accordion-summary">
                 <span><span class="eyebrow">SOLICITAÇÕES</span><strong>{{ $records->total() }} resultados</strong></span>

@@ -47,6 +47,7 @@ Route::prefix(config('app.route_prefix'))->group(function () {
     });
     Route::middleware(['auth', 'role:manager,super_admin'])->prefix('gestor')->group(function () {
         Route::get('/', [ManagerController::class, 'index'])->name('manager.dashboard');
+        Route::get('/dashboard/modalidade-trabalho', [ManagerController::class, 'workModeDistribution'])->name('manager.work-mode-distribution');
         Route::post('/solicitacoes/{workRequest}/analisar', [ManagerController::class, 'review'])->name('manager.review');
         Route::post('/solicitacoes/analisar-em-lote', [ManagerController::class, 'reviewBatch'])->name('manager.review.batch');
         Route::get('/exportar', [ManagerController::class, 'export'])->name('manager.export');

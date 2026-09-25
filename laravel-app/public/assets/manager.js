@@ -202,3 +202,93 @@ saveFilters?.addEventListener('click', () => {
   saveFilters.textContent = 'Preferência salva ✓';
   window.setTimeout(() => { saveFilters.textContent = 'Salvar preferência'; }, 1800);
 });
+
+const workModeChart = document.querySelector('[data-work-mode-chart]');
+if (workModeChart) {
+  const filters = workModeChart.querySelector('[data-work-mode-filters]');
+  const status = workModeChart.querySelector('[data-work-mode-status]');
+  const scroll = workModeChart.querySelector('[data-work-mode-scroll]');
+  const bars = workModeChart.querySelector('[data-work-mode-bars]');
+  let requestController;
+
+  const renderWorkModes = (items) => {
+    bars.replaceChildren();
+    if (!items.length) {
+      scroll.hidden = true;
+      status.hidden = false;
+      status.classList.remove('is-loading', 'is-error');
+      status.textContent = 'Nenhum registro encontrado para este período.';
+      return;
+    }
+
+    const maximum = Math.max(1, ...items.flatMap((item) => [item.home_office, item.onsite]));
+    const scale = document.createElement('div');
+    scale.className = 'work-mode-scale';
+    scale.setAttribute('aria-hidden', 'true');
+    [maximum, Math.round(maximum / 2), 0].forEach((value) => {
+      const label = document.createElement('span');
+      label.textContent = value;
+      scale.append(label);
+    });
+    bars.append(scale);
+
+    items.forEach((item) => {
+      const group = document.createElement('div');
+      group.className = 'work-mode-group';
+      group.tabIndex = 0;
+      group.setAttribute('aria-label', `${item.collaborator}: Home Office ${item.home_office} dias; Presencial ${item.onsite} dias`);
+
+      const columns = document.createElement('div');
+      columns.className = 'work-mode-columns';
+      [['home_office', 'Home Office'], ['onsite', 'Presencial']].forEach(([key, label]) => {
+        const column = document.createElement('span');
+        column.className = `work-mode-bar ${key.replace('_', '-')}`;
+        column.style.setProperty('--bar-height', `${(item[key] / maximum) * 100}%`);
+        column.setAttribute('aria-hidden', 'true');
+        const value = document.createElement('b');
+        value.textContent = item[key];
+        column.append(value);
+        columns.append(column);
+      });
+
+      const name = document.createElement('strong');
+      name.textContent = item.collaborator;
+      const tooltip = document.createElement('span');
+      tooltip.className = 'work-mode-tooltip';
+      tooltip.innerHTML = `<b></b><span>Home Office: ${item.home_office} dias</span><span>Presencial: ${item.onsite} dias</span>`;
+      tooltip.querySelector('b').textContent = item.collaborator;
+      group.append(columns, name, tooltip);
+      bars.append(group);
+    });
+
+    bars.style.setProperty('--group-count', items.length);
+    status.hidden = true;
+    scroll.hidden = false;
+  };
+
+  const loadWorkModes = async () => {
+    requestController?.abort();
+    requestController = new AbortController();
+    status.hidden = false;
+    status.className = 'work-mode-status is-loading';
+    status.textContent = 'Carregando dados...';
+    scroll.hidden = true;
+    const query = new URLSearchParams(new FormData(filters));
+    try {
+      const response = await fetch(`${workModeChart.dataset.endpoint}?${query}`, {
+        credentials: 'same-origin', headers: { Accept: 'application/json' }, signal: requestController.signal,
+      });
+      if (!response.ok) throw new Error('Não foi possível consultar o período.');
+      const payload = await response.json();
+      renderWorkModes(payload.data || []);
+    } catch (error) {
+      if (error.name === 'AbortError') return;
+      status.hidden = false;
+      status.className = 'work-mode-status is-error';
+      status.textContent = 'Não foi possível carregar os dados. Tente novamente.';
+    }
+  };
+
+  filters.addEventListener('change', loadWorkModes);
+  loadWorkModes();
+}

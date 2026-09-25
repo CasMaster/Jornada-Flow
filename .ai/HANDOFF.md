@@ -2,9 +2,11 @@
 
 ## Objetivo atual
 
-Adicionar solicitação de dia presencial pelo colaborador, usando a mesma aprovação gerencial do home office.
+Adicionar ao painel gerencial o indicador mensal "Modalidade de Trabalho", comparando dias aprovados de home office e presencial por colaborador sem caráter de ranking.
 
 ## Estado atual
+
+Em 2026-09-25, o indicador foi implementado localmente no painel de gestão. A consulta reutiliza `work_requests`, considera somente registros aprovados no mês/ano selecionado, respeita equipes próprias e delegadas do gestor e retorna os colaboradores em ordem alfabética. O card atualiza os dados de forma assíncrona, possui carregamento, estado vazio, tooltip acessível e rolagem horizontal no mobile, sem nova biblioteca ou alteração de banco. A suíte local passou com 84 testes e 442 assertions; envio e publicação ainda não foram realizados nesta tarefa.
 
 Em 2026-09-23, a modalidade de trabalho foi adicionada localmente a `work_requests`, preservando os registros anteriores como `home_office`. O colaborador escolhe home office ou presencial no calendário; ambos nascem pendentes, respeitam bloqueios e férias, impedem modalidades ativas conflitantes e seguem pela mesma aprovação, auditoria, notificação, filtros e exportação. A migration e a publicação ainda não foram executadas fora dos testes locais.
 

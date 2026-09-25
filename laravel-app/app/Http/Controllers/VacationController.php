@@ -33,8 +33,13 @@ class VacationController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate(['vacation_entitlement_id' => ['required', 'integer'], 'starts_on' => ['required', 'date', 'after_or_equal:today'], 'ends_on' => ['required', 'date', 'after_or_equal:starts_on'], 'cash_allowance_days' => ['nullable', 'integer', 'min:0']]);
+        $data = $request->validate(['vacation_entitlement_id' => ['required', 'integer'], 'request_type' => ['nullable', 'in:vacation,cash_allowance'], 'starts_on' => ['nullable', 'required_unless:request_type,cash_allowance', 'date', 'after_or_equal:today'], 'ends_on' => ['nullable', 'required_unless:request_type,cash_allowance', 'date', 'after_or_equal:starts_on'], 'cash_allowance_days' => ['nullable', 'integer', 'min:0']]);
         $entitlement = VacationEntitlement::findOrFail($data['vacation_entitlement_id']);
+        if (($data['request_type'] ?? 'vacation') === 'cash_allowance') {
+            $allowance = $this->vacations->createCashAllowance($request->user(), $entitlement);
+
+            return back()->with('success', $allowance->cash_allowance_days.' dia(s) de abono enviados para análise.');
+        }
         $cashAllowanceDays = (int) ($data['cash_allowance_days'] ?? 0);
         $vacation = $this->vacations->create($request->user(), $entitlement, $data['starts_on'], $data['ends_on'], $cashAllowanceDays);
 

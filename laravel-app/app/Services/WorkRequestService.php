@@ -28,6 +28,7 @@ class WorkRequestService
         }
         $vacations = VacationRequest::where('user_id', $user->id)
             ->where('status', 'approved')
+            ->where('request_type', 'vacation')
             ->get(['starts_on', 'ends_on']);
         $vacationConflict = $vacations->contains(fn (VacationRequest $vacation) => collect($uniqueDates)
             ->contains(function (string $date) use ($vacation) {

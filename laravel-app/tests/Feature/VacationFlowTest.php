@@ -167,6 +167,68 @@ class VacationFlowTest extends TestCase
         $this->travelBack();
     }
 
+    public function test_employee_can_request_allowance_only_without_vacation_dates(): void
+    {
+        $this->travelTo('2026-09-01');
+        Team::create(['name' => 'Fiscal', 'active' => true]);
+        $employee = User::factory()->create(['role' => 'employee', 'team' => 'Fiscal']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $entitlement = VacationEntitlement::create([
+            'user_id' => $employee->id,
+            'acquisition_starts_on' => '2025-10-01',
+            'acquisition_ends_on' => '2026-09-30',
+            'expires_on' => '2027-09-30',
+            'granted_days' => 30,
+        ]);
+
+        $this->actingAs($employee)->post(route('vacations.store'), [
+            'vacation_entitlement_id' => $entitlement->id,
+            'request_type' => 'cash_allowance',
+        ])->assertSessionHasNoErrors();
+
+        $allowance = VacationRequest::firstOrFail();
+        $this->assertTrue($allowance->isAllowanceOnly());
+        $this->assertSame('2027-10-01', $allowance->starts_on->toDateString());
+        $this->assertSame($allowance->starts_on->toDateString(), $allowance->ends_on->toDateString());
+        $this->assertSame(0, $allowance->days());
+        $this->assertSame(10, $allowance->cash_allowance_days);
+        $this->assertSame(20, $entitlement->availableDays());
+        $this->actingAs($employee)->get(route('vacations.index'))->assertOk()->assertSee('10 dias convertidos em abono');
+        $this->actingAs($admin)->get(route('manager.vacations.index'))->assertOk()->assertSee('Somente abono');
+        $export = $this->actingAs($admin)->get(route('manager.vacations.export'))->assertOk();
+        $this->assertStringContainsString('Somente abono', $export->streamedContent());
+        $this->actingAs($admin)->post(route('manager.vacations.review', $allowance), ['decision' => 'approved'])->assertSessionHasNoErrors();
+        $this->assertSame('approved', $allowance->fresh()->status);
+        $this->travelBack();
+    }
+
+    public function test_custom_vacation_period_can_include_cash_allowance(): void
+    {
+        $this->travelTo('2026-09-01');
+        $employee = User::factory()->create(['role' => 'employee']);
+        $entitlement = VacationEntitlement::create([
+            'user_id' => $employee->id,
+            'acquisition_starts_on' => '2025-10-01',
+            'acquisition_ends_on' => '2026-09-30',
+            'expires_on' => '2027-09-30',
+            'granted_days' => 30,
+        ]);
+
+        $this->actingAs($employee)->post(route('vacations.store'), [
+            'vacation_entitlement_id' => $entitlement->id,
+            'request_type' => 'vacation',
+            'starts_on' => '2026-10-01',
+            'ends_on' => '2026-10-15',
+            'cash_allowance_days' => 10,
+        ])->assertSessionHasNoErrors();
+
+        $request = VacationRequest::firstOrFail();
+        $this->assertSame(15, $request->days());
+        $this->assertSame(10, $request->cash_allowance_days);
+        $this->assertSame(5, $entitlement->availableDays());
+        $this->travelBack();
+    }
+
     public function test_vacation_cannot_start_on_a_holiday_or_weekend(): void
     {
         $this->travelTo('2026-09-01');

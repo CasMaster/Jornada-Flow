@@ -15,7 +15,7 @@ O serviço web acessa o host interno `postgres:5432`. O compose publica PostgreS
 - `teams`: catálogo de equipes e estado ativo.
 - `manager_team`: relação muitos-para-muitos entre gestores e equipes.
 - `work_requests`: solicitante, data, modalidade (`home_office` ou `onsite`), status, revisor e data da análise.
-- `vacation_requests`: solicitante, intervalo, dias convertidos em abono pecuniário, status, análise, correção e cancelamento preservado.
+- `vacation_requests`: solicitante, tipo (`vacation` ou `cash_allowance`), intervalo, dias convertidos em abono pecuniário, status, análise, correção e cancelamento preservado. Solicitações exclusivas de abono não têm datas de descanso no domínio; usam datas técnicas posteriores ao prazo concessivo apenas para manter compatibilidade de rollback com a versão anterior.
 - `vacation_entitlements`: concessão e ajuste de dias por colaborador e período aquisitivo; consumo e reserva são derivados das solicitações vinculadas.
 - `holidays`: datas corporativas e indicador de bloqueio.
 - `audit_logs`: ator, evento, alvo, valores anterior/novo e metadados da requisição.

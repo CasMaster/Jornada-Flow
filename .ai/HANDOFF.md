@@ -2,11 +2,11 @@
 
 ## Objetivo atual
 
-Adicionar ao painel gerencial o indicador mensal "Modalidade de Trabalho", comparando dias aprovados de home office e presencial por colaborador sem caráter de ranking.
+Permitir que o colaborador solicite o abono pecuniário tanto junto a um período personalizado de férias quanto separadamente, sem datas de descanso.
 
 ## Estado atual
 
-Em 2026-09-25, foram implementados o abono pecuniário e as validações da CLT no módulo de férias. A solicitação oferece período integral, descanso com conversão de 1/3 em abono ou período personalizado. O servidor valida titularidade, saldo, prazo do abono, antecedência mínima de 30 dias, início compatível com feriados/repouso e fracionamento em até três períodos (um de 14 dias e os demais de 5). Descanso e abono reservam e consomem o mesmo saldo. Histórico, gestão, notificação, auditoria e CSV identificam o abono.
+Em 2026-09-25, foram implementados o abono pecuniário e as validações da CLT no módulo de férias. A solicitação oferece período integral, descanso com conversão de 1/3 em abono, período personalizado com abono opcional e solicitação exclusiva de abono sem datas de descanso. O servidor valida titularidade, saldo, prazo do abono, antecedência mínima de 30 dias, início compatível com feriados/repouso e fracionamento em até três períodos (um de 14 dias e os demais de 5). Descanso e abono reservam e consomem o mesmo saldo. Histórico, gestão, notificação, auditoria e CSV identificam o abono; solicitações exclusivas não bloqueiam dias de trabalho.
 
 Em 2026-09-25, o indicador foi implementado localmente no painel de gestão. A consulta reutiliza `work_requests`, considera somente registros aprovados no mês/ano selecionado, respeita equipes próprias e delegadas do gestor e retorna os colaboradores em ordem alfabética. O card atualiza os dados de forma assíncrona, possui carregamento, estado vazio, tooltip acessível e rolagem horizontal no mobile, sem nova biblioteca ou alteração de banco. A suíte local passou com 84 testes e 442 assertions; envio e publicação ainda não foram realizados nesta tarefa.
 
@@ -46,11 +46,11 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 - CI adicional em PostgreSQL 16 e smoke externo de produção a cada 15 minutos.
 - Deploy com dump/checksum prévio, verificação de saúde e tentativa de retorno à imagem anterior.
 - `.dockerignore` evita copiar cache local de descoberta de pacotes para a imagem de produção.
-- Solicitações de férias oferecem período integral, descanso com abono de 1/3 e período personalizado; o abono integra o saldo real, a aprovação, a auditoria, as notificações e as exportações. O domínio valida antecedência mínima de 30 dias, início compatível com feriados/repouso semanal e fracionamento legal.
+- Solicitações de férias oferecem período integral, descanso com abono de 1/3, período personalizado com abono opcional e pedido exclusivo de abono; o abono integra o saldo real, a aprovação, a auditoria, as notificações e as exportações. O domínio valida antecedência mínima de 30 dias, início compatível com feriados/repouso semanal e fracionamento legal.
 
 ## Validação
 
-- Férias, abono e regras CLT: Laravel Pint, sintaxe JavaScript e suíte completa aprovados em 2026-09-25, com 90 testes e 477 assertions.
+- Férias, abono e regras CLT: Laravel Pint, sintaxe JavaScript e suíte completa aprovados em 2026-09-25, com 92 testes e 496 assertions, incluindo abono em período personalizado, solicitação exclusiva sem datas, gestão e CSV.
 - Modalidade presencial: suíte completa aprovada em 2026-09-23, com 81 testes e 431 assertions; inclui criação pendente, aprovação gerencial, conflito entre modalidades e filtro da gestão.
 - Modalidade presencial: Laravel Pint, sintaxe JavaScript, `git diff --check` e build local da imagem aprovados.
 - Laravel Pint: aprovado após as correções de segurança.
@@ -72,7 +72,7 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Próximo passo
 
-Publicar as validações da CLT em homologação e conferir no calendário um feriado, os dois dias anteriores, a antecedência e as combinações de fracionamento antes de considerar produção. A simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
+Publicar os dois fluxos de abono em homologação e validar visualmente a solicitação, a análise gerencial e o histórico antes de considerar produção. A simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
 
 ## Limites
 

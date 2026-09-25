@@ -6,7 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const entitlement = document.querySelector('#vacation-entitlement')
   const availability = document.querySelector('#vacation-availability')
   const calendar = document.querySelector('#vacation-calendar')
+  const requestType = document.querySelector('#vacation-request-type')
   const cashAllowance = document.querySelector('#vacation-cash-allowance')
+  const customAllowance = document.querySelector('#vacation-custom-allowance')
+  const customAllowanceWrap = document.querySelector('#vacation-custom-allowance-wrap')
   const planSummary = document.querySelector('#vacation-plan-summary')
   const plans = [...document.querySelectorAll('input[name="vacation_plan"]')]
 
@@ -52,19 +55,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const total = Number(balance?.dataset.totalDays || available)
     const allowance = Number(balance?.dataset.allowanceDays || 0)
     const allowanceOption = plans.find((plan) => plan.value === 'allowance')
-    if (allowanceOption) allowanceOption.disabled = balance?.dataset.allowanceEligible !== '1'
+    const allowanceOnlyOption = plans.find((plan) => plan.value === 'allowance_only')
+    const allowanceEligible = balance?.dataset.allowanceEligible === '1'
+    if (allowanceOption) allowanceOption.disabled = !allowanceEligible
+    if (allowanceOnlyOption) allowanceOnlyOption.disabled = !allowanceEligible
+    if (customAllowance) customAllowance.disabled = !allowanceEligible
     document.querySelector('[data-plan-full]').textContent = available ? `${available} dias de descanso` : 'Período integral'
     document.querySelector('[data-plan-allowance]').textContent = allowance ? `${total - allowance} dias + ${allowance} de abono` : 'Descanso + abono'
-    if (allowanceOption?.disabled && allowanceOption.checked) plans.find((plan) => plan.value === 'custom').checked = true
-    cashAllowance.value = selectedPlan() === 'allowance' ? allowance : 0
-    endTrigger.disabled = selectedPlan() !== 'custom' || !balance?.value
-    if (startsOn.value && selectedPlan() !== 'custom') {
-      const restDays = selectedPlan() === 'allowance' ? total - allowance : available
+    document.querySelector('[data-plan-allowance-only]').textContent = allowance ? `${allowance} dias de abono` : 'Somente abono'
+    if (!allowanceEligible && (allowanceOption?.checked || allowanceOnlyOption?.checked)) plans.find((plan) => plan.value === 'custom').checked = true
+    const plan = selectedPlan()
+    const allowanceSelected = plan === 'allowance' || plan === 'allowance_only' || (plan === 'custom' && customAllowance?.checked)
+    requestType.value = plan === 'allowance_only' ? 'cash_allowance' : 'vacation'
+    cashAllowance.value = allowanceSelected && allowanceEligible ? allowance : 0
+    customAllowanceWrap.hidden = plan !== 'custom'
+    startTrigger.disabled = plan === 'allowance_only' || !balance?.value
+    endTrigger.disabled = plan !== 'custom' || !balance?.value
+    if (plan === 'allowance_only') {
+      startsOn.value = ''
+      endsOn.value = ''
+    } else if (startsOn.value && plan !== 'custom') {
+      const restDays = plan === 'allowance' ? total - allowance : available
       endsOn.value = addDays(startsOn.value, restDays - 1)
       if (!inWindow(endsOn.value)) endsOn.value = ''
     }
     const restDays = startsOn.value && endsOn.value ? Math.round((fromIso(endsOn.value) - fromIso(startsOn.value)) / 86400000) + 1 : 0
-    planSummary.textContent = restDays
+    planSummary.textContent = plan === 'allowance_only'
+      ? `${allowance} dias serão solicitados exclusivamente como abono, sem período de afastamento.`
+      : restDays
       ? `${restDays} dias de descanso${Number(cashAllowance.value) ? ` + ${cashAllowance.value} dias de abono` : ''}. Total utilizado: ${restDays + Number(cashAllowance.value)} dias.`
       : (allowanceOption?.disabled && balance?.value ? 'O abono não está disponível para este saldo ou o prazo legal terminou.' : '')
     updateTriggers()
@@ -187,6 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
     endsOn.value = ''
     updatePlan()
   }))
+  customAllowance?.addEventListener('change', updatePlan)
   days.addEventListener('click', (event) => {
     const button = event.target.closest('[data-date]')
     if (button && !button.disabled) chooseDate(button.dataset.date)

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class VacationRequest extends Model
 {
-    protected $fillable = ['user_id', 'vacation_entitlement_id', 'starts_on', 'ends_on', 'cash_allowance_days', 'status', 'reviewed_by', 'reviewed_at', 'review_note', 'corrected_by', 'corrected_at', 'cancelled_by', 'cancelled_at', 'cancel_note'];
+    protected $fillable = ['user_id', 'vacation_entitlement_id', 'request_type', 'starts_on', 'ends_on', 'cash_allowance_days', 'status', 'reviewed_by', 'reviewed_at', 'review_note', 'corrected_by', 'corrected_at', 'cancelled_by', 'cancelled_at', 'cancel_note'];
 
     protected $casts = ['starts_on' => 'date', 'ends_on' => 'date', 'cash_allowance_days' => 'integer', 'reviewed_at' => 'datetime', 'corrected_at' => 'datetime', 'cancelled_at' => 'datetime'];
 
@@ -28,7 +28,12 @@ class VacationRequest extends Model
 
     public function days(): int
     {
-        return $this->starts_on->diffInDays($this->ends_on) + 1;
+        return $this->isAllowanceOnly() ? 0 : $this->starts_on->diffInDays($this->ends_on) + 1;
+    }
+
+    public function isAllowanceOnly(): bool
+    {
+        return $this->request_type === 'cash_allowance';
     }
 
     public function totalDebitedDays(): int

@@ -296,3 +296,21 @@ Prazo definido pelo responsável do projeto.
 ### Consequências
 
 O expurgo deve ser automatizado e respeitar integridade, auditoria e eventual anonimização. A implementação desse processo ainda está pendente.
+
+## 2026-09-25 — Abono integrado e independente do descanso
+
+### Contexto
+
+O colaborador precisa poder converter um terço do saldo em abono tanto ao solicitar um período personalizado de férias quanto em uma solicitação separada, sem datas de descanso.
+
+### Decisão
+
+Representar os dois fluxos em `vacation_requests`: `request_type=vacation` para descanso, com abono opcional, e `request_type=cash_allowance` para o pedido exclusivo de abono. O saldo reservado e consumido continua derivado dos registros, sem contador duplicado.
+
+### Motivo
+
+Manter aprovação, auditoria, notificações e exportação no mesmo fluxo de férias, distinguindo claramente o que bloqueia datas de trabalho do que apenas converte saldo.
+
+### Consequências
+
+O pedido exclusivo não exige datas do usuário e não possui período de descanso no domínio. Para preservar compatibilidade com a versão anterior durante rollback, o registro mantém datas técnicas posteriores ao prazo concessivo, sempre ignoradas por calendário, conflitos e cálculos da versão atual. Esse pedido não pode receber correção de período e continua sujeito ao limite de um terço, ao saldo e ao prazo legal.

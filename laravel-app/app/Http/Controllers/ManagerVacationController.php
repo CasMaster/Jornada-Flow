@@ -50,7 +50,7 @@ class ManagerVacationController extends Controller
 
         return view('vacations.manage', [
             'vacations' => (clone $query)->orderBy('starts_on')->paginate(25)->withQueryString(),
-            'approved' => (clone $query)->where('status', 'approved')->whereDate('ends_on', '>=', today())->orderBy('starts_on')->limit(20)->get(),
+            'approved' => (clone $query)->where('request_type', 'vacation')->where('status', 'approved')->whereDate('ends_on', '>=', today())->orderBy('starts_on')->limit(20)->get(),
             'teams' => $this->allowedTeams($request->user()),
             'employees' => $employees,
             'entitlements' => $request->user()->role === 'super_admin' ? VacationEntitlement::with(['user', 'requests'])->latest('acquisition_ends_on')->limit(100)->get() : collect(),
@@ -91,7 +91,7 @@ class ManagerVacationController extends Controller
             fwrite($out, "\xEF\xBB\xBF");
             fputcsv($out, ['Colaborador', 'E-mail', 'Equipe', 'Período aquisitivo', 'Início', 'Fim', 'Dias de descanso', 'Dias de abono', 'Total utilizado', 'Status', 'Analisado por'], ';');
             foreach ($records as $item) {
-                fputcsv($out, SpreadsheetSafeText::row([$item->user->name, $item->user->email, $item->user->team, $item->entitlement ? $item->entitlement->acquisition_starts_on->format('d/m/Y').' a '.$item->entitlement->acquisition_ends_on->format('d/m/Y') : 'Legado', $item->starts_on->format('d/m/Y'), $item->ends_on->format('d/m/Y'), $item->days(), $item->cash_allowance_days, $item->totalDebitedDays(), ['pending' => 'Pendente', 'approved' => 'Aprovada', 'rejected' => 'Recusada', 'cancelled' => 'Cancelada'][$item->status], $item->reviewer?->name ?? '']), ';');
+                fputcsv($out, SpreadsheetSafeText::row([$item->user->name, $item->user->email, $item->user->team, $item->entitlement ? $item->entitlement->acquisition_starts_on->format('d/m/Y').' a '.$item->entitlement->acquisition_ends_on->format('d/m/Y') : 'Legado', $item->isAllowanceOnly() ? 'Somente abono' : $item->starts_on->format('d/m/Y'), $item->isAllowanceOnly() ? 'Somente abono' : $item->ends_on->format('d/m/Y'), $item->days(), $item->cash_allowance_days, $item->totalDebitedDays(), ['pending' => 'Pendente', 'approved' => 'Aprovada', 'rejected' => 'Recusada', 'cancelled' => 'Cancelada'][$item->status], $item->reviewer?->name ?? '']), ';');
             } fclose($out);
         }, 'ferias-mixhome-'.today()->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }

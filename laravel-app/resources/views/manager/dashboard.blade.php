@@ -85,6 +85,6 @@
 @endsection
 
 @push('scripts')
-<style>.work-mode-chart-scroll{overflow-y:hidden}.work-mode-tooltip{top:8px;bottom:auto}</style>
+<style>.work-mode-chart-scroll{overflow-y:hidden}.work-mode-tooltip{top:8px;bottom:auto}.review-actions .request-menu-panel{display:grid;grid-template-columns:1fr 1fr;width:min(300px,calc(100vw - 24px))}.request-menu-panel textarea{grid-column:1/-1;min-height:72px}</style>
 <script src="{{ asset('assets/manager.js') }}?v={{ filemtime(public_path('assets/manager.js')) }}" defer></script>
 @endpush

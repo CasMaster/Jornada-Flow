@@ -84,4 +84,7 @@
 </main>
 @endsection
 
-@push('scripts')<script src="{{ asset('assets/manager.js') }}?v={{ filemtime(public_path('assets/manager.js')) }}" defer></script>@endpush
+@push('scripts')
+<style>.work-mode-chart-scroll{overflow-y:hidden}.work-mode-tooltip{top:8px;bottom:auto}</style>
+<script src="{{ asset('assets/manager.js') }}?v={{ filemtime(public_path('assets/manager.js')) }}" defer></script>
+@endpush

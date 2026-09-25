@@ -62,7 +62,8 @@ class WorkModeDashboardTest extends TestCase
         $this->actingAs($manager)->get(route('manager.dashboard'))
             ->assertOk()
             ->assertSee('Modalidade de Trabalho')
-            ->assertSee('Distribuição de dias por modalidade de trabalho');
+            ->assertSee('Distribuição de dias por modalidade de trabalho')
+            ->assertSee('.work-mode-chart-scroll{overflow-y:hidden}.work-mode-tooltip{top:8px;bottom:auto}', false);
 
         $this->actingAs($manager)
             ->getJson(route('manager.work-mode-distribution', ['month' => 13, 'year' => 2026]))

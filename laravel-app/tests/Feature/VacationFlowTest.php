@@ -155,6 +155,10 @@ class VacationFlowTest extends TestCase
         $this->assertSame(10, $vacation->cash_allowance_days);
         $this->assertSame(30, $vacation->totalDebitedDays());
         $this->assertSame(0, $entitlement->availableDays());
+        $this->actingAs($employee)->get(route('vacations.index'))
+            ->assertOk()
+            ->assertSee('20 dias de descanso · 10 de abono')
+            ->assertDontSee('@if($vacation->cash_allowance_days)', false);
         $this->travelBack();
     }
 

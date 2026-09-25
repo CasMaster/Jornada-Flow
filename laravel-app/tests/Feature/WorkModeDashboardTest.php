@@ -69,4 +69,11 @@ class WorkModeDashboardTest extends TestCase
             ->assertUnprocessable()
             ->assertJsonValidationErrors('month');
     }
+
+    public function test_loaded_chart_hides_the_loading_state(): void
+    {
+        $stylesheet = file_get_contents(public_path('assets/manager.css'));
+
+        $this->assertStringContainsString('.work-mode-status[hidden],.work-mode-chart-scroll[hidden]{display:none}', $stylesheet);
+    }
 }

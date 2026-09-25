@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\AuditLog;
+use App\Models\Holiday;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\VacationEntitlement;
@@ -29,10 +30,11 @@ class VacationFlowTest extends TestCase
             'ends_on' => now()->addDays(12)->toDateString(),
         ])->assertSessionHasErrors('starts_on');
 
+        $start = $this->validVacationStart();
         $this->actingAs($employee)->post(route('vacations.store'), [
             'vacation_entitlement_id' => $entitlement->id,
-            'starts_on' => now()->addDays(20)->toDateString(),
-            'ends_on' => now()->addDays(24)->toDateString(),
+            'starts_on' => $start->toDateString(),
+            'ends_on' => $start->copy()->addDays(4)->toDateString(),
         ])->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('vacation_requests', ['user_id' => $employee->id, 'status' => 'pending']);
@@ -49,8 +51,9 @@ class VacationFlowTest extends TestCase
         $allowed = User::factory()->create(['team' => 'Fiscal']);
         $denied = User::factory()->create(['team' => 'TI']);
         $allowedEntitlement = $this->entitlement($allowed, 30);
-        $allowedVacation = VacationRequest::create(['user_id' => $allowed->id, 'vacation_entitlement_id' => $allowedEntitlement->id, 'starts_on' => now()->addMonth(), 'ends_on' => now()->addMonth()->addDays(4)]);
-        $deniedVacation = VacationRequest::create(['user_id' => $denied->id, 'starts_on' => now()->addMonth(), 'ends_on' => now()->addMonth()->addDays(4)]);
+        $start = $this->validVacationStart();
+        $allowedVacation = VacationRequest::create(['user_id' => $allowed->id, 'vacation_entitlement_id' => $allowedEntitlement->id, 'starts_on' => $start, 'ends_on' => $start->copy()->addDays(4)]);
+        $deniedVacation = VacationRequest::create(['user_id' => $denied->id, 'starts_on' => $start, 'ends_on' => $start->copy()->addDays(4)]);
 
         $this->actingAs($manager)->post(route('manager.vacations.review', $deniedVacation), ['decision' => 'approved'])->assertForbidden();
         $this->actingAs($manager)->post(route('manager.vacations.review', $allowedVacation), ['decision' => 'approved'])->assertSessionHasNoErrors();
@@ -74,8 +77,9 @@ class VacationFlowTest extends TestCase
         $manager->managedTeams()->attach($team);
         $employee = User::factory()->create(['role' => 'employee', 'team' => 'Fiscal']);
         $entitlement = $this->entitlement($employee, 30);
-        $date = now()->addMonth()->startOfMonth()->addDays(10);
-        $vacation = VacationRequest::create(['user_id' => $employee->id, 'vacation_entitlement_id' => $entitlement->id, 'starts_on' => $date->copy()->subDay(), 'ends_on' => $date->copy()->addDay()]);
+        $start = $this->validVacationStart();
+        $date = $start->copy()->addDay();
+        $vacation = VacationRequest::create(['user_id' => $employee->id, 'vacation_entitlement_id' => $entitlement->id, 'starts_on' => $start, 'ends_on' => $start->copy()->addDays(4)]);
         WorkRequest::create(['user_id' => $employee->id, 'work_date' => $date, 'status' => 'pending']);
 
         $this->actingAs($manager)->post(route('manager.vacations.review', $vacation), ['decision' => 'approved'])->assertSessionHasErrors('starts_on');
@@ -107,28 +111,29 @@ class VacationFlowTest extends TestCase
         $manager = User::factory()->create(['role' => 'manager']);
         $manager->managedTeams()->attach($team);
         $employee = User::factory()->create(['role' => 'employee', 'team' => 'Fiscal']);
-        $entitlement = $this->entitlement($employee, 10);
-        $start = now()->addMonth()->startOfMonth();
+        $entitlement = $this->entitlement($employee, 20);
+        $start = $this->validVacationStart();
 
         $this->actingAs($employee)->post(route('vacations.store'), [
             'vacation_entitlement_id' => $entitlement->id,
             'starts_on' => $start->toDateString(),
             'ends_on' => $start->copy()->addDays(5)->toDateString(),
         ])->assertSessionHasNoErrors();
-        $this->assertSame(4, $entitlement->availableDays());
+        $this->assertSame(14, $entitlement->availableDays());
         $this->actingAs($employee)->get(route('vacations.index'))
-            ->assertSee('4 dias restantes')
+            ->assertSee('14 dias restantes')
             ->assertSee('6 dias já estão reservados em solicitação pendente.');
 
+        $secondStart = $start->copy()->addWeeks(2);
         $this->actingAs($employee)->post(route('vacations.store'), [
             'vacation_entitlement_id' => $entitlement->id,
-            'starts_on' => $start->copy()->addDays(10)->toDateString(),
-            'ends_on' => $start->copy()->addDays(15)->toDateString(),
+            'starts_on' => $secondStart->toDateString(),
+            'ends_on' => $secondStart->copy()->addDays(14)->toDateString(),
         ])->assertSessionHasErrors('ends_on');
 
         $vacation = $employee->vacationRequests()->firstOrFail();
         $this->actingAs($manager)->post(route('manager.vacations.review', $vacation), ['decision' => 'rejected'])->assertSessionHasNoErrors();
-        $this->assertSame(10, $entitlement->availableDays());
+        $this->assertSame(20, $entitlement->availableDays());
     }
 
     public function test_employee_can_request_twenty_days_with_ten_day_cash_allowance(): void
@@ -162,6 +167,80 @@ class VacationFlowTest extends TestCase
         $this->travelBack();
     }
 
+    public function test_vacation_cannot_start_on_a_holiday_or_weekend(): void
+    {
+        $this->travelTo('2026-09-01');
+        $employee = User::factory()->create(['role' => 'employee']);
+        $entitlement = VacationEntitlement::create([
+            'user_id' => $employee->id,
+            'acquisition_starts_on' => '2025-10-01',
+            'acquisition_ends_on' => '2026-09-30',
+            'expires_on' => '2027-09-30',
+            'granted_days' => 30,
+        ]);
+        Holiday::create(['date' => '2026-10-01', 'name' => 'Feriado de teste', 'blocks_requests' => true]);
+
+        $this->actingAs($employee)->get(route('vacations.index'))
+            ->assertOk()
+            ->assertSee('data-blocked-starts="2026-10-01"', false);
+
+        $this->actingAs($employee)->post(route('vacations.store'), [
+            'vacation_entitlement_id' => $entitlement->id,
+            'starts_on' => '2026-10-01',
+            'ends_on' => '2026-10-15',
+        ])->assertSessionHasErrors('starts_on');
+
+        $this->actingAs($employee)->post(route('vacations.store'), [
+            'vacation_entitlement_id' => $entitlement->id,
+            'starts_on' => '2026-10-03',
+            'ends_on' => '2026-10-17',
+        ])->assertSessionHasErrors('starts_on');
+
+        $this->assertDatabaseCount('vacation_requests', 0);
+        $this->travelBack();
+    }
+
+    public function test_clt_notice_start_window_and_fraction_limits_are_enforced(): void
+    {
+        $this->travelTo('2026-09-01');
+        $employee = User::factory()->create(['role' => 'employee']);
+        $entitlement = VacationEntitlement::create([
+            'user_id' => $employee->id,
+            'acquisition_starts_on' => '2025-09-01',
+            'acquisition_ends_on' => '2026-08-31',
+            'expires_on' => '2027-08-31',
+            'granted_days' => 30,
+        ]);
+        Holiday::create(['date' => '2026-10-07', 'name' => 'Feriado futuro', 'blocks_requests' => true]);
+
+        $this->actingAs($employee)->post(route('vacations.store'), [
+            'vacation_entitlement_id' => $entitlement->id,
+            'starts_on' => '2026-09-30',
+            'ends_on' => '2026-10-13',
+        ])->assertSessionHasErrors('starts_on');
+
+        $this->actingAs($employee)->post(route('vacations.store'), [
+            'vacation_entitlement_id' => $entitlement->id,
+            'starts_on' => '2026-10-05',
+            'ends_on' => '2026-10-18',
+        ])->assertSessionHasErrors('starts_on');
+
+        $this->actingAs($employee)->post(route('vacations.store'), [
+            'vacation_entitlement_id' => $entitlement->id,
+            'starts_on' => '2026-10-08',
+            'ends_on' => '2026-10-11',
+        ])->assertSessionHasErrors('ends_on');
+
+        $this->actingAs($employee)->post(route('vacations.store'), [
+            'vacation_entitlement_id' => $entitlement->id,
+            'starts_on' => '2026-10-08',
+            'ends_on' => '2026-11-02',
+        ])->assertSessionHasErrors('ends_on');
+
+        $this->assertDatabaseCount('vacation_requests', 0);
+        $this->travelBack();
+    }
+
     public function test_cash_allowance_rejects_invalid_amount_and_expired_request_deadline(): void
     {
         $this->travelTo('2026-09-01');
@@ -174,7 +253,7 @@ class VacationFlowTest extends TestCase
             'granted_days' => 30,
         ]);
 
-        $payload = ['vacation_entitlement_id' => $entitlement->id, 'starts_on' => '2026-09-10', 'ends_on' => '2026-09-29'];
+        $payload = ['vacation_entitlement_id' => $entitlement->id, 'starts_on' => '2026-10-01', 'ends_on' => '2026-10-20'];
         $this->actingAs($employee)->post(route('vacations.store'), [...$payload, 'cash_allowance_days' => 9])->assertSessionHasErrors('cash_allowance_days');
         $this->actingAs($employee)->post(route('vacations.store'), [...$payload, 'cash_allowance_days' => 10])->assertSessionHasErrors('cash_allowance_days');
         $this->assertDatabaseCount('vacation_requests', 0);
@@ -356,5 +435,15 @@ class VacationFlowTest extends TestCase
             'granted_days' => $days,
             'notes' => 'Saldo de teste',
         ]);
+    }
+
+    private function validVacationStart(): mixed
+    {
+        $date = now()->addDays(35)->startOfDay();
+        while ($date->isFriday() || $date->isWeekend()) {
+            $date->addDay();
+        }
+
+        return $date;
     }
 }

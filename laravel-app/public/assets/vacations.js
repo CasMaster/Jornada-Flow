@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const nextMonth = calendar.querySelector('[data-calendar-next]')
   const monthFormatter = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' })
   const dateFormatter = new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' })
+  const blockedStarts = new Set((calendar.dataset.blockedStarts || '').split(',').filter(Boolean))
   let minimum = startsOn.dataset.today
   let maximum = ''
   let selecting = 'start'
@@ -29,6 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const formatDate = (value) => value ? dateFormatter.format(fromIso(value)) : ''
   const selectedBalance = () => entitlement?.tagName === 'SELECT' ? entitlement.selectedOptions[0] : entitlement
   const inWindow = (value) => value >= minimum && (!maximum || value <= maximum)
+  const invalidCltStart = (date, value) => {
+    if (date.getUTCDay() === 0 || date.getUTCDay() === 6 || blockedStarts.has(value)) return true
+    for (let offset = 1; offset <= 2; offset++) {
+      const next = new Date(date)
+      next.setUTCDate(date.getUTCDate() + offset)
+      if (next.getUTCDay() === 0 || blockedStarts.has(toIso(next))) return true
+    }
+    return false
+  }
   const selectedPlan = () => plans.find((plan) => plan.checked)?.value || 'custom'
   const addDays = (value, amount) => {
     const date = fromIso(value)
@@ -89,7 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
       button.type = 'button'
       button.textContent = date.getUTCDate()
       button.dataset.date = value
-      button.disabled = !inWindow(value)
+      const invalidStart = selecting === 'start' && invalidCltStart(date, value)
+      button.disabled = !inWindow(value) || invalidStart
       button.classList.toggle('outside', date.getUTCMonth() !== month)
       button.classList.toggle('range-start', value === startsOn.value)
       button.classList.toggle('range-end', value === endsOn.value)
@@ -145,9 +156,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const applyBalanceWindow = () => {
     const balance = selectedBalance()
-    const availableFrom = balance?.dataset.availableFrom || startsOn.dataset.today
+    const availableFrom = balance?.dataset.availableFrom || startsOn.dataset.cltMinStart
     maximum = balance?.dataset.expiresOn || ''
-    minimum = availableFrom > startsOn.dataset.today ? availableFrom : startsOn.dataset.today
+    minimum = availableFrom > startsOn.dataset.cltMinStart ? availableFrom : startsOn.dataset.cltMinStart
 
     if (startsOn.value && !inWindow(startsOn.value)) startsOn.value = ''
     if (endsOn.value && (!inWindow(endsOn.value) || (startsOn.value && endsOn.value < startsOn.value))) endsOn.value = ''

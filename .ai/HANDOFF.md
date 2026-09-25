@@ -6,7 +6,7 @@ Adicionar ao painel gerencial o indicador mensal "Modalidade de Trabalho", compa
 
 ## Estado atual
 
-Em 2026-09-25, foi implementado localmente o abono pecuniário no módulo de férias. A solicitação oferece período integral, descanso com conversão de 1/3 em abono ou período personalizado. O servidor valida titularidade, saldo total, proporção, uso prévio e prazo; descanso e abono reservam e consomem o mesmo saldo. Histórico, gestão, notificação, auditoria e CSV identificam o abono. A migration progressiva adiciona `cash_allowance_days` com zero para registros existentes. Os testes específicos de férias passaram; a suíte completa e a publicação ainda não foram executadas.
+Em 2026-09-25, foram implementados o abono pecuniário e as validações da CLT no módulo de férias. A solicitação oferece período integral, descanso com conversão de 1/3 em abono ou período personalizado. O servidor valida titularidade, saldo, prazo do abono, antecedência mínima de 30 dias, início compatível com feriados/repouso e fracionamento em até três períodos (um de 14 dias e os demais de 5). Descanso e abono reservam e consomem o mesmo saldo. Histórico, gestão, notificação, auditoria e CSV identificam o abono.
 
 Em 2026-09-25, o indicador foi implementado localmente no painel de gestão. A consulta reutiliza `work_requests`, considera somente registros aprovados no mês/ano selecionado, respeita equipes próprias e delegadas do gestor e retorna os colaboradores em ordem alfabética. O card atualiza os dados de forma assíncrona, possui carregamento, estado vazio, tooltip acessível e rolagem horizontal no mobile, sem nova biblioteca ou alteração de banco. A suíte local passou com 84 testes e 442 assertions; envio e publicação ainda não foram realizados nesta tarefa.
 
@@ -46,11 +46,11 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 - CI adicional em PostgreSQL 16 e smoke externo de produção a cada 15 minutos.
 - Deploy com dump/checksum prévio, verificação de saúde e tentativa de retorno à imagem anterior.
 - `.dockerignore` evita copiar cache local de descoberta de pacotes para a imagem de produção.
-- Solicitações de férias oferecem período integral, descanso com abono de 1/3 e período personalizado; o abono integra o saldo real, a aprovação, a auditoria, as notificações e as exportações.
+- Solicitações de férias oferecem período integral, descanso com abono de 1/3 e período personalizado; o abono integra o saldo real, a aprovação, a auditoria, as notificações e as exportações. O domínio valida antecedência mínima de 30 dias, início compatível com feriados/repouso semanal e fracionamento legal.
 
 ## Validação
 
-- Férias e abono: Laravel Pint, sintaxe JavaScript e suíte completa aprovados em 2026-09-25, com 88 testes e 458 assertions.
+- Férias, abono e regras CLT: Laravel Pint, sintaxe JavaScript e suíte completa aprovados em 2026-09-25, com 90 testes e 477 assertions.
 - Modalidade presencial: suíte completa aprovada em 2026-09-23, com 81 testes e 431 assertions; inclui criação pendente, aprovação gerencial, conflito entre modalidades e filtro da gestão.
 - Modalidade presencial: Laravel Pint, sintaxe JavaScript, `git diff --check` e build local da imagem aprovados.
 - Laravel Pint: aprovado após as correções de segurança.
@@ -72,7 +72,7 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Próximo passo
 
-Publicar o fluxo de férias com abono em homologação, executar a migration progressiva e validar as três opções de solicitação antes de considerar produção. A simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
+Publicar as validações da CLT em homologação e conferir no calendário um feriado, os dois dias anteriores, a antecedência e as combinações de fracionamento antes de considerar produção. A simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
 
 ## Limites
 

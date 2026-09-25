@@ -2,6 +2,10 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-09-25 — Regras da CLT no planejamento de férias
+
+Solicitações de férias validam antecedência mínima de 30 dias, início fora de feriado ou repouso semanal e dos dois dias anteriores, além do fracionamento em no máximo três períodos, com um período de ao menos 14 dias e os demais de ao menos 5. Como não há escala individual cadastrada, domingo é adotado como repouso semanal; os feriados bloqueantes vêm do calendário corporativo. A aprovação gerencial continua representando a decisão do empregador.
+
 ## 2026-09-25 — Abono pecuniário integrado ao saldo de férias
 
 O colaborador pode solicitar férias integrais, um período personalizado ou converter exatamente 1/3 do direito em abono pecuniário dentro do prazo aplicável. Dias de descanso e de abono pertencem à mesma solicitação e ambos reservam/consomem o saldo derivado do período aquisitivo. O fluxo mantém uma única aprovação gerencial, auditoria e exportação, sem contadores duplicados.
@@ -36,7 +40,7 @@ O período anual em formação é criado a partir da data de admissão e pode re
 
 ## 2026-09-15 — Saldo administrativo de férias por período aquisitivo
 
-O MixHome conta dias corridos de forma inclusiva e controla concessão, ajuste, reserva e consumo por período aquisitivo. A data de contratação gera automaticamente ciclos anuais completos, com 30 dias e prazo de utilização de um ano após o término. A sincronização ocorre ao salvar o usuário e diariamente. Solicitações pendentes reservam saldo; aprovadas consomem; recusadas e canceladas liberam os dias. O Super Admin ajusta exceções mediante justificativa auditada. O controle apoia o planejamento, mas não substitui o sistema oficial de RH/folha nem automatiza regras legais de fracionamento, abono ou redução por faltas.
+O MixHome conta dias corridos de forma inclusiva e controla concessão, ajuste, reserva e consumo por período aquisitivo. A data de contratação gera automaticamente ciclos anuais completos, com 30 dias e prazo de utilização de um ano após o término. A sincronização ocorre ao salvar o usuário e diariamente. Solicitações pendentes reservam saldo; aprovadas consomem; recusadas e canceladas liberam os dias. O Super Admin ajusta exceções mediante justificativa auditada. O controle apoia o planejamento, mas não substitui o sistema oficial de RH/folha; reduções por faltas continuam dependentes de ajuste administrativo.
 
 ## 2026-09-14 — Alerta de falha no backup
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Holiday;
 use App\Models\VacationEntitlement;
 use App\Services\VacationEntitlementService;
 use App\Services\VacationRequestService;
@@ -26,6 +27,7 @@ class VacationController extends Controller
             'usableEntitlements' => $entitlements->filter(fn (VacationEntitlement $entitlement) => $entitlement->isUsable() && $entitlement->availableDays() > 0)->values(),
             'requestableEntitlements' => $entitlements->filter(fn (VacationEntitlement $entitlement) => $entitlement->isRequestable() && $entitlement->availableDays() > 0)->values(),
             'accrualPeriod' => $this->vacationEntitlements->currentAccrualPeriod($request->user()),
+            'blockedVacationStarts' => Holiday::where('blocks_requests', true)->whereDate('date', '>=', today())->orderBy('date')->get(['date'])->map(fn (Holiday $holiday) => $holiday->date->format('Y-m-d')),
         ]);
     }
 

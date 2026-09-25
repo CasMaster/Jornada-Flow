@@ -40,7 +40,7 @@ O MixHome é um sistema interno da Mix Fiscal para controlar dias de home office
 - Endpoint de prontidão e scripts de backup/monitoramento.
 - Importadores SQLite apenas para instalações históricas.
 - Planejamento de férias com geração de períodos pela data de contratação, dias corridos, saldo, fracionamento em solicitações, análise gerencial, calendário de equipe, auditoria e exportação.
-- Solicitação guiada de férias integrais, personalizadas ou com conversão de 1/3 em abono pecuniário, incorporada ao saldo e à aprovação.
+- Solicitação guiada de férias integrais, personalizadas ou com conversão de 1/3 em abono pecuniário, incorporada ao saldo e à aprovação, com antecedência, início e fracionamento validados conforme a CLT.
 - Aplicativo web instalável (PWA) em Android, iPhone e desktop, com escopo compatível com produção e `/homologacao` e tela offline sem persistência de dados corporativos.
 
 ## Componentes

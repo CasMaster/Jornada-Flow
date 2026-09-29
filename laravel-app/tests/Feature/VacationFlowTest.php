@@ -88,20 +88,22 @@ class VacationFlowTest extends TestCase
 
     public function test_super_admin_corrects_cancels_and_exports_vacations(): void
     {
+        $this->travelTo('2026-09-01');
         Notification::fake();
         Team::create(['name' => 'Fiscal']);
         $admin = User::factory()->create(['role' => 'super_admin']);
         $employee = User::factory()->create(['team' => 'Fiscal']);
         $entitlement = $this->entitlement($employee, 30);
-        $vacation = VacationRequest::create(['user_id' => $employee->id, 'vacation_entitlement_id' => $entitlement->id, 'starts_on' => now()->addMonth(), 'ends_on' => now()->addMonth()->addDays(4), 'status' => 'approved']);
+        $vacation = VacationRequest::create(['user_id' => $employee->id, 'vacation_entitlement_id' => $entitlement->id, 'starts_on' => '2026-10-05', 'ends_on' => '2026-10-09', 'status' => 'approved']);
 
-        $this->actingAs($admin)->put(route('admin.vacations.correct', $vacation), ['vacation_entitlement_id' => $entitlement->id, 'starts_on' => now()->addMonth()->addDay()->toDateString(), 'ends_on' => now()->addMonth()->addDays(5)->toDateString(), 'note' => 'Ajuste solicitado pelo RH'])->assertSessionHasNoErrors();
+        $this->actingAs($admin)->put(route('admin.vacations.correct', $vacation), ['vacation_entitlement_id' => $entitlement->id, 'starts_on' => '2026-10-06', 'ends_on' => '2026-10-10', 'note' => 'Ajuste solicitado pelo RH'])->assertSessionHasNoErrors();
         $this->actingAs($admin)->post(route('admin.vacations.cancel', $vacation), ['note' => 'Cancelamento solicitado pelo RH'])->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('vacation_requests', ['id' => $vacation->id, 'status' => 'cancelled', 'cancel_note' => 'Cancelamento solicitado pelo RH']);
         $this->assertSame(1, AuditLog::where('event', 'vacation_request.corrected')->count());
         $this->assertSame(1, AuditLog::where('event', 'vacation_request.cancelled')->count());
         $this->actingAs($admin)->get(route('manager.vacations.export'))->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8');
+        $this->travelBack();
     }
 
     public function test_pending_requests_reserve_balance_and_rejection_releases_it(): void

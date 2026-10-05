@@ -39,17 +39,24 @@ class HibridoFlowTest extends TestCase
         $this->travelBack();
     }
 
-    public function test_login_exposes_employee_and_manager_areas(): void
+    public function test_login_uses_one_form_and_routes_each_role_to_its_dashboard(): void
     {
-        $this->get('/login')->assertOk()->assertSee('Sou colaborador')->assertSee('Sou gestor');
-        $this->get('/login?perfil=manager')->assertOk()->assertSee('Painel do gestor')->assertSee('Entrar como gestor');
+        $this->get('/login')->assertOk()
+            ->assertSee('Entre na sua conta')
+            ->assertSee('Colaboradores, gestores e administradores utilizam o mesmo acesso.')
+            ->assertDontSee('Sou colaborador')
+            ->assertDontSee('Sou gestor')
+            ->assertDontSee('Primeiro acesso');
         $manager = User::factory()->create(['role' => 'manager', 'password' => 'password']);
-        $this->post('/login', ['email' => $manager->email, 'password' => 'password', 'profile' => 'manager'])->assertRedirect('/gestor');
+        $employee = User::factory()->create(['role' => 'employee', 'password' => 'password']);
+        $this->post('/login', ['email' => $manager->email, 'password' => 'password'])->assertRedirect('/gestor');
+        $this->post('/logout');
+        $this->post('/login', ['email' => $employee->email, 'password' => 'password'])->assertRedirect('/painel');
     }
 
     public function test_login_error_is_rendered_inside_authentication_card(): void
     {
-        $response = $this->from('/login')->post('/login', ['email' => 'invalido@example.com', 'password' => 'errada', 'profile' => 'employee']);
+        $response = $this->from('/login')->post('/login', ['email' => 'invalido@example.com', 'password' => 'errada']);
 
         $response->assertRedirect('/login');
         $this->get('/login')->assertOk()->assertSee('auth-alert', false)->assertSee('Não foi possível entrar')->assertSee('E-mail ou senha inválidos.');
@@ -115,7 +122,8 @@ class HibridoFlowTest extends TestCase
     {
         Team::create(['name' => 'Fiscal']);
         $manager = User::factory()->create(['role' => 'manager', 'team' => 'Fiscal', 'password' => 'password']);
-        $this->post('/login', ['email' => $manager->email, 'password' => 'password', 'profile' => 'employee'])->assertRedirect('/painel');
+        $this->post('/login', ['email' => $manager->email, 'password' => 'password'])->assertRedirect('/gestor');
+        $this->get('/painel')->assertOk();
         $this->post('/solicitacoes', ['dates' => ['2026-08-12']])->assertSessionHasNoErrors();
         $this->assertDatabaseHas('work_requests', ['user_id' => $manager->id, 'work_date' => '2026-08-12 00:00:00', 'status' => 'pending']);
         $this->get('/painel')->assertOk()->assertSee('Meu home office')->assertSee('Gestão');
@@ -164,10 +172,10 @@ class HibridoFlowTest extends TestCase
     public function test_login_is_rate_limited_by_email_and_ip(): void
     {
         for ($attempt = 0; $attempt < 5; $attempt++) {
-            $this->post('/login', ['email' => 'alvo@mixfiscal.com.br', 'password' => 'incorreta', 'profile' => 'manager']);
+            $this->post('/login', ['email' => 'alvo@mixfiscal.com.br', 'password' => 'incorreta']);
         }
 
-        $this->post('/login', ['email' => 'alvo@mixfiscal.com.br', 'password' => 'incorreta', 'profile' => 'manager'])
+        $this->post('/login', ['email' => 'alvo@mixfiscal.com.br', 'password' => 'incorreta'])
             ->assertTooManyRequests();
     }
 

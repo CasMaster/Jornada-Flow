@@ -6,6 +6,8 @@ Corrigir os três achados da auditoria Codex Security: sessões após desativaç
 
 ## Estado atual
 
+Em 2026-10-05, o login foi simplificado localmente para um único formulário compartilhado por colaboradores, gestores e Super Admins. A escolha manual de perfil e a opção textual de primeiro acesso foram removidas; após autenticar, o servidor encaminha colaboradores ao painel pessoal e perfis gerenciais à gestão, mantendo o acesso posterior ao painel pessoal pelo menu principal. O link de recuperação de senha permanece disponível. Pint e a suíte completa passaram, com 98 testes e 529 assertions. A alteração ainda não foi commitada nem publicada.
+
 Em 2026-10-05, as correções dos três achados da auditoria foram publicadas no commit `908b9f7`, implantadas em homologação pelo deploy `37328399858` e promovidas para produção pelo deploy `37329595946`, após validação do CI e de homologação. Contas inativas e sessões com versão anterior são recusadas por middleware; a desativação incrementa `auth_version` e gira o token persistente, preservando os registros de sessão. Solicitações foram limitadas a 31 datas e dez envios por minuto, com defesa no controller e no serviço. Deploy e monitor de backup agora exigem `DEPLOY_SSH_KNOWN_HOSTS` fixo e `StrictHostKeyChecking=yes`. A chave pública Ed25519 foi conferida diretamente no servidor pelo canal SSH já confiável e cadastrada nos environments `homologacao` e `producao`, sem alterar a chave pessoal. Localmente, seis testes focados e a suíte completa passaram, com 98 testes e 526 assertions; Pint, `git diff --check`, sintaxe PHP e build da imagem também passaram. Os CIs `37328100022` e `37328856017` confirmaram a suíte, as migrations no PostgreSQL 16 e o build. Os deploys concluíram backup, migração, healthcheck e smoke autenticado; a verificação pública adicional de produção retornou HTTP 200.
 
 Em 2026-09-25, foram implementados o abono pecuniário e as validações da CLT no módulo de férias. A solicitação oferece período integral, descanso com conversão de 1/3 em abono, período personalizado com abono opcional e solicitação exclusiva de abono sem datas de descanso. O servidor valida titularidade, saldo, prazo do abono, antecedência mínima de 30 dias, início compatível com feriados/repouso e fracionamento em até três períodos (um de 14 dias e os demais de 5). Descanso e abono reservam e consomem o mesmo saldo. Histórico, gestão, notificação, auditoria e CSV identificam o abono; solicitações exclusivas não bloqueiam dias de trabalho.
@@ -74,7 +76,7 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Próximo passo
 
-Acompanhar os próximos monitores de produção. A simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
+Publicar e validar visualmente o login unificado em homologação antes de considerar produção. A simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
 
 ## Limites
 

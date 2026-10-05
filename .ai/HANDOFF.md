@@ -6,7 +6,7 @@ Corrigir os três achados da auditoria Codex Security: sessões após desativaç
 
 ## Estado atual
 
-Em 2026-10-05, o login foi simplificado localmente para um único formulário compartilhado por colaboradores, gestores e Super Admins. A escolha manual de perfil e a opção textual de primeiro acesso foram removidas; após autenticar, o servidor encaminha colaboradores ao painel pessoal e perfis gerenciais à gestão, mantendo o acesso posterior ao painel pessoal pelo menu principal. O link de recuperação de senha permanece disponível. Pint e a suíte completa passaram, com 98 testes e 529 assertions. A alteração ainda não foi commitada nem publicada.
+Em 2026-10-05, o login foi simplificado no commit `ed18999` para um único formulário compartilhado por colaboradores, gestores e Super Admins e publicado em homologação pelo deploy `37355739514`. A escolha manual de perfil e a opção textual de primeiro acesso foram removidas; após autenticar, o servidor encaminha colaboradores ao painel pessoal e perfis gerenciais à gestão, mantendo o acesso posterior ao painel pessoal pelo menu principal. O link de recuperação de senha permanece disponível. Pint e a suíte completa passaram, com 98 testes e 529 assertions; o CI `37355478983` confirmou PostgreSQL 16 e build. O deploy concluiu healthcheck e smoke autenticado, e a verificação pública confirmou o novo formulário sem o menu antigo nem a opção removida.
 
 Em 2026-10-05, as correções dos três achados da auditoria foram publicadas no commit `908b9f7`, implantadas em homologação pelo deploy `37328399858` e promovidas para produção pelo deploy `37329595946`, após validação do CI e de homologação. Contas inativas e sessões com versão anterior são recusadas por middleware; a desativação incrementa `auth_version` e gira o token persistente, preservando os registros de sessão. Solicitações foram limitadas a 31 datas e dez envios por minuto, com defesa no controller e no serviço. Deploy e monitor de backup agora exigem `DEPLOY_SSH_KNOWN_HOSTS` fixo e `StrictHostKeyChecking=yes`. A chave pública Ed25519 foi conferida diretamente no servidor pelo canal SSH já confiável e cadastrada nos environments `homologacao` e `producao`, sem alterar a chave pessoal. Localmente, seis testes focados e a suíte completa passaram, com 98 testes e 526 assertions; Pint, `git diff --check`, sintaxe PHP e build da imagem também passaram. Os CIs `37328100022` e `37328856017` confirmaram a suíte, as migrations no PostgreSQL 16 e o build. Os deploys concluíram backup, migração, healthcheck e smoke autenticado; a verificação pública adicional de produção retornou HTTP 200.
 
@@ -76,7 +76,7 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Próximo passo
 
-Publicar e validar visualmente o login unificado em homologação antes de considerar produção. A simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
+Validar visualmente o login unificado em homologação antes de considerar produção. A simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
 
 ## Limites
 

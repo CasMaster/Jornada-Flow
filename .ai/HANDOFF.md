@@ -6,7 +6,7 @@ Corrigir os três achados da auditoria Codex Security: sessões após desativaç
 
 ## Estado atual
 
-Em 2026-10-05, o painel de solicitações da gestão foi simplificado no commit `0b1a2a0` e publicado em homologação pelo deploy `37358507254`. O título foi reduzido, a exportação virou uma ação recolhível, filtros avançados permanecem fechados até serem solicitados ou possuírem parâmetros ativos, as três métricas foram condensadas em uma faixa e os cards de prioridade/distribuição passaram para um resumo opcional do ciclo. Nenhuma consulta ou função foi removida. Pint, compilação Blade, `git diff --check` e a suíte completa passaram, com 98 testes e 532 assertions; o CI `37358247777` confirmou PostgreSQL 16 e build. O deploy concluiu healthcheck e smoke autenticado, e a verificação pública adicional retornou HTTP 200.
+Em 2026-10-05, o painel de solicitações da gestão foi simplificado no commit `0b1a2a0`, publicado em homologação pelo deploy `37358507254` e promovido para produção pelo deploy `37359484833`. O título foi reduzido, a exportação virou uma ação recolhível, filtros avançados permanecem fechados até serem solicitados ou possuírem parâmetros ativos, as três métricas foram condensadas em uma faixa e os cards de prioridade/distribuição passaram para um resumo opcional do ciclo. Nenhuma consulta ou função foi removida. Pint, compilação Blade, `git diff --check` e a suíte completa passaram, com 98 testes e 532 assertions; os CIs `37358247777` e `37358885964` confirmaram PostgreSQL 16 e build. Os deploys concluíram healthcheck e smoke autenticado, e as verificações públicas adicionais retornaram HTTP 200.
 
 Em 2026-10-05, o login foi simplificado no commit `ed18999` para um único formulário compartilhado por colaboradores, gestores e Super Admins e publicado em homologação pelo deploy `37355739514`. A escolha manual de perfil e a opção textual de primeiro acesso foram removidas; após autenticar, o servidor encaminha colaboradores ao painel pessoal e perfis gerenciais à gestão, mantendo o acesso posterior ao painel pessoal pelo menu principal. O link de recuperação de senha permanece disponível. Pint e a suíte completa passaram, com 98 testes e 529 assertions; o CI `37355478983` confirmou PostgreSQL 16 e build. O deploy concluiu healthcheck e smoke autenticado, e a verificação pública confirmou o novo formulário sem o menu antigo nem a opção removida.
 
@@ -78,7 +78,7 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Próximo passo
 
-Validar visualmente em homologação a simplificação do painel de gestão antes de considerar produção. Por orientação do Super Admin, alterações validadas devem seguir por padrão para homologação; produção continua dependendo de autorização explícita. A simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
+Acompanhar os próximos monitores de produção. Por orientação do Super Admin, alterações validadas devem seguir por padrão para homologação; produção continua dependendo de autorização explícita. A simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
 
 ## Limites
 

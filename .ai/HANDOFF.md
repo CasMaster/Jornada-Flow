@@ -6,7 +6,7 @@ Corrigir os três achados da auditoria Codex Security: sessões após desativaç
 
 ## Estado atual
 
-Em 2026-10-05, as correções dos três achados da auditoria foram implementadas localmente. Contas inativas e sessões com versão anterior são recusadas por middleware; a desativação incrementa `auth_version` e gira o token persistente, preservando os registros de sessão. Solicitações foram limitadas a 31 datas e dez envios por minuto, com defesa no controller e no serviço. Deploy e monitor de backup agora exigem `DEPLOY_SSH_KNOWN_HOSTS` fixo e `StrictHostKeyChecking=yes`. A chave pública Ed25519 foi conferida diretamente no servidor pelo canal SSH já confiável e cadastrada nos environments `homologacao` e `producao`, sem alterar a chave pessoal. Seis testes focados foram adicionados; Pint, `git diff --check`, sintaxe PHP, suíte completa com 98 testes e 526 assertions e build da imagem foram aprovados. O commit, o push e a publicação em homologação ainda não haviam sido executados no momento deste registro.
+Em 2026-10-05, as correções dos três achados da auditoria foram publicadas no commit `908b9f7` e implantadas em homologação pelo deploy `37328399858`. Contas inativas e sessões com versão anterior são recusadas por middleware; a desativação incrementa `auth_version` e gira o token persistente, preservando os registros de sessão. Solicitações foram limitadas a 31 datas e dez envios por minuto, com defesa no controller e no serviço. Deploy e monitor de backup agora exigem `DEPLOY_SSH_KNOWN_HOSTS` fixo e `StrictHostKeyChecking=yes`. A chave pública Ed25519 foi conferida diretamente no servidor pelo canal SSH já confiável e cadastrada nos environments `homologacao` e `producao`, sem alterar a chave pessoal. Localmente, seis testes focados e a suíte completa passaram, com 98 testes e 526 assertions; Pint, `git diff --check`, sintaxe PHP e build da imagem também passaram. O CI `37328100022` confirmou a suíte, as migrations no PostgreSQL 16 e o build, e o deploy de homologação concluiu backup, migração, healthcheck e smoke autenticado.
 
 Em 2026-09-25, foram implementados o abono pecuniário e as validações da CLT no módulo de férias. A solicitação oferece período integral, descanso com conversão de 1/3 em abono, período personalizado com abono opcional e solicitação exclusiva de abono sem datas de descanso. O servidor valida titularidade, saldo, prazo do abono, antecedência mínima de 30 dias, início compatível com feriados/repouso e fracionamento em até três períodos (um de 14 dias e os demais de 5). Descanso e abono reservam e consomem o mesmo saldo. Histórico, gestão, notificação, auditoria e CSV identificam o abono; solicitações exclusivas não bloqueiam dias de trabalho.
 
@@ -74,7 +74,7 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Próximo passo
 
-Publicar os dois fluxos de abono em homologação e validar visualmente a solicitação, a análise gerencial e o histórico antes de considerar produção. A simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
+Validar visualmente em homologação os fluxos afetados antes de solicitar autorização explícita para produção. A simulação de retenção em homologação e a revisão da chave pessoal antiga continuam pendentes. A revisão trimestral da restauração já está agendada como lembrete, sem execução automática.
 
 ## Limites
 

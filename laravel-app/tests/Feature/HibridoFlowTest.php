@@ -221,6 +221,9 @@ class HibridoFlowTest extends TestCase
         $this->actingAs($admin)->get(route('manager.dashboard'))
             ->assertOk()
             ->assertSee('Localizar solicitações')
+            ->assertSee('compact-panel-summary', false)
+            ->assertSee('manager-summary-strip', false)
+            ->assertSee('Resumo do ciclo')
             ->assertDontSee('Delegação de gestores');
 
         $this->actingAs($admin)->get(route('admin.teams.index'))

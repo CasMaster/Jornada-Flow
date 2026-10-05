@@ -5,21 +5,20 @@
 @section('content')
 <main>
     <section class="workspace manager-workspace">
-        <div class="manager-head">
+        <div class="manager-head manager-head-compact">
             <div>
-                <p class="eyebrow">PAINEL DO GESTOR</p>
-                <h1>Gestão da <em>jornada híbrida.</em></h1>
-                <p>Ciclo {{ $start->format('d/m/Y') }} até {{ $end->format('d/m/Y') }}.</p>
+                <p class="eyebrow">GESTÃO</p>
+                <h1>Solicitações</h1>
+                <p>Ciclo {{ $start->format('d/m/Y') }}–{{ $end->format('d/m/Y') }}</p>
             </div>
-            <form class="export-menu" method="get" action="{{ route('manager.export') }}">@foreach(request()->except(['format','export_status']) as $key=>$value)@if(is_array($value))@foreach($value as $item)<input type="hidden" name="{{ $key }}[]" value="{{ $item }}">@endforeach @else<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif @endforeach<label>Formato<select name="format"><option value="xlsx">Excel matricial</option><option value="csv">CSV detalhado</option></select></label><label>Status<select name="export_status"><option value="approved">Aprovadas</option><option value="pending">Pendentes</option><option value="rejected">Recusadas</option><option value="all">Todos</option></select></label><button class="primary">Exportar ↓</button></form>
+            <details class="manager-tools"><summary>Exportar</summary><form class="export-menu" method="get" action="{{ route('manager.export') }}">@foreach(request()->except(['format','export_status']) as $key=>$value)@if(is_array($value))@foreach($value as $item)<input type="hidden" name="{{ $key }}[]" value="{{ $item }}">@endforeach @else<input type="hidden" name="{{ $key }}" value="{{ $value }}">@endif @endforeach<label>Formato<select name="format"><option value="xlsx">Excel matricial</option><option value="csv">CSV detalhado</option></select></label><label>Status<select name="export_status"><option value="approved">Aprovadas</option><option value="pending">Pendentes</option><option value="rejected">Recusadas</option><option value="all">Todos</option></select></label><button class="primary">Exportar ↓</button></form></details>
         </div>
 
         @include('manager._navigation')
 
-        <article class="card filters-card" id="registros">
-            <div class="report-head filter-priority-head">
-                <div><p class="eyebrow">PESQUISA E FILTROS</p><h2>Localizar solicitações</h2><p class="filter-description">Combine os campos abaixo para encontrar rapidamente os registros que precisam de análise.</p></div>
-            </div>
+        <details class="card filters-card compact-panel" id="registros" @if(request()->hasAny(['q','cycle','team','teams','status','work_mode','employees','sort','per_page'])) open @endif>
+            <summary class="compact-panel-summary"><span><b>Localizar solicitações</b><small>Pesquisa e filtros avançados</small></span><span class="compact-panel-action"><span class="when-closed">Exibir</span><span class="when-open">Ocultar</span></span></summary>
+            <div class="compact-panel-body">
             <form method="get" class="filters request-filters" data-manager-filters>
                 <label class="request-search">Nome ou e-mail<input name="q" value="{{ request('q') }}" placeholder="Pesquisar colaborador"></label>
                 <label>Ciclo 20–19<select name="cycle">@foreach($cycles as $cycle)<option value="{{ $cycle['value'] }}" @selected(request('cycle',$cycles[0]['value'])===$cycle['value'])>{{ $cycle['label'] }}</option>@endforeach</select></label>
@@ -35,15 +34,16 @@
                     @if(request()->hasAny(['q','cycle','team','teams','status','work_mode','employees']))<a class="clear-filter" href="{{ route('manager.dashboard') }}">Limpar</a>@endif
                 </div>
             </form>
-        </article>
+            </div>
+        </details>
 
-        <div class="stats stats-three compact-stats">
-            <div><span>REGISTROS NO FILTRO</span><strong>{{ $metrics->total ?? 0 }}</strong></div>
-            <div class="pending-highlight"><span>AGUARDANDO SUA AÇÃO</span><strong>{{ $metrics->pending ?? 0 }}</strong></div>
-            <div><span>COLABORADORES</span><strong>{{ $metrics->collaborators ?? 0 }}</strong></div>
+        <div class="manager-summary-strip" aria-label="Resumo das solicitações">
+            <span class="summary-pending"><strong>{{ $metrics->pending ?? 0 }}</strong> aguardando sua ação</span>
+            <span><strong>{{ $metrics->total ?? 0 }}</strong> registros</span>
+            <span><strong>{{ $metrics->collaborators ?? 0 }}</strong> colaboradores</span>
         </div>
 
-        <section class="manager-insights" aria-label="Resumo gerencial"><article class="card priority-card"><div class="report-head"><div><p class="eyebrow">PRIORIDADE</p><h2>Pendências mais antigas</h2></div><a href="{{ route('manager.dashboard',[...request()->query(),'status'=>'pending']) }}">Ver todas</a></div><div class="priority-list">@forelse($priorityRequests as $record)<div><span><b>{{ $record->user->name }}</b><small>{{ $record->user->team }} · {{ $record->work_date->format('d/m/Y') }}</small></span><strong>{{ $record->created_at->diffForHumans() }}</strong></div>@empty<p class="empty compact-empty">Nenhuma pendência no filtro atual.</p>@endforelse</div></article><article class="card executive-card"><div class="report-head"><div><p class="eyebrow">VISÃO EXECUTIVA</p><h2>Distribuição do ciclo</h2></div></div>@php($summaryTotal=max(1,(int)$statusSummary->sum()))<div class="status-bars">@foreach(['pending'=>'Pendentes','approved'=>'Aprovadas','rejected'=>'Recusadas'] as $status=>$label)@php($amount=(int)($statusSummary[$status]??0))<div><span><b>{{ $label }}</b><small>{{ $amount }}</small></span><i><em class="bar-{{ $status }}" style="width:{{ round($amount/$summaryTotal*100) }}%"></em></i></div>@endforeach</div><div class="team-ranking">@foreach($teamSummary as $team)<span><b>{{ $team->team ?: 'Sem equipe' }}</b><small>{{ $team->total }} registros · {{ $team->pending }} pendentes</small></span>@endforeach</div></article></section>
+        <details class="manager-overview"><summary>Resumo do ciclo</summary><section class="manager-insights" aria-label="Resumo gerencial"><article class="card priority-card"><div class="report-head"><div><p class="eyebrow">PRIORIDADE</p><h2>Pendências mais antigas</h2></div><a href="{{ route('manager.dashboard',[...request()->query(),'status'=>'pending']) }}">Ver todas</a></div><div class="priority-list">@forelse($priorityRequests as $record)<div><span><b>{{ $record->user->name }}</b><small>{{ $record->user->team }} · {{ $record->work_date->format('d/m/Y') }}</small></span><strong>{{ $record->created_at->diffForHumans() }}</strong></div>@empty<p class="empty compact-empty">Nenhuma pendência no filtro atual.</p>@endforelse</div></article><article class="card executive-card"><div class="report-head"><div><p class="eyebrow">VISÃO EXECUTIVA</p><h2>Distribuição do ciclo</h2></div></div>@php($summaryTotal=max(1,(int)$statusSummary->sum()))<div class="status-bars">@foreach(['pending'=>'Pendentes','approved'=>'Aprovadas','rejected'=>'Recusadas'] as $status=>$label)@php($amount=(int)($statusSummary[$status]??0))<div><span><b>{{ $label }}</b><small>{{ $amount }}</small></span><i><em class="bar-{{ $status }}" style="width:{{ round($amount/$summaryTotal*100) }}%"></em></i></div>@endforeach</div><div class="team-ranking">@foreach($teamSummary as $team)<span><b>{{ $team->team ?: 'Sem equipe' }}</b><small>{{ $team->total }} registros · {{ $team->pending }} pendentes</small></span>@endforeach</div></article></section></details>
 
         <article class="card work-mode-card" data-work-mode-chart data-endpoint="{{ route('manager.work-mode-distribution') }}">
             <header class="work-mode-head">

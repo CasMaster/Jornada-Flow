@@ -41,7 +41,7 @@ Route::prefix(config('app.route_prefix'))->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
     Route::middleware(['auth', 'role:employee,manager,super_admin'])->group(function () {
         Route::get('/painel', [EmployeeController::class, 'index'])->name('employee.dashboard');
-        Route::post('/solicitacoes', [EmployeeController::class, 'store'])->name('employee.requests.store');
+        Route::post('/solicitacoes', [EmployeeController::class, 'store'])->middleware('throttle:work-requests')->name('employee.requests.store');
         Route::get('/ferias', [VacationController::class, 'index'])->name('vacations.index');
         Route::post('/ferias', [VacationController::class, 'store'])->name('vacations.store');
     });

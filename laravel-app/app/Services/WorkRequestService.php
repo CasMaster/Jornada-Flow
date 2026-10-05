@@ -13,10 +13,15 @@ use Illuminate\Validation\ValidationException;
 
 class WorkRequestService
 {
+    public const MAX_DATES_PER_REQUEST = 31;
+
     public function __construct(private AuditService $audit) {}
 
     public function createMany(User $user, array $dates, string $workMode = 'home_office'): int
     {
+        if (count($dates) > self::MAX_DATES_PER_REQUEST) {
+            throw ValidationException::withMessages(['dates' => 'Selecione no máximo '.self::MAX_DATES_PER_REQUEST.' dias por solicitação.']);
+        }
         $uniqueDates = array_unique($dates);
         $blocked = Holiday::where(function ($query) use ($uniqueDates) {
             foreach ($uniqueDates as $date) {

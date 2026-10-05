@@ -2,6 +2,10 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-10-01 — Revogação de acesso e limites de solicitações
+
+Desativar uma conta incrementa sua versão de autenticação e gira o token de lembrança. Todas as rotas web com usuário autenticado comparam a versão da sessão com a conta e encerram sessões antigas ou contas inativas, inclusive após reativação, sem excluir os metadados de sessão sujeitos à retenção. Solicitações de jornada aceitam no máximo 31 datas e até dez envios por minuto por usuário; o controller rejeita o volume antes da validação item a item e o serviço repete o limite como defesa em profundidade. Workflows SSH usam uma entrada `known_hosts` fixa, fornecida por secret de ambiente, e não confiam em descoberta feita durante o próprio job.
+
 ## 2026-09-25 — Regras da CLT no planejamento de férias
 
 Solicitações de férias validam antecedência mínima de 30 dias, início fora de feriado ou repouso semanal e dos dois dias anteriores, além do fracionamento em no máximo três períodos, com um período de ao menos 14 dias e os demais de ao menos 5. Como não há escala individual cadastrada, domingo é adotado como repouso semanal; os feriados bloqueantes vêm do calendário corporativo. A aprovação gerencial continua representando a decisão do empregador.

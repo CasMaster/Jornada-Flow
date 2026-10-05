@@ -48,6 +48,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'active' => 'boolean',
             'hired_on' => 'date',
+            'auth_version' => 'integer',
         ];
     }
 

@@ -2,9 +2,11 @@
 
 ## Objetivo atual
 
-Permitir que o colaborador solicite o abono pecuniário tanto junto a um período personalizado de férias quanto separadamente, sem datas de descanso.
+Corrigir os três achados da auditoria Codex Security: sessões após desativação, lotes de datas sem limite e autenticação do host SSH nos workflows.
 
 ## Estado atual
+
+Em 2026-10-05, as correções dos três achados da auditoria foram implementadas localmente. Contas inativas e sessões com versão anterior são recusadas por middleware; a desativação incrementa `auth_version` e gira o token persistente, preservando os registros de sessão. Solicitações foram limitadas a 31 datas e dez envios por minuto, com defesa no controller e no serviço. Deploy e monitor de backup agora exigem `DEPLOY_SSH_KNOWN_HOSTS` fixo e `StrictHostKeyChecking=yes`. A chave pública Ed25519 foi conferida diretamente no servidor pelo canal SSH já confiável e cadastrada nos environments `homologacao` e `producao`, sem alterar a chave pessoal. Seis testes focados foram adicionados; Pint, `git diff --check`, sintaxe PHP, suíte completa com 98 testes e 526 assertions e build da imagem foram aprovados. O commit, o push e a publicação em homologação ainda não haviam sido executados no momento deste registro.
 
 Em 2026-09-25, foram implementados o abono pecuniário e as validações da CLT no módulo de férias. A solicitação oferece período integral, descanso com conversão de 1/3 em abono, período personalizado com abono opcional e solicitação exclusiva de abono sem datas de descanso. O servidor valida titularidade, saldo, prazo do abono, antecedência mínima de 30 dias, início compatível com feriados/repouso e fracionamento em até três períodos (um de 14 dias e os demais de 5). Descanso e abono reservam e consomem o mesmo saldo. Histórico, gestão, notificação, auditoria e CSV identificam o abono; solicitações exclusivas não bloqueiam dias de trabalho.
 

@@ -2,6 +2,7 @@
 
 ## Confirmado
 
+
 - Ativar e validar a aprovação web do deploy em homologação antes de disponibilizá-la em produção; a implementação local ainda não foi publicada nem configurada no servidor.
 
 - Repetir trimestralmente o teste de restauração do backup B2 em banco descartável, mediante autorização do Super Admin.
@@ -10,6 +11,8 @@
 - Avaliar rotação posterior da chave pessoal: ela permanece intacta, mas já esteve em um secret do GitHub, e cópias históricas não são revogadas pela substituição do secret.
 
 ## Corrigido
+
+- Contas desativadas revogam sessões por versão de autenticação e token persistente, preservando metadados conforme a retenção; solicitações possuem limite de lote/taxa e workflows SSH exigem chave de host previamente fixada.
 
 - Healthcheck agora usa `/health/ready` e respeita `APP_ROUTE_PREFIX`.
 - Deploy passou a reconstruir e recriar explicitamente web, worker e scheduler, preservando PostgreSQL.

@@ -61,6 +61,7 @@ O `compose.yaml` define quatro serviços: `postgres`, `hibrido_laravel`, `queue_
 ### Usuários e permissões
 
 - `users.team` representa a equipe própria do usuário.
+- `users.auth_version` revoga todas as sessões anteriores sem depender da exclusão dos metadados retidos; o middleware web também rejeita contas inativas em toda requisição autenticada.
 - `manager_team` representa equipes administradas; são conceitos distintos.
 - `manager_delegations` concede temporariamente ao substituto o escopo de equipes do gestor de origem, entre datas inclusivas.
 - Rotas usam `auth` e `role:*`; ações sensíveis também usam Form Requests ou Policy.

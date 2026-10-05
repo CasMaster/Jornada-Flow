@@ -32,6 +32,10 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($email.'|'.$request->ip());
         });
 
+        RateLimiter::for('work-requests', function (Request $request): Limit {
+            return Limit::perMinute(10)->by('work-request|'.($request->user()?->id ?? $request->ip()));
+        });
+
         DB::listen(function (QueryExecuted $query): void {
             if ($query->time >= config('observability.slow_query_ms')) {
                 Log::warning('slow_query', ['duration_ms' => $query->time, 'connection' => $query->connectionName, 'sql' => $query->sql]);

@@ -27,6 +27,7 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'Esta conta não possui acesso de gestor.'])->onlyInput('email');
         }
         $request->session()->regenerate();
+        $request->session()->put('authenticated_version', $request->user()->auth_version);
 
         return redirect()->intended($credentials['profile'] === 'manager' ? route('manager.dashboard') : route('employee.dashboard'));
     }

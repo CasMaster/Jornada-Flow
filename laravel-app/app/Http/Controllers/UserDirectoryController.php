@@ -107,7 +107,14 @@ class UserDirectoryController extends Controller
     {
         abort_if($request->user()->is($user), 422, 'Você não pode desativar a própria conta.');
         $old = $user->only(['active']);
-        $user->update(['active' => ! $user->active]);
+        DB::transaction(function () use ($user): void {
+            $activating = ! $user->active;
+            $user->forceFill([
+                'active' => $activating,
+                'remember_token' => $activating ? $user->remember_token : Str::random(60),
+                'auth_version' => $activating ? $user->auth_version : $user->auth_version + 1,
+            ])->save();
+        });
         $this->audit->record('user.status_changed', $user, $old, $user->only(['active']));
 
         return back()->with('success', 'Status do usuário atualizado.');

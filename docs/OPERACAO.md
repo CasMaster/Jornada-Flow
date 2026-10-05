@@ -329,6 +329,13 @@ Instale `scripts/mixhome-ci-gate.sh` e `scripts/mixhome-approve.sh` como
 O secret `DEPLOY_SSH_KEY` dos **dois** ambientes usa o arquivo privado da chave
 exclusiva da automação desde 2026-09-21. Nunca versione essa chave.
 
+Cadastre também `DEPLOY_SSH_KNOWN_HOSTS` como **Environment secret** em
+`homologacao` e `producao`. O valor deve ser a linha completa do `known_hosts`
+para o valor exato de `DEPLOY_HOST` (`host algoritmo chave`), obtida por um canal
+administrativo confiável e conferida com a chave pública do servidor. Não gere
+esse valor com `ssh-keyscan` dentro do workflow: uma divergência deve interromper
+o job antes de qualquer pacote ou consulta de backup ser enviado.
+
 O comando forçado aceita apenas `backup-status`, `deploy-homologacao` e
 `deploy-producao`. O workflow envia o pacote pelo canal SSH; o servidor imprime
 o SHA-256 e aguarda por até 15 minutos. Depois de conferir o ambiente, commit e
@@ -464,4 +471,4 @@ Use `GET /health/ready` para confirmar aplicação e PostgreSQL e consultar jobs
 
 O script `scripts/backup-postgres.sh` cria dump em formato custom, SHA-256 e retenção configurável. O agendamento oficial é o descrito na seção **Cópia externa no Backblaze B2**, às 05:15 UTC, com um único cron e alerta de falha. Não crie um segundo agendamento local. O workflow `Backup externo` consulta diariamente às 08:00 UTC o B2 por SSH e falha se não houver dump recente acompanhado de arquivo de checksum. Ele é independente da aplicação, banco e SMTP, mas depende do GitHub Actions, SSH, servidor e B2; a notificação de falha deve estar habilitada no GitHub.
 
-Mantenha a cópia externa no bucket privado e repita trimestralmente o teste de `pg_restore` em banco descartável. O deploy manual do GitHub exige `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER` e `TARGET_DIR`, sempre promovendo homologação antes de produção.
+Mantenha a cópia externa no bucket privado e repita trimestralmente o teste de `pg_restore` em banco descartável. O deploy manual do GitHub exige `DEPLOY_SSH_KEY`, `DEPLOY_SSH_KNOWN_HOSTS`, `DEPLOY_HOST`, `DEPLOY_USER` e `TARGET_DIR`, sempre promovendo homologação antes de produção.

@@ -53,7 +53,8 @@ class DeployApprovalTest extends TestCase
         $this->actingAs($manager)->get(route('admin.deploy.index'))->assertForbidden();
         $this->actingAs($manager)->post(route('admin.deploy.approve', $digest), ['password' => 'password'])->assertForbidden();
         $inactive = User::factory()->create(['role' => 'super_admin', 'active' => false, 'password' => 'secret-password']);
-        $this->actingAs($inactive)->post(route('admin.deploy.approve', $digest), ['password' => 'secret-password'])->assertSessionHasErrors('password');
+        $this->actingAs($inactive)->post(route('admin.deploy.approve', $digest), ['password' => 'secret-password'])->assertRedirect(route('login'));
+        $this->assertGuest();
         $this->assertFileDoesNotExist($this->approvedDir.'/homologacao-'.$digest);
     }
 

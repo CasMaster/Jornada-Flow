@@ -2,6 +2,10 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-10-07 — Nome público Jornada Flow
+
+O nome padrão do produto e de seus metadados passa a ser Jornada Flow. A configuração white label continua permitindo que cada fork defina outra identidade por variáveis `BRAND_*`; o cabeçalho, login, rodapé, favicon e ícones PWA usam os assets próprios da nova marca.
+
 ## 2026-10-07 — Licença Apache-2.0
 
 O código próprio do MixHome é distribuído sob Apache License 2.0, alinhado à licença do RustDB escolhida pelo responsável. O repositório mantém `LICENSE` com o texto oficial, `NOTICE` com a atribuição do produto e `composer.json` declara `Apache-2.0`. A licença concede uso, modificação e redistribuição, incluindo a licença de patentes prevista no texto, e preserva a proteção de marcas por não conceder direitos de uso de nome ou marca.
@@ -89,7 +93,7 @@ uso somente para smoke test é operacional. Procedimento em `docs/OPERACAO.md`.
 
 ## 2026-08-27 — Marca MixHome
 
-O nome público do produto passa a ser MixHome, com favicon baseado na marca existente da Mix Fiscal. Títulos, cabeçalho, rodapé, configuração de nome e documentação usam a nova marca.
+O nome público do produto passa a ser MixHome, com favicon baseado na marca então existente. Títulos, cabeçalho, rodapé, configuração de nome e documentação usam a nova marca.
 
 Identificadores técnicos `hibrido` (banco, volumes, containers, comandos e código) permanecem inalterados. O Compose preserva o nome anterior do cookie de sessão por padrão e permite sobrescrevê-lo por `SESSION_COOKIE`; não há migração de dados nesta mudança.
 

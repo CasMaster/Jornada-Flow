@@ -11,16 +11,15 @@ class BrandingTest extends TestCase
 
     public function test_login_uses_the_configured_brand_and_favicon(): void
     {
-        $favicon = public_path('assets/favicon.svg');
+        $favicon = public_path('assets/jornada-flow-favicon.png');
 
         $this->assertFileExists($favicon);
-        $this->assertStringContainsString('data:image/png;base64,', file_get_contents($favicon));
 
         $this->get('/login')
             ->assertOk()
-            ->assertSee('<title>Entrar — MixHome</title>', false)
-            ->assertSee('rel="icon" type="image/svg+xml"', false)
-            ->assertSee(asset('assets/favicon.svg').'?v='.filemtime($favicon), false)
+            ->assertSee('<title>Entrar — Jornada Flow</title>', false)
+            ->assertSee('rel="icon" type="image/png"', false)
+            ->assertSee(asset('assets/jornada-flow-favicon.png').'?v='.filemtime($favicon), false)
             ->assertDontSee('HÍBRIDO')
             ->assertDontSee('Híbrido');
     }

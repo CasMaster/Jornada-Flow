@@ -1,6 +1,6 @@
-# MixHome — Controle de Home Office
+# Jornada Flow — Gestão de trabalho flexível
 
-Sistema da Mix Fiscal para solicitação, aprovação, acompanhamento e exportação de dias de home office.
+Sistema corporativo para solicitação, aprovação, acompanhamento e exportação de dias de home office.
 
 Licenciado sob a [Apache License 2.0](LICENSE).
 

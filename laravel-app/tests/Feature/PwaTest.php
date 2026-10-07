@@ -14,7 +14,7 @@ class PwaTest extends TestCase
         $this->get('/manifest.webmanifest')
             ->assertOk()
             ->assertHeader('Content-Type', 'application/manifest+json')
-            ->assertJsonPath('name', 'MixHome')
+            ->assertJsonPath('name', 'Jornada Flow')
             ->assertJsonPath('display', 'standalone')
             ->assertJsonPath('scope', '/')
             ->assertJsonCount(3, 'icons');

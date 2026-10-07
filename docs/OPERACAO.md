@@ -1,4 +1,4 @@
-# Operação do MixHome
+# Operação do Jornada Flow
 
 ## Ambientes atuais
 
@@ -36,8 +36,8 @@ MAIL_PORT=587
 MAIL_USERNAME=USUARIO_SMTP
 MAIL_PASSWORD=SENHA_SMTP
 MAIL_FROM_ADDRESS=hibrido@DOMINIO
-MAIL_FROM_NAME="MixHome | Mix Fiscal"
-AUTOMATED_NOTIFICATION_EXCLUDED_EMAILS=gestor@mixfiscal.com.br
+MAIL_FROM_NAME="[nome do sistema]"
+AUTOMATED_NOTIFICATION_EXCLUDED_EMAILS=conta-tecnica@empresa.invalid
 ```
 
 O `.env` deve ter permissão `600` e nunca pode entrar no Git.
@@ -266,7 +266,7 @@ Em produção, execute diariamente às `05:15 UTC`, equivalente a `02:15` em
 `/opt/backups/hibrido-home-office/backup.log`. Mantenha somente este agendamento:
 
 ```cron
-15 5 * * * BACKUP_REMOTE=b2-mixhome:mixhome-backups/producao /opt/hibrido-home-office-prod/scripts/backup-postgres.sh >> /opt/backups/hibrido-home-office/backup.log 2>&1 || { status=$?; podman exec hibrido-home-office-prod php artisan hibrido:notify-backup-failure --exit-code="$status" --exclude-email=gestor@mixfiscal.com.br >> /opt/backups/hibrido-home-office/backup.log 2>&1; }
+15 5 * * * BACKUP_REMOTE=b2-mixhome:mixhome-backups/producao /opt/hibrido-home-office-prod/scripts/backup-postgres.sh >> /opt/backups/hibrido-home-office/backup.log 2>&1 || { status=$?; podman exec hibrido-home-office-prod php artisan hibrido:notify-backup-failure --exit-code="$status" --exclude-email=conta-tecnica@empresa.invalid >> /opt/backups/hibrido-home-office/backup.log 2>&1; }
 ```
 
 Em caso de falha, o comando envia imediatamente e-mail e notificação interna a

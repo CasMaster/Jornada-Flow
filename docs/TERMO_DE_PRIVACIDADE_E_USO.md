@@ -42,7 +42,7 @@ Não há venda de dados pessoais. Qualquer transferência internacional, se apli
 
 São adotadas medidas técnicas e administrativas razoáveis para proteger os dados, incluindo controle de acesso, autenticação, auditoria, cópias de segurança e gestão de sessões. Nenhum sistema é inteiramente livre de riscos; ocorrências relevantes serão tratadas conforme a legislação aplicável e os procedimentos internos.
 
-Os dados são mantidos pelo tempo necessário às finalidades descritas, às obrigações legais e à defesa de direitos. No MixHome, registros de auditoria, sessões, notificações, solicitações recusadas e contas desativadas têm retenção prevista de até dois anos, salvo obrigação ou necessidade legítima de conservação por prazo diverso. Após o período aplicável, os dados serão eliminados ou anonimizados de forma segura, quando cabível.
+Os dados são mantidos pelo tempo necessário às finalidades descritas, às obrigações legais e à defesa de direitos. No Jornada Flow, registros de auditoria, sessões, notificações, solicitações recusadas e contas desativadas têm retenção prevista de até dois anos, salvo obrigação ou necessidade legítima de conservação por prazo diverso. Após o período aplicável, os dados serão eliminados ou anonimizados de forma segura, quando cabível.
 
 ## 7. Direitos da pessoa titular
 

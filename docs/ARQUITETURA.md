@@ -1,4 +1,4 @@
-# Arquitetura e regras do MixHome
+# Arquitetura e regras do Jornada Flow
 
 ## Componentes
 

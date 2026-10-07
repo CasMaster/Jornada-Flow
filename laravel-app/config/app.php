@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'MixHome | Mix Fiscal'),
+    'name' => env('APP_NAME', 'Jornada Flow'),
 
     /*
     |--------------------------------------------------------------------------

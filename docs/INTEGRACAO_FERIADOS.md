@@ -1,6 +1,6 @@
 # Integração de feriados
 
-O MixHome sincroniza os feriados nacionais e estaduais aplicáveis ao estado de São Paulo por meio da Feriados API. O endpoint estadual inclui também os feriados nacionais e está disponível no plano gratuito do provedor.
+O Jornada Flow sincroniza os feriados nacionais e estaduais aplicáveis ao estado de São Paulo por meio da Feriados API. O endpoint estadual inclui também os feriados nacionais e está disponível no plano gratuito do provedor.
 
 ## Configuração
 

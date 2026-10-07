@@ -1,4 +1,4 @@
-# Manual de usuário — MixHome
+# Manual de usuário — Jornada Flow
 
 ## 1. Acesso ao sistema
 
@@ -218,7 +218,7 @@ Gestores acessam **Gestão → Férias**, visualizam somente suas equipes, consu
 próximos períodos aprovados e aprovam ou recusam pedidos. A exportação CSV respeita
 os filtros. Férias aprovadas impedem novos pedidos de home office nas mesmas datas.
 
-O Super Admin informa a **data de contratação** no cadastro do usuário. O MixHome
+O Super Admin informa a **data de contratação** no cadastro do usuário. O Jornada Flow
 gera automaticamente cada período anual completo, com 30 dias e prazo de uso de um
 ano após seu término. Uma sincronização diária cria o novo saldo quando outro ciclo
 for concluído. Ajustes positivos ou negativos, correções e cancelamentos exigem
@@ -226,12 +226,12 @@ justificativa e ficam na auditoria. Solicitações antigas sem vínculo devem se
 a um período antes da aprovação. Este saldo é administrativo e deve ser conferido com
 o sistema oficial do RH.
 
-## 15. Instalar o MixHome como aplicativo
+## 15. Instalar o Jornada Flow como aplicativo
 
-O MixHome pode ser instalado no celular ou computador sem criar uma conta adicional. O aplicativo utiliza o mesmo endereço, login e permissões da versão web.
+O Jornada Flow pode ser instalado no celular ou computador sem criar uma conta adicional. O aplicativo utiliza o mesmo endereço, login e permissões da versão web.
 
-No Android ou em navegadores compatíveis, acesse o MixHome e use o botão **Instalar app** quando ele aparecer. Também é possível abrir o menu do navegador e escolher **Instalar aplicativo** ou **Adicionar à tela inicial**.
+No Android ou em navegadores compatíveis, acesse o Jornada Flow e use o botão **Instalar app** quando ele aparecer. Também é possível abrir o menu do navegador e escolher **Instalar aplicativo** ou **Adicionar à tela inicial**.
 
-No iPhone ou iPad, o botão **Como instalar** mostra a orientação específica do iOS. Abra o MixHome no Safari, toque em **Compartilhar** e escolha **Adicionar à Tela de Início**. Se a opção estiver recolhida, role a lista ou abra **Editar Ações**.
+No iPhone ou iPad, o botão **Como instalar** mostra a orientação específica do iOS. Abra o Jornada Flow no Safari, toque em **Compartilhar** e escolha **Adicionar à Tela de Início**. Se a opção estiver recolhida, role a lista ou abra **Editar Ações**.
 
 Por segurança, solicitações, dados pessoais e páginas autenticadas não ficam disponíveis sem internet. Em caso de perda da conexão, o aplicativo mostra uma tela informativa e permite tentar novamente.

@@ -1,4 +1,4 @@
-# Aplicação Laravel do MixHome
+# Aplicação Laravel do Jornada Flow
 
 Este diretório contém a aplicação oficial do sistema de controle de home office.
 

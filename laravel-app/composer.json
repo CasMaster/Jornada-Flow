@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "mix-fiscal/hibrido-home-office",
+    "name": "jornada-flow/jornada-flow",
     "type": "project",
     "description": "Controle corporativo de solicitações de home office.",
     "keywords": ["laravel", "home-office", "gestao"],

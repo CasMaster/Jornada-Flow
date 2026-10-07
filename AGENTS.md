@@ -1,6 +1,6 @@
 # Instruções para agentes de IA
 
-Este repositório contém o MixHome, sistema corporativo da Mix Fiscal para solicitação, aprovação, acompanhamento e exportação de dias de home office. A aplicação oficial está em `laravel-app/`. O contexto compartilhado e independente de ferramenta está neste arquivo e em `.ai/`.
+Este repositório contém o Jornada Flow, sistema corporativo para solicitação, aprovação, acompanhamento e exportação de dias de trabalho flexível. A aplicação oficial está em `laravel-app/`. O contexto compartilhado e independente de ferramenta está neste arquivo e em `.ai/`.
 
 ## Leitura obrigatória antes de alterar código
 

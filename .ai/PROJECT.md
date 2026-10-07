@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-O MixHome é um sistema interno da Mix Fiscal para controlar dias de home office. Ele substitui controles dispersos por um fluxo rastreável de solicitação, análise gerencial, histórico e exportação.
+O Jornada Flow é um sistema corporativo para controlar dias de trabalho flexível. Ele substitui controles dispersos por um fluxo rastreável de solicitação, análise gerencial, histórico e exportação.
 
 ## Problema resolvido
 

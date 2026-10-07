@@ -11,6 +11,30 @@ php artisan test
 php artisan route:list
 ```
 
+## Docker sem Caddy
+
+O `compose.yaml` inicia a aplicação web, PostgreSQL, worker de fila e scheduler; Caddy não é necessário para desenvolvimento local ou para uma rede privada. Copie o arquivo de exemplo e defina uma chave própria antes de subir os containers:
+
+```bash
+cp .env.example .env
+php artisan key:generate
+docker compose up -d --build
+```
+
+Também é compatível com Podman, substituindo `docker compose` por `podman-compose`. Com os valores padrão, a aplicação fica disponível somente em `http://127.0.0.1:8081`, e o PostgreSQL em `127.0.0.1:15432`. Acesse `http://127.0.0.1:8081` diretamente, sem proxy reverso.
+
+Para disponibilizar a aplicação apenas em uma rede privada, ajuste `APP_BIND_IP=0.0.0.0`, `APP_URL` e `ASSET_URL` para o endereço interno do servidor, mantenha `SESSION_SECURE_COOKIE=false` enquanto usar HTTP e restrinja a porta no firewall. Não exponha essa configuração diretamente à internet: para produção pública, use HTTPS por Caddy ou outro proxy/TLS confiável e mantenha `SESSION_SECURE_COOKIE=true`.
+
+Comandos úteis:
+
+```bash
+docker compose ps
+docker compose logs -f hibrido_laravel
+docker compose stop
+```
+
+Não use `docker compose down -v` nem `podman-compose down -v`, pois a opção `-v` remove o volume persistente do banco.
+
 Comandos próprios do sistema:
 
 ```bash

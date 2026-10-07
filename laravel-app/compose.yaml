@@ -24,7 +24,22 @@ services:
     ports:
       - "${APP_BIND_IP:-127.0.0.1}:${APP_PORT:-8081}:80"
     environment:
-      APP_NAME: "MixHome | Mix Fiscal"
+      APP_NAME: "${APP_NAME:-Jornada Flow}"
+      BRAND_NAME: "${BRAND_NAME:-Jornada Flow}"
+      BRAND_COMPANY: "${BRAND_COMPANY:-}"
+      BRAND_INITIALS: "${BRAND_INITIALS:-JF}"
+      BRAND_TAGLINE: "${BRAND_TAGLINE:-Controle simples. Trabalho flexível.}"
+      BRAND_DESCRIPTION: "${BRAND_DESCRIPTION:-Solicitações e acompanhamento de home office e férias.}"
+      BRAND_THEME_COLOR: "${BRAND_THEME_COLOR:-#071424}"
+      BRAND_ACCENT_COLOR: "${BRAND_ACCENT_COLOR:-#147b34}"
+      BRAND_LOGO: "${BRAND_LOGO:-assets/jornada-flow-logo.png}"
+      BRAND_LOGIN_LOGO: "${BRAND_LOGIN_LOGO:-assets/jornada-flow-logo.png}"
+      BRAND_MARK: "${BRAND_MARK:-assets/jornada-flow-mark.png}"
+      BRAND_FAVICON: "${BRAND_FAVICON:-assets/jornada-flow-favicon.png}"
+      BRAND_FAVICON_MIME: "${BRAND_FAVICON_MIME:-image/png}"
+      BRAND_ICON_192: "${BRAND_ICON_192:-assets/icons/jornada-flow-192.png}"
+      BRAND_ICON_512: "${BRAND_ICON_512:-assets/icons/jornada-flow-512.png}"
+      BRAND_MASKABLE_ICON_512: "${BRAND_MASKABLE_ICON_512:-assets/icons/jornada-flow-maskable-512.png}"
       APP_ENV: production
       APP_DEBUG: "false"
       APP_URL: "${APP_URL:-http://localhost:8081}"
@@ -74,7 +89,22 @@ services:
     restart: unless-stopped
     command: php artisan queue:work database --sleep=3 --tries=3 --timeout=120
     environment: &app_environment
-      APP_NAME: "MixHome | Mix Fiscal"
+      APP_NAME: "${APP_NAME:-Jornada Flow}"
+      BRAND_NAME: "${BRAND_NAME:-Jornada Flow}"
+      BRAND_COMPANY: "${BRAND_COMPANY:-}"
+      BRAND_INITIALS: "${BRAND_INITIALS:-JF}"
+      BRAND_TAGLINE: "${BRAND_TAGLINE:-Controle simples. Trabalho flexível.}"
+      BRAND_DESCRIPTION: "${BRAND_DESCRIPTION:-Solicitações e acompanhamento de home office e férias.}"
+      BRAND_THEME_COLOR: "${BRAND_THEME_COLOR:-#071424}"
+      BRAND_ACCENT_COLOR: "${BRAND_ACCENT_COLOR:-#147b34}"
+      BRAND_LOGO: "${BRAND_LOGO:-assets/jornada-flow-logo.png}"
+      BRAND_LOGIN_LOGO: "${BRAND_LOGIN_LOGO:-assets/jornada-flow-logo.png}"
+      BRAND_MARK: "${BRAND_MARK:-assets/jornada-flow-mark.png}"
+      BRAND_FAVICON: "${BRAND_FAVICON:-assets/jornada-flow-favicon.png}"
+      BRAND_FAVICON_MIME: "${BRAND_FAVICON_MIME:-image/png}"
+      BRAND_ICON_192: "${BRAND_ICON_192:-assets/icons/jornada-flow-192.png}"
+      BRAND_ICON_512: "${BRAND_ICON_512:-assets/icons/jornada-flow-512.png}"
+      BRAND_MASKABLE_ICON_512: "${BRAND_MASKABLE_ICON_512:-assets/icons/jornada-flow-maskable-512.png}"
       APP_ENV: production
       APP_DEBUG: "false"
       APP_URL: "${APP_URL:-http://localhost:8081}"

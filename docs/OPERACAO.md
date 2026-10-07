@@ -9,6 +9,20 @@
 
 O proxy reverso publica a produção na raiz do endereço e mantém a homologação sob `/homologacao`.
 
+## Docker sem Caddy
+
+Para desenvolvimento local ou uso em rede privada, o Jornada Flow pode ser executado diretamente pelo Compose, sem Caddy ou outro proxy reverso. O arquivo `laravel-app/compose.yaml` sobe os quatro serviços necessários: aplicação web, PostgreSQL, worker de fila e scheduler.
+
+1. Entre em `laravel-app/` e copie `.env.example` para `.env`.
+2. Gere uma `APP_KEY` exclusiva e defina uma senha forte em `DB_PASSWORD`.
+3. Mantenha `APP_BIND_IP=127.0.0.1`, `APP_PORT=8081`, `APP_URL=http://127.0.0.1:8081`, `ASSET_URL=http://127.0.0.1:8081` e `SESSION_SECURE_COOKIE=false`.
+4. Execute `docker compose up -d --build` ou `podman-compose up -d --build`.
+5. Acesse `http://127.0.0.1:8081` e verifique `http://127.0.0.1:8081/health/ready`.
+
+Para uma rede privada, `APP_BIND_IP=0.0.0.0` pode ser usado somente junto a regras de firewall que limitem o acesso à rede autorizada. Ajuste também `APP_URL` e `ASSET_URL` para o endereço interno real. Sem HTTPS, o cookie de sessão deve permanecer sem o atributo `Secure` (`SESSION_SECURE_COOKIE=false`).
+
+Não exponha a aplicação diretamente à internet em HTTP. Para uso público, mantenha Caddy ou use outro proxy/TLS confiável, com `APP_URL` em HTTPS e `SESSION_SECURE_COOKIE=true`. O PostgreSQL deve continuar vinculado ao loopback e nunca ser exposto publicamente.
+
 ## Variáveis obrigatórias
 
 ```dotenv

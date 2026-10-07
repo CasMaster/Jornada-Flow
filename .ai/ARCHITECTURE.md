@@ -85,7 +85,7 @@ Não existe API pública versionada. As interfaces são rotas web em `routes/web
 
 ## Inicialização e proxy
 
-O entrypoint aguarda o banco e executa `php artisan migrate --force`, exceto quando `SKIP_MIGRATIONS=true`; depois cria o cache de configuração. A aplicação confia nos cabeçalhos do proxy configurados em `bootstrap/app.php`. Caddy é restrito ao servidor e não é versionado neste repositório. `mixhome.app.br` atende produção e `/homologacao` atende homologação.
+O entrypoint aguarda o banco e executa `php artisan migrate --force`, exceto quando `SKIP_MIGRATIONS=true`; depois cria o cache de configuração. A aplicação confia nos cabeçalhos do proxy configurados em `bootstrap/app.php`. Caddy é restrito ao servidor e não é versionado neste repositório. `mixhome.app.br` atende produção e `/homologacao` atende homologação. Para desenvolvimento local ou rede privada, o Compose também pode expor o Apache diretamente, sem Caddy; esse modo usa HTTP e deve ficar limitado a `127.0.0.1` ou protegido por firewall. Publicação pública continua exigindo TLS em Caddy ou proxy equivalente.
 
 ## Pontos de atenção
 

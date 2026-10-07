@@ -2,6 +2,14 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-10-07 — Licença Apache-2.0
+
+O código próprio do MixHome é distribuído sob Apache License 2.0, alinhado à licença do RustDB escolhida pelo responsável. O repositório mantém `LICENSE` com o texto oficial, `NOTICE` com a atribuição do produto e `composer.json` declara `Apache-2.0`. A licença concede uso, modificação e redistribuição, incluindo a licença de patentes prevista no texto, e preserva a proteção de marcas por não conceder direitos de uso de nome ou marca.
+
+## 2026-10-07 — Identidade configurável para forks white label
+
+O fork de uma instalação do MixHome mantém o domínio e as regras de negócio isolados, mas obtém nome, empresa, textos institucionais, cores e caminhos de assets de marca por variáveis `BRAND_*`. As páginas, o manifesto PWA, a tela offline, a instalação no iOS e os alertas de backup usam essa configuração. Cada fork continua responsável por seus próprios dados, domínio, cookies, SMTP, backup e credenciais operacionais; a configuração não transforma a aplicação em multiempresa.
+
 ## 2026-10-01 — Revogação de acesso e limites de solicitações
 
 Desativar uma conta incrementa sua versão de autenticação e gira o token de lembrança. Todas as rotas web com usuário autenticado comparam a versão da sessão com a conta e encerram sessões antigas ou contas inativas, inclusive após reativação, sem excluir os metadados de sessão sujeitos à retenção. Solicitações de jornada aceitam no máximo 31 datas e até dez envios por minuto por usuário; o controller rejeita o volume antes da validação item a item e o serviço repete o limite como defesa em profundidade. Workflows SSH usam uma entrada `known_hosts` fixa, fornecida por secret de ambiente, e não confiam em descoberta feita durante o próprio job.

@@ -1,6 +1,8 @@
 (() => {
   if (!('serviceWorker' in navigator)) return;
 
+  const brandName = document.body.dataset.brandName || 'Aplicativo';
+
   const manifest = document.querySelector('link[rel="manifest"]');
   const serviceWorkerUrl = manifest?.dataset.serviceWorker;
   if (serviceWorkerUrl) window.addEventListener('load', () => navigator.serviceWorker.register(serviceWorkerUrl).catch(() => {}));
@@ -45,7 +47,7 @@
 
       const title = document.createElement('h2');
       title.id = 'pwa-install-title';
-      title.textContent = 'Instalar o MixHome no iPhone';
+      title.textContent = `Instalar o ${brandName} no iPhone`;
       const instructions = document.createElement('p');
       instructions.textContent = 'Abra esta página no Safari, toque no botão Compartilhar e escolha Adicionar à Tela de Início.';
       const note = document.createElement('small');

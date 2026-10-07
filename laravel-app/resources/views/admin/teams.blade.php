@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Equipes — MixHome')
+@section('title', 'Equipes — '.config('brand.name'))
 @section('bodyClass','manager-page')
 
 @section('content')

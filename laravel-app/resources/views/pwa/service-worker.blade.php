@@ -1,5 +1,5 @@
 const CACHE_NAME = @json($cacheName);
-const CACHE_PREFIX = 'mixhome-shell-';
+const CACHE_PREFIX = 'brand-shell-';
 const OFFLINE_URL = @json($offlineUrl);
 const CORE_ASSETS = @json(array_values(array_unique([...$assets, $offlineUrl])));
 

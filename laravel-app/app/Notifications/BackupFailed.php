@@ -28,10 +28,12 @@ class BackupFailed extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
+        $name = config('brand.name');
+
         return (new MailMessage)
-            ->subject('[MixHome] Falha no backup de produção')
+            ->subject("[{$name}] Falha no backup de produção")
             ->greeting('Olá, '.$notifiable->name.'.')
-            ->line('O backup diário do MixHome não foi concluído.')
+            ->line("O backup diário do {$name} não foi concluído.")
             ->line("Horário da falha: {$this->failedAt}.")
             ->line("Código de saída: {$this->exitCode}.")
             ->line('Consulte /opt/backups/hibrido-home-office/backup.log no servidor e execute novamente o backup após corrigir a causa.');

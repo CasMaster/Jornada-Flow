@@ -2,6 +2,8 @@
 
 Sistema da Mix Fiscal para solicitação, aprovação, acompanhamento e exportação de dias de home office.
 
+Licenciado sob a [Apache License 2.0](LICENSE).
+
 Inclui ciclos 20–19, múltiplas equipes, gestores que também atuam como colaboradores, aprovação individual ou em lote, férias, calendário corporativo, notificações assíncronas, auditoria, recuperação de senha e monitoramento de prontidão.
 
 ## Estado atual
@@ -50,6 +52,8 @@ A antiga implementação PHP/SQLite foi retirada da árvore ativa após a migra�
     ├── compose.yaml         Aplicação e PostgreSQL
     └── Dockerfile           Imagem PHP/Apache
 ```
+
+Consulte também a [minuta de termo de privacidade e uso](docs/TERMO_DE_PRIVACIDADE_E_USO.md) antes de publicar uma instância do sistema.
 
 ## Execução local
 

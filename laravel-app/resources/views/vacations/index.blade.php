@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Minhas férias — MixHome')
+@section('title', 'Minhas férias — '.config('brand.name'))
 @section('content')
 <main><section class="workspace vacation-workspace">
   <div class="manager-head"><div><p class="eyebrow">PLANEJAMENTO DE FÉRIAS</p><h1>Organize seu <em>período de descanso.</em></h1><p>Informe o intervalo; depois do envio, a solicitação fica disponível apenas para acompanhamento.</p></div></div>

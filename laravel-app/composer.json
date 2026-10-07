@@ -4,7 +4,7 @@
     "type": "project",
     "description": "Controle corporativo de solicitações de home office.",
     "keywords": ["laravel", "home-office", "gestao"],
-    "license": "MIT",
+    "license": "Apache-2.0",
     "require": {
         "php": "^8.2",
         "laravel/framework": "^12.0",

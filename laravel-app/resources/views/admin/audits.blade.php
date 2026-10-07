@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Auditoria — MixHome')
+@section('title', 'Auditoria — '.config('brand.name'))
 @section('bodyClass','manager-page')
 @section('content')
 <main><section class="workspace manager-workspace"><div class="manager-head"><div><p class="eyebrow">SEGURANÇA</p><h1>Trilha de <em>auditoria.</em></h1><p>Registro imutável das ações relevantes do sistema.</p></div><a class="button-link primary" href="{{ route('manager.dashboard') }}">Voltar ao painel</a></div>

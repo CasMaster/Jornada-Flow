@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Aprovação de deploy — MixHome')
+@section('title', 'Aprovação de deploy — '.config('brand.name'))
 @section('bodyClass','manager-page')
 @section('content')
 <main><section class="workspace manager-workspace">

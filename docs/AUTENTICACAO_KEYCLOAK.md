@@ -112,7 +112,7 @@ O relatório separa contas vinculadas, vínculos seguros, criações, pendência
 php artisan hibrido:keycloak-migrate-users --apply --create-missing
 ```
 
-Sem `--create-missing`, contas ausentes são apenas listadas. Duplicidades e e-mails remotos não confirmados são bloqueados para revisão manual. Faça backup antes da aplicação, valide em homologação e não remova o login local até todos os usuários concluírem o primeiro acesso.
+Sem `--create-missing`, contas ausentes são apenas listadas. Contas com e-mail inválido, domínio reservado `.invalid` ou listadas em `KEYCLOAK_MIGRATION_EXCLUDED_EMAILS` são tratadas como técnicas e ignoradas. Duplicidades e e-mails remotos não confirmados são bloqueados para revisão manual. Faça backup antes da aplicação, valide em homologação e não remova o login local até todos os usuários concluírem o primeiro acesso.
 
 ## Implantação e validação
 

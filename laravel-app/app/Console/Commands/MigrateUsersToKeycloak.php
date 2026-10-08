@@ -25,10 +25,17 @@ class MigrateUsersToKeycloak extends Command
 
         $apply = (bool) $this->option('apply');
         $createMissing = (bool) $this->option('create-missing');
-        $summary = ['linked' => 0, 'link' => 0, 'create' => 0, 'pending' => 0, 'conflict' => 0, 'error' => 0];
+        $summary = ['linked' => 0, 'link' => 0, 'create' => 0, 'pending' => 0, 'excluded' => 0, 'conflict' => 0, 'error' => 0];
         $this->info($apply ? 'MODO APLICAÇÃO' : 'MODO SIMULAÇÃO — nenhuma alteração será feita');
 
         User::query()->where('active', true)->orderBy('id')->each(function (User $user) use ($keycloak, $apply, $createMissing, &$summary): void {
+            if ($this->isTechnicalAccount($user->email)) {
+                $summary['excluded']++;
+                $this->line("IGNORADO    {$user->email} (conta técnica)");
+
+                return;
+            }
+
             if ($user->keycloak_subject) {
                 $summary['linked']++;
                 $this->line("VINCULADO  {$user->email}");
@@ -86,13 +93,23 @@ class MigrateUsersToKeycloak extends Command
         });
 
         $this->newLine();
-        $this->table(['Já vinculadas', 'Vínculos', 'Criações', 'Pendentes', 'Conflitos', 'Erros'], [[
-            $summary['linked'], $summary['link'], $summary['create'], $summary['pending'], $summary['conflict'], $summary['error'],
+        $this->table(['Já vinculadas', 'Vínculos', 'Criações', 'Pendentes', 'Ignoradas', 'Conflitos', 'Erros'], [[
+            $summary['linked'], $summary['link'], $summary['create'], $summary['pending'], $summary['excluded'], $summary['conflict'], $summary['error'],
         ]]);
         if (! $apply) {
             $this->comment('Revise o resultado e repita com --apply. Para criar ausentes, acrescente --create-missing.');
         }
 
         return ($summary['conflict'] + $summary['error']) > 0 ? self::FAILURE : self::SUCCESS;
+    }
+
+    private function isTechnicalAccount(string $email): bool
+    {
+        $normalized = strtolower(trim($email));
+        $excluded = array_map('strtolower', config('oidc.migration.excluded_emails', []));
+
+        return filter_var($normalized, FILTER_VALIDATE_EMAIL) === false
+            || str_ends_with($normalized, '.invalid')
+            || in_array($normalized, $excluded, true);
     }
 }

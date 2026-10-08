@@ -108,6 +108,19 @@ class MigrateUsersToKeycloakTest extends TestCase
         );
     }
 
+    public function test_technical_accounts_are_excluded_from_migration(): void
+    {
+        User::factory()->create(['email' => 'gestor@local', 'keycloak_subject' => null]);
+        User::factory()->create(['email' => 'smoke-homologacao@mixhome.invalid', 'keycloak_subject' => null]);
+        Http::fake();
+
+        $this->artisan('hibrido:keycloak-migrate-users', ['--apply' => true, '--create-missing' => true])
+            ->expectsOutputToContain('IGNORADO')
+            ->assertSuccessful();
+
+        Http::assertNothingSent();
+    }
+
     private function fakeTokenAndUsers(array $users): void
     {
         Http::fake([

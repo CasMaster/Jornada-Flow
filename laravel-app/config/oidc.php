@@ -16,5 +16,9 @@ return [
     'migration' => [
         'client_id' => env('KEYCLOAK_MIGRATION_CLIENT_ID'),
         'client_secret' => env('KEYCLOAK_MIGRATION_CLIENT_SECRET'),
+        'excluded_emails' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('KEYCLOAK_MIGRATION_EXCLUDED_EMAILS', ''))
+        ))),
     ],
 ];

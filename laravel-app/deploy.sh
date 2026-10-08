@@ -10,6 +10,24 @@ if [ -f "$OIDC_ENV_FILE" ]; then
     # Arquivo administrado fora do repositório e legível somente pelo usuário de deploy.
     . "$OIDC_ENV_FILE"
     set +a
+
+    OIDC_ENABLED="${OIDC_ENABLED:-true}"
+    OIDC_ISSUER="${OIDC_ISSUER:-https://auth.mixhome.app.br/realms/mixapps}"
+    OIDC_CLIENT_ID="${OIDC_CLIENT_ID:-mixhome-web}"
+    OIDC_SCOPES="${OIDC_SCOPES:-openid profile email}"
+    OIDC_SIGNING_ALGORITHM="${OIDC_SIGNING_ALGORITHM:-RS256}"
+    case "$PWD" in
+        *-hml)
+            OIDC_REDIRECT_URI="${OIDC_REDIRECT_URI:-https://mixhome.app.br/homologacao/auth/callback}"
+            OIDC_LOGOUT_REDIRECT_URI="${OIDC_LOGOUT_REDIRECT_URI:-https://mixhome.app.br/homologacao}"
+            ;;
+        *-prod)
+            OIDC_REDIRECT_URI="${OIDC_REDIRECT_URI:-https://mixhome.app.br/auth/callback}"
+            OIDC_LOGOUT_REDIRECT_URI="${OIDC_LOGOUT_REDIRECT_URI:-https://mixhome.app.br}"
+            ;;
+    esac
+    export OIDC_ENABLED OIDC_ISSUER OIDC_CLIENT_ID OIDC_SCOPES OIDC_SIGNING_ALGORITHM
+    export OIDC_REDIRECT_URI OIDC_LOGOUT_REDIRECT_URI
 fi
 
 PROJECT_NAME="${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}";

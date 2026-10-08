@@ -61,10 +61,12 @@ O `compose.yaml` define quatro serviços: `postgres`, `hibrido_laravel`, `queue_
 ### Usuários e permissões
 
 - `users.team` representa a equipe própria do usuário.
+- `users.keycloak_subject` vincula de forma única e nullable a identidade central do realm `mixapps`; o e-mail verificado é usado apenas no vínculo inicial.
 - `users.auth_version` revoga todas as sessões anteriores sem depender da exclusão dos metadados retidos; o middleware web também rejeita contas inativas em toda requisição autenticada.
 - `manager_team` representa equipes administradas; são conceitos distintos.
 - `manager_delegations` concede temporariamente ao substituto o escopo de equipes do gestor de origem, entre datas inclusivas.
 - Rotas usam `auth` e `role:*`; ações sensíveis também usam Form Requests ou Policy.
+- Sessões OIDC armazenam somente o provedor, papéis da aplicação, expiração e o ID token necessário ao logout federado. Áreas administrativas também exigem `mixhome-admin` por `oidc.role`; sessões locais de contingência continuam usando os perfis existentes.
 - Super Admin acessa todas as equipes; gestor fica restrito aos vínculos.
 
 ### Ciclo e exportação

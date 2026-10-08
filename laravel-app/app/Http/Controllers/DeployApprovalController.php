@@ -38,9 +38,17 @@ class DeployApprovalController extends Controller
         $environment = $this->environment();
         abort_unless($environment && preg_match('/^[a-f0-9]{64}$/D', $digest), 404);
 
-        $data = $request->validate(['password' => ['required', 'string']]);
-        if (! $request->user()->active || ! Hash::check($data['password'], $request->user()->password)) {
-            return back()->withErrors(['password' => 'Senha inválida.']);
+        if ($request->session()->get('auth_provider') === 'oidc') {
+            abort_unless(
+                (int) $request->session()->get('oidc_authenticated_at', 0) >= now()->subMinutes(10)->timestamp,
+                403,
+                'Entre novamente com sua conta corporativa antes de aprovar o pacote.'
+            );
+        } else {
+            $data = $request->validate(['password' => ['required', 'string']]);
+            if (! $request->user()->active || ! Hash::check($data['password'], $request->user()->password)) {
+                return back()->withErrors(['password' => 'Senha inválida.']);
+            }
         }
 
         $pending = config('deploy_approval.pending_dir').DIRECTORY_SEPARATOR.$environment.'-'.$digest;

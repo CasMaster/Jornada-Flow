@@ -2,6 +2,8 @@
 
 ## Confirmado
 
+- Configurar e validar o cliente `mixhome-web` no Keycloak primeiro em homologação: fornecer o segredo externamente, cadastrar URLs, criar/atribuir `mixhome-admin` e `mixhome-user` e confirmar audience/mapper de papéis no ID token.
+- Atualizar em tarefa separada as dependências com advisories confirmados pelo `composer audit` em 2026-10-08: Laravel 12.64.0, league/commonmark 2.9.0 e league/flysystem 3.35.2. A nova dependência `firebase/php-jwt` 7.2.1 não apresentou advisory.
 
 - Ativar e validar a aprovação web do deploy em homologação antes de disponibilizá-la em produção; a implementação local ainda não foi publicada nem configurada no servidor.
 

@@ -20,9 +20,18 @@ class EnsureActiveUser
         $sessionWasRevoked = $authenticatedVersion === null
             ? $user->auth_version > 0
             : (int) $authenticatedVersion !== $user->auth_version;
+        $oidcSessionExpired = $request->session()->get('auth_provider') === 'oidc'
+            && (int) $request->session()->get('oidc_expires_at', 0) <= now()->timestamp;
+        $oidcRoles = $request->session()->get('oidc_roles', []);
+        $oidcAccessRevoked = $request->session()->get('auth_provider') === 'oidc'
+            && (! is_array($oidcRoles) || ! array_intersect([
+                config('oidc.user_role'),
+                config('oidc.admin_role'),
+            ], $oidcRoles));
 
-        if (! $user->active || $sessionWasRevoked) {
+        if (! $user->active || $sessionWasRevoked || $oidcSessionExpired || $oidcAccessRevoked) {
             Auth::logout();
+            $request->session()->invalidate();
             $request->session()->regenerateToken();
 
             if ($request->expectsJson()) {

@@ -21,6 +21,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'keycloak_subject',
         'name',
         'email',
         'password', 'role', 'team', 'hired_on', 'active',
@@ -80,5 +81,14 @@ class User extends Authenticatable
     public function isManager(): bool
     {
         return in_array($this->role, ['manager', 'super_admin'], true);
+    }
+
+    public function hasOidcRole(string $role): bool
+    {
+        if (session('auth_provider') !== 'oidc') {
+            return true;
+        }
+
+        return in_array($role, session('oidc_roles', []), true);
     }
 }

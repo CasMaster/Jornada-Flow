@@ -26,6 +26,16 @@ APP_URL
 ASSET_URL
 APP_TIMEZONE
 APP_ROUTE_PREFIX
+OIDC_ENABLED
+OIDC_ISSUER
+OIDC_CLIENT_ID
+OIDC_CLIENT_SECRET
+OIDC_REDIRECT_URI
+OIDC_LOGOUT_REDIRECT_URI
+OIDC_SCOPES
+OIDC_SIGNING_ALGORITHM
+OIDC_DISCOVERY_CACHE_SECONDS
+OIDC_JWKS_CACHE_SECONDS
 APP_PORT
 APP_BIND_IP
 APP_CONTAINER_NAME
@@ -58,6 +68,8 @@ AUTOMATED_NOTIFICATION_EXCLUDED_EMAILS
 DEPLOY_SSH_KNOWN_HOSTS
 LEGACY_SQLITE_PATH
 ```
+
+Consulte `docs/AUTENTICACAO_KEYCLOAK.md` para as URLs exatas de produção e homologação, configuração do cliente `mixhome-web`, papéis e procedimento de implantação. `OIDC_CLIENT_SECRET` deve existir somente no ambiente protegido.
 
 Use `.env.example` como referência. `.env` nunca deve entrar no Git.
 

@@ -1,6 +1,17 @@
 #!/bin/sh
 set -eu
 
+OIDC_ENV_FILE="${OIDC_ENV_FILE:-/home/admin/.config/mixhome-web/oidc.env}"
+if [ -f "$OIDC_ENV_FILE" ]; then
+    [ ! -L "$OIDC_ENV_FILE" ] || { echo "OIDC_ENV_FILE não pode ser link simbólico." >&2; exit 1; }
+    mode="$(stat -c '%a' "$OIDC_ENV_FILE")"
+    [ "$mode" = "600" ] || { echo "OIDC_ENV_FILE deve ter permissão 0600." >&2; exit 1; }
+    set -a
+    # Arquivo administrado fora do repositório e legível somente pelo usuário de deploy.
+    . "$OIDC_ENV_FILE"
+    set +a
+fi
+
 PROJECT_NAME="${COMPOSE_PROJECT_NAME:-$(basename "$PWD")}";
 APP_CONTAINER="${APP_CONTAINER_NAME:-}"
 if [ -z "$APP_CONTAINER" ]; then

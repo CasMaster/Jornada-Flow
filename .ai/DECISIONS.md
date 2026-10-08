@@ -330,3 +330,21 @@ Manter aprovação, auditoria, notificações e exportação no mesmo fluxo de f
 ### Consequências
 
 O pedido exclusivo não exige datas do usuário e não possui período de descanso no domínio. Para preservar compatibilidade com a versão anterior durante rollback, o registro mantém datas técnicas posteriores ao prazo concessivo, sempre ignoradas por calendário, conflitos e cálculos da versão atual. Esse pedido não pode receber correção de período e continua sujeito ao limite de um terço, ao saldo e ao prazo legal.
+
+## 2026-10-08 — Keycloak como identidade central com vínculo local por subject
+
+### Contexto
+
+Os usuários do Jornada Flow são compartilhados com o Mix Identity e outras aplicações do realm `mixapps`, mas dados de equipe, perfil operacional e relacionamentos continuam pertencendo à aplicação.
+
+### Decisão
+
+Usar OpenID Connect Authorization Code com PKCE `S256` no cliente confidential `mixhome-web`. O `sub` do Keycloak é salvo como identificador externo único e o e-mail verificado serve somente para o primeiro vínculo de uma conta local ainda não associada. `mixhome-admin` protege funções administrativas e `mixhome-user` permite o acesso comum; o perfil local continua representando equipe e escopo gerencial.
+
+### Motivo
+
+Centralizar credenciais sem duplicar dados de negócio nem transformar e-mail, um atributo mutável, em identidade permanente.
+
+### Consequências
+
+Assinatura, algoritmo, issuer, audience, expiração e nonce do ID token são validados. O segredo permanece fora do repositório. O login local é mantido temporariamente como contingência até a migração ser validada. O middleware administrativo verifica também o papel Keycloak para sessões OIDC, e a expiração do token encerra a sessão local.

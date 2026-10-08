@@ -2,9 +2,11 @@
 
 ## Objetivo atual
 
-Corrigir os três achados da auditoria Codex Security: sessões após desativação, lotes de datas sem limite e autenticação do host SSH nos workflows.
+Integrar autenticação centralizada do Jornada Flow ao Keycloak do realm `mixapps`, preservando os dados de negócio e o acesso local de contingência durante a migração.
 
 ## Estado atual
+
+Em 2026-10-08, a integração OIDC foi implementada localmente com Authorization Code, PKCE `S256`, discovery, troca confidential, validação de assinatura/JWKS, algoritmo RS256, issuer, audience, expiração, nonce e `state`. Usuários são vinculados pelo `sub` em `users.keycloak_subject`; o e-mail verificado só participa do primeiro vínculo. `mixhome-user` habilita o acesso comum e `mixhome-admin` protege administração também por middleware, sem substituir equipes e escopos gerenciais locais. Logout local/federado, expiração de sessão, erros seguros, tela de login corporativo, aprovação de deploy por autenticação OIDC recente, variáveis, migration, testes e documentação foram adicionados. O login local e as senhas foram preservados como contingência. Pint, Composer validate, `git diff --check`, a suíte completa (105 testes, 578 assertions) e o build da imagem passaram. A tentativa de migration em PostgreSQL descartável local não iniciou o container por indisponibilidade do controller `pids` no Podman desta VM; a migration passou no SQLite da suíte e ainda deve ser confirmada pelo CI PostgreSQL/homologação. `composer audit` apontou advisories preexistentes em Laravel, CommonMark e Flysystem, registrados no TODO; `firebase/php-jwt` 7.2.1 não apresentou alerta. Nada foi commitado, enviado ou publicado. A configuração manual do Keycloak e o segredo continuam pendentes.
 
 Em 2026-10-05, o painel de solicitações da gestão foi simplificado no commit `0b1a2a0`, publicado em homologação pelo deploy `37358507254` e promovido para produção pelo deploy `37359484833`. O título foi reduzido, a exportação virou uma ação recolhível, filtros avançados permanecem fechados até serem solicitados ou possuírem parâmetros ativos, as três métricas foram condensadas em uma faixa e os cards de prioridade/distribuição passaram para um resumo opcional do ciclo. Nenhuma consulta ou função foi removida. Pint, compilação Blade, `git diff --check` e a suíte completa passaram, com 98 testes e 532 assertions; os CIs `37358247777` e `37358885964` confirmaram PostgreSQL 16 e build. Os deploys concluíram healthcheck e smoke autenticado, e as verificações públicas adicionais retornaram HTTP 200.
 

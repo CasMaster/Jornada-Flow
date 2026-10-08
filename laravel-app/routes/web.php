@@ -27,10 +27,12 @@ Route::prefix(config('app.route_prefix'))->group(function () {
         return redirect()->route(auth()->user()->isManager()
             ? 'manager.dashboard'
             : 'employee.dashboard');
-    });
+    })->name('home');
     Route::middleware('guest')->group(function () {
         Route::get('/login', [AuthController::class, 'show'])->name('login');
         Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
+        Route::get('/auth/login', [AuthController::class, 'redirectToProvider'])->middleware('throttle:10,1')->name('oidc.login');
+        Route::get('/auth/callback', [AuthController::class, 'callback'])->middleware('throttle:10,1')->name('oidc.callback');
     });
     Route::middleware('guest')->group(function () {
         Route::get('/esqueci-a-senha', [PasswordController::class, 'request'])->name('password.request');
@@ -55,7 +57,7 @@ Route::prefix(config('app.route_prefix'))->group(function () {
         Route::post('/ferias/{vacation}/analisar', [ManagerVacationController::class, 'review'])->name('manager.vacations.review');
         Route::get('/ferias/exportar', [ManagerVacationController::class, 'export'])->name('manager.vacations.export');
     });
-    Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->group(function () {
+    Route::middleware(['auth', 'role:super_admin', 'oidc.role:mixhome-admin'])->prefix('admin')->group(function () {
         Route::get('/equipes', [AdminController::class, 'teams'])->name('admin.teams.index');
         Route::post('/equipes', [AdminController::class, 'team'])->name('admin.teams.store');
         Route::patch('/equipes/{team}', [AdminController::class, 'toggleTeam'])->name('admin.teams.toggle');

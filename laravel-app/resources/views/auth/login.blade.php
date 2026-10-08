@@ -6,6 +6,14 @@
 @if($errors->any())<div class="auth-alert" role="alert" aria-live="assertive"><span aria-hidden="true">!</span><p><b>Não foi possível entrar</b><small>{{ $errors->first() }}</small></p></div>@endif
 <div class="login-heading"><span class="role-icon">H</span><div><p class="eyebrow">ACESSO {{ mb_strtoupper(config('brand.name')) }}</p><h2>Entre na sua conta</h2></div></div>
 <p class="form-intro">Colaboradores, gestores e administradores utilizam o mesmo acesso.</p>
-<form method="post" action="{{ route('login') }}" class="unified-form">@csrf<label>E-mail corporativo<input name="email" type="email" value="{{ old('email') }}" autocomplete="email" autofocus required></label><label>Senha<input name="password" type="password" autocomplete="current-password" required></label><button class="primary">Entrar <span>→</span></button>@if(config('auth.password_recovery_enabled'))<div class="login-actions"><a class="auth-help" href="{{ route('password.request') }}">Esqueci minha senha</a></div>@endif</form>
+<div class="unified-form">
+@if(config('oidc.enabled'))
+<a class="primary corporate-login" href="{{ route('oidc.login') }}">Entrar com conta corporativa <span>→</span></a>
+<p class="corporate-help">Você será direcionado ao acesso seguro da empresa.</p>
+<details class="legacy-login"><summary>Usar acesso local temporário</summary>
+@endif
+<form method="post" action="{{ route('login') }}">@csrf<label>E-mail corporativo<input name="email" type="email" value="{{ old('email') }}" autocomplete="email" @unless(config('oidc.enabled')) autofocus @endunless required></label><label>Senha<input name="password" type="password" autocomplete="current-password" required></label><button class="primary">Entrar <span>→</span></button>@if(config('auth.password_recovery_enabled'))<div class="login-actions"><a class="auth-help" href="{{ route('password.request') }}">Esqueci minha senha</a></div>@endif</form>
+@if(config('oidc.enabled'))</details>@endif
+</div>
 </section></main>
 @endsection

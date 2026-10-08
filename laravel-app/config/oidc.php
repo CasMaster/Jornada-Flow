@@ -13,4 +13,8 @@ return [
     'user_role' => 'mixhome-user',
     'discovery_cache_seconds' => (int) env('OIDC_DISCOVERY_CACHE_SECONDS', 3600),
     'jwks_cache_seconds' => (int) env('OIDC_JWKS_CACHE_SECONDS', 3600),
+    'migration' => [
+        'client_id' => env('KEYCLOAK_MIGRATION_CLIENT_ID'),
+        'client_secret' => env('KEYCLOAK_MIGRATION_CLIENT_SECRET'),
+    ],
 ];

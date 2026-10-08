@@ -16,6 +16,11 @@
         <div><span>GESTORES</span><strong>{{ $managerUsers }}</strong></div>
     </div>
 
+    <article class="card">
+        <div class="report-head"><div><p class="eyebrow">IDENTIDADE CENTRAL</p><h2>Migração para o Keycloak</h2><p>{{ $keycloakLinkedUsers }} vinculados · {{ $keycloakPendingUsers }} pendentes</p></div></div>
+        <p class="form-hint">O vínculo preserva equipes, férias, solicitações e o login local de contingência. A migração é executada primeiro em modo de simulação pelo procedimento operacional.</p>
+    </article>
+
     <article class="card directory-create">
         <div class="report-head"><div><p class="eyebrow">NOVO ACESSO</p><h2>Criar usuário</h2></div><p class="form-hint">{{ config('auth.password_recovery_enabled')?'Deixe a senha vazia para enviar um link de definição de senha.':'Defina uma senha provisória; o envio por e-mail será liberado após configurar HTTPS e SMTP.' }}</p></div>
         <form method="post" action="{{ route('admin.users.store') }}" class="management-form directory-create-form">@csrf
@@ -43,11 +48,12 @@
 
     <article class="card report users-report directory-report">
         <div class="report-head"><div><p class="eyebrow">RESULTADOS</p><h2>{{ $users->total() }} usuários encontrados</h2></div><small>Página {{ $users->currentPage() }} de {{ $users->lastPage() }}</small></div>
-        <div class="table-wrap"><table><thead><tr><th>USUÁRIO</th><th>PERFIL</th><th>EQUIPE PRÓPRIA / ADMINISTRADAS</th><th>STATUS</th><th>AÇÕES</th></tr></thead><tbody>
+        <div class="table-wrap"><table><thead><tr><th>USUÁRIO</th><th>PERFIL</th><th>EQUIPE PRÓPRIA / ADMINISTRADAS</th><th>IDENTIDADE</th><th>STATUS</th><th>AÇÕES</th></tr></thead><tbody>
         @forelse($users as $user)<tr>
             <td><b>{{ $user->name }}</b><small>{{ $user->email }}</small></td>
             <td>{{ ['employee'=>'Colaborador','manager'=>'Gestor','super_admin'=>'Super Admin'][$user->role] }}</td>
             <td>{{ $user->team?:'Sem equipe' }}<small>Contratação: {{ $user->hired_on?->format('d/m/Y') ?? 'não informada' }}</small>@if($user->isManager())<small>Administra: {{ $user->role==='super_admin'?'Todas':($user->managedTeams->pluck('name')->join(', ')?:'nenhuma') }}</small>@endif</td>
+            <td><span class="directory-status {{ $user->keycloak_subject?'is-active':'is-inactive' }}">{{ $user->keycloak_subject?'Keycloak vinculado':'Migração pendente' }}</span></td>
             <td><span class="directory-status {{ $user->active?'is-active':'is-inactive' }}">{{ $user->active?'Ativo':'Inativo' }}</span></td>
             <td><details class="user-menu"><summary>Gerenciar</summary><div class="user-actions-panel">
                 <form method="post" action="{{ route('admin.users.update',$user) }}" class="edit-user-form">@csrf @method('PUT')
@@ -61,7 +67,7 @@
                 </form>
                 <div class="directory-row-actions">@if(config('auth.password_recovery_enabled'))<form method="post" action="{{ route('admin.users.password-link',$user) }}">@csrf<button class="text-action">Enviar acesso por e-mail</button></form>@endif @if(!$user->is(auth()->user()))<form method="post" action="{{ route('admin.users.toggle',$user) }}">@csrf @method('PATCH')<button class="text-action">{{ $user->active?'Desativar':'Ativar' }}</button></form>@endif</div>
             </div></details></td>
-        </tr>@empty<tr><td colspan="5" class="empty">Nenhum usuário corresponde aos filtros.</td></tr>@endforelse
+        </tr>@empty<tr><td colspan="6" class="empty">Nenhum usuário corresponde aos filtros.</td></tr>@endforelse
         </tbody></table></div>
         @if($users->hasPages())<nav class="directory-pagination" aria-label="Paginação">@if($users->onFirstPage())<span>← Anterior</span>@else<a href="{{ $users->previousPageUrl() }}">← Anterior</a>@endif<strong>{{ $users->currentPage() }} / {{ $users->lastPage() }}</strong>@if($users->hasMorePages())<a href="{{ $users->nextPageUrl() }}">Próxima →</a>@else<span>Próxima →</span>@endif</nav>@endif
     </article>

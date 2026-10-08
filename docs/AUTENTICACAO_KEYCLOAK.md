@@ -87,6 +87,33 @@ O middleware administrativo confere `mixhome-admin` na sessão OIDC, além do pe
 
 O login local e a recuperação de senha permanecem disponíveis como contingência temporária. Não remova senhas nem desative esse caminho antes de validar todos os usuários, gestores, Super Admins, integrações de smoke e o procedimento de recuperação operacional.
 
+## Migração das contas existentes
+
+A migração usa um cliente de serviço separado do `mixhome-web`, para que o cliente de login não receba acesso à API administrativa. Crie um cliente confidential, por exemplo `mixhome-user-migrator`, habilite Service accounts e atribua ao service account somente `view-users`, `query-users` e `manage-users` do cliente `realm-management`. Mantenha `Full Scope Allowed` desabilitado e desative ou remova o cliente ao terminar a migração.
+
+Configure o segredo somente no arquivo protegido usado pelo deploy:
+
+```ini
+KEYCLOAK_MIGRATION_CLIENT_ID=mixhome-user-migrator
+KEYCLOAK_MIGRATION_CLIENT_SECRET=<fornecido externamente>
+```
+
+O comando nunca copia senhas locais. Contas criadas recebem as ações obrigatórias de verificação de e-mail e definição de senha e o Keycloak envia o respectivo link, por isso o SMTP do realm deve estar validado antes da aplicação. `super_admin` recebe `mixhome-user` e `mixhome-admin`; os demais perfis recebem `mixhome-user`. Equipes, férias, solicitações e perfis gerenciais continuam no banco local.
+
+Execute primeiro a simulação:
+
+```bash
+php artisan hibrido:keycloak-migrate-users --create-missing
+```
+
+O relatório separa contas vinculadas, vínculos seguros, criações, pendências, conflitos e erros. Correspondências só são vinculadas quando o e-mail remoto é único e confirmado. Após revisar o relatório, aplique explicitamente:
+
+```bash
+php artisan hibrido:keycloak-migrate-users --apply --create-missing
+```
+
+Sem `--create-missing`, contas ausentes são apenas listadas. Duplicidades e e-mails remotos não confirmados são bloqueados para revisão manual. Faça backup antes da aplicação, valide em homologação e não remova o login local até todos os usuários concluírem o primeiro acesso.
+
 ## Implantação e validação
 
 1. Faça backup e publique primeiro em homologação.

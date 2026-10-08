@@ -2,6 +2,10 @@
 
 Somente decisões comprovadas pelo código ou pela documentação existente são registradas aqui.
 
+## 2026-10-08 — Migração controlada de contas para o Keycloak
+
+A migração de usuários locais usa um cliente de serviço dedicado, separado do cliente web, e começa obrigatoriamente em simulação. O vínculo automático exige uma única conta remota com e-mail confirmado; conflitos ficam para revisão manual. Senhas locais não são copiadas, permanecem disponíveis como contingência e contas novas no Keycloak exigem verificação do e-mail e definição da própria senha. Dados de negócio continuam associados à conta local pelo `keycloak_subject`.
+
 ## 2026-10-07 — Nome público Jornada Flow
 
 O nome padrão do produto e de seus metadados passa a ser Jornada Flow. A configuração white label continua permitindo que cada fork defina outra identidade por variáveis `BRAND_*`; o cabeçalho, login, rodapé, favicon e ícones PWA usam os assets próprios da nova marca.

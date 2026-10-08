@@ -43,6 +43,8 @@ class UserDirectoryController extends Controller
             'totalUsers' => User::count(),
             'activeUsers' => User::where('active', true)->count(),
             'managerUsers' => User::whereIn('role', ['manager', 'super_admin'])->count(),
+            'keycloakLinkedUsers' => User::whereNotNull('keycloak_subject')->count(),
+            'keycloakPendingUsers' => User::whereNull('keycloak_subject')->count(),
         ]);
     }
 

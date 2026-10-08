@@ -38,6 +38,8 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Alterações atuais
 
+- Migração controlada de contas locais para o Keycloak implementada localmente: cliente de serviço dedicado, simulação obrigatória por padrão, vínculo apenas por e-mail remoto único e confirmado, criação opcional sem copiar senha, atribuição de papéis e envio das ações de verificação/definição de senha. O diretório mostra vinculados e pendentes. Ainda não houve commit, envio nem implantação desta alteração.
+
 - Cadastro público removido; criação de contas permanece exclusiva do Super Admin.
 - Primeiro acesso e redefinição usam token individual por e-mail, com expiração e revogação das sessões anteriores.
 - Login limitado a cinco tentativas por minuto para a combinação de e-mail normalizado e IP.

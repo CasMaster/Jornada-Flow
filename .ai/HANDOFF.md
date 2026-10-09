@@ -38,7 +38,9 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Alterações atuais
 
-- Em 2026-10-09, a simulação de migração em homologação encontrou uma conta vinculada, quatro contas corporativas para criação e duas contas técnicas corretamente ignoradas. As quatro contas foram criadas no Keycloak com os papéis esperados, mas permanecem sem vínculo local porque o envio das ações obrigatórias falhou: primeiro por redirect URI e, após a correção, por rejeição das credenciais SMTP reutilizadas (`535`). O banco de homologação continua com uma conta vinculada e quatro corporativas pendentes. A configuração anterior do realm foi salva antes do SMTP em `MixIdentity/backups/keycloak/`. É necessário corrigir/rotacionar a credencial SMTP do realm, testar o envio e só então concluir os vínculos.
+- Em 2026-10-09, o realm `mixapps` recebeu um tema Keycloak próprio e persistente no projeto `/home/admin/MixIdentity`: identidade visual Mix Fiscal/Mix Apps, textos em português do Brasil, seletor de idioma, contraste e foco acessíveis, layout responsivo e tema de e-mail em português. O tema está ativo no login central compartilhado; nenhum segredo foi incluído. O estado anterior do realm e os arquivos substituídos foram preservados em `MixIdentity/backups/`.
+
+- Em 2026-10-09, a migração foi validada em homologação. João permaneceu vinculado e confirmou o fluxo; Felipe, Victor e Marcio foram criados, receberam `mixhome-user`, receberam o convite e foram vinculados localmente. `gestor@local`, a conta de smoke e `homolog@mixfiscal.com.br` são contas técnicas sem migração; a identidade Keycloak criada durante o teste para `homolog@mixfiscal.com.br` foi desativada, sem excluir a conta local. O SMTP do realm foi configurado e validado, com backups anteriores preservados em `MixIdentity/backups/keycloak/`.
 
 - Migração controlada de contas locais para o Keycloak implantada em homologação: cliente de serviço dedicado, simulação obrigatória por padrão, vínculo apenas por e-mail remoto único e confirmado, criação opcional sem copiar senha, atribuição de papéis e envio das ações de verificação/definição de senha. O diretório mostra vinculados e pendentes.
 
@@ -62,6 +64,7 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Validação
 
+- Tema Keycloak `mixapps`: container saudável, login público HTTP 200, CSS e logotipo públicos HTTP 200, idioma `pt-BR` ativo e conferência visual aprovada após invalidar o cache do asset versionado `mixapps-v2.css`.
 - Férias, abono e regras CLT: Laravel Pint, sintaxe JavaScript e suíte completa aprovados em 2026-09-25, com 92 testes e 496 assertions, incluindo abono em período personalizado, solicitação exclusiva sem datas, gestão e CSV.
 - Modalidade presencial: suíte completa aprovada em 2026-09-23, com 81 testes e 431 assertions; inclui criação pendente, aprovação gerencial, conflito entre modalidades e filtro da gestão.
 - Modalidade presencial: Laravel Pint, sintaxe JavaScript, `git diff --check` e build local da imagem aprovados.

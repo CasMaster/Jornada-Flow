@@ -2,7 +2,7 @@
 
 ## Confirmado
 
-- Concluir em homologação um login interativo real com `mixmasteradmin`, confirmando retorno ao MixHome, acesso administrativo e logout federado.
+- Reconfigurar no environment `homologacao` do repositório renomeado `CasMaster/Jornada-Flow` os secrets do deploy e do smoke. O workflow `37929719916` falhou antes da publicação porque `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER` e `DEPLOY_SSH_KNOWN_HOSTS` estavam ausentes; não reutilizar a chave pessoal.
 - Atualizar em tarefa separada as dependências com advisories confirmados pelo `composer audit` em 2026-10-08: Laravel 12.64.0, league/commonmark 2.9.0 e league/flysystem 3.35.2. A nova dependência `firebase/php-jwt` 7.2.1 não apresentou advisory.
 
 - Repetir trimestralmente o teste de restauração do backup B2 em banco descartável, mediante autorização do Super Admin.
@@ -12,6 +12,7 @@
 
 ## Corrigido
 
+- Login OIDC interativo com `mixmasteradmin`, acesso administrativo, troca de usuário e logout federado validados em homologação; o tema central `mixapps` também foi publicado e conferido visualmente.
 - Contas desativadas revogam sessões por versão de autenticação e token persistente, preservando metadados conforme a retenção; solicitações possuem limite de lote/taxa e workflows SSH exigem chave de host previamente fixada.
 
 - Healthcheck agora usa `/health/ready` e respeita `APP_ROUTE_PREFIX`.

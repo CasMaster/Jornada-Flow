@@ -59,11 +59,9 @@ class KeycloakAdminService
 
     private function sendRequiredActionsEmail(string $subject): void
     {
-        $redirectUri = (string) (config('oidc.logout_redirect_uri') ?: config('app.url'));
         $this->request()->put(
             $this->adminUrl('/users/'.rawurlencode($subject).'/execute-actions-email').'?'.http_build_query([
                 'client_id' => config('oidc.client_id'),
-                'redirect_uri' => $redirectUri,
                 'lifespan' => 43200,
             ]),
             ['VERIFY_EMAIL', 'UPDATE_PASSWORD']

@@ -98,7 +98,7 @@ KEYCLOAK_MIGRATION_CLIENT_ID=mixhome-user-migrator
 KEYCLOAK_MIGRATION_CLIENT_SECRET=<fornecido externamente>
 ```
 
-O comando nunca copia senhas locais. Contas criadas recebem as ações obrigatórias de verificação de e-mail e definição de senha e o Keycloak envia o respectivo link, por isso o SMTP do realm deve estar validado antes da aplicação. `super_admin` recebe `mixhome-user` e `mixhome-admin`; os demais perfis recebem `mixhome-user`. Equipes, férias, solicitações e perfis gerenciais continuam no banco local.
+O comando nunca copia senhas locais. Contas criadas recebem as ações obrigatórias de verificação de e-mail e definição de senha e o Keycloak envia o respectivo link sem forçar uma URL de retorno adicional, por isso o SMTP do realm deve estar validado antes da aplicação. `super_admin` recebe `mixhome-user` e `mixhome-admin`; os demais perfis recebem `mixhome-user`. Equipes, férias, solicitações e perfis gerenciais continuam no banco local.
 
 Execute primeiro a simulação:
 

@@ -104,6 +104,7 @@ class MigrateUsersToKeycloakTest extends TestCase
         Http::assertSent(fn ($request): bool =>
             $request->method() === 'PUT'
             && str_contains($request->url(), '/users/new-sub/execute-actions-email?')
+            && ! str_contains($request->url(), 'redirect_uri=')
             && $request->data() === ['VERIFY_EMAIL', 'UPDATE_PASSWORD']
         );
     }

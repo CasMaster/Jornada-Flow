@@ -38,7 +38,9 @@ Falhas do backup disparam `hibrido:notify-backup-failure`, que envia e-mail e no
 
 ## Alterações atuais
 
-- Migração controlada de contas locais para o Keycloak implementada localmente: cliente de serviço dedicado, simulação obrigatória por padrão, vínculo apenas por e-mail remoto único e confirmado, criação opcional sem copiar senha, atribuição de papéis e envio das ações de verificação/definição de senha. O diretório mostra vinculados e pendentes. Ainda não houve commit, envio nem implantação desta alteração.
+- Em 2026-10-09, a simulação de migração em homologação encontrou uma conta vinculada, quatro contas corporativas para criação e duas contas técnicas corretamente ignoradas. As quatro contas foram criadas no Keycloak com os papéis esperados, mas permanecem sem vínculo local porque o envio das ações obrigatórias falhou: primeiro por redirect URI e, após a correção, por rejeição das credenciais SMTP reutilizadas (`535`). O banco de homologação continua com uma conta vinculada e quatro corporativas pendentes. A configuração anterior do realm foi salva antes do SMTP em `MixIdentity/backups/keycloak/`. É necessário corrigir/rotacionar a credencial SMTP do realm, testar o envio e só então concluir os vínculos.
+
+- Migração controlada de contas locais para o Keycloak implantada em homologação: cliente de serviço dedicado, simulação obrigatória por padrão, vínculo apenas por e-mail remoto único e confirmado, criação opcional sem copiar senha, atribuição de papéis e envio das ações de verificação/definição de senha. O diretório mostra vinculados e pendentes.
 
 - Cadastro público removido; criação de contas permanece exclusiva do Super Admin.
 - Primeiro acesso e redefinição usam token individual por e-mail, com expiração e revogação das sessões anteriores.
